@@ -1,0 +1,64 @@
+# Local interpreters, package caches and build outputs
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage*
+htmlcov/
+.venv/
+venv/
+env/
+build/
+dist/
+*.spec
+*.egg-info/
+*.exe
+*.msi
+*.whl
+
+# Secrets, signing materials and local developer configuration
+.env
+.env.*
+*.pem
+*.pfx
+*.p12
+*.key
+*.keystore
+*.jks
+*.p8
+*.ovpn
+id_rsa*
+id_ed25519*
+.vscode/settings.json
+.idea/
+
+# Task Runner private runtime data and user workflow output
+*.sqlite3
+*.sqlite3-*
+*.db
+*.db-wal
+*.db-shm
+settings.json
+stop-signals/
+captures/
+failures/
+browser-binaries/
+ms-playwright/
+windows-self-test.json
+self-test.json
+*.log
+*-execution-*.txt
+*-backup.sqlite3
+
+# Release archives are distributed as GitHub Releases, not tracked source
+*.zip
+*.7z
+*.tar.gz
+
+# Windows and macOS temporary files
+Thumbs.db
+Desktop.ini
+.DS_Store
+*.tmp
+*.bak

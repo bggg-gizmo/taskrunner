@@ -1,0 +1,16 @@
+{
+  "name": "taskrunner",
+  "display_name": "Task Runner",
+  "description": "Windows desktop automation with a visual workflow wizard, scheduling, Playwright, Beautiful Soup, verification, retries, and retro-vaporwave audio.",
+  "developer": "Background Gremlin Group",
+  "tagline": "Creating Unique Tools for Unique Individuals",
+  "platforms": ["Windows 10 x64", "Windows 11 x64"],
+  "language": "Python",
+  "interface": "PySide6 / Qt",
+  "distribution": "Source and Windows build command scripts",
+  "topics": ["windows", "desktop-automation", "workflow-automation", "task-scheduler", "playwright", "beautifulsoup", "pyside6", "vaporwave", "python"],
+  "repository_visibility": "public",
+  "automatic_publication": false,
+  "github_actions_workflows": false,
+  "license_selected": false
+}
