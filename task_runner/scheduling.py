@@ -35,6 +35,10 @@ def compute_next(kind: str, config: dict, after: datetime | None = None) -> date
     after = (after or utc_now()).astimezone(UTC)
     if kind == "manual":
         return None
+    if kind == "file_event":
+        from .file_events import validate
+        validate(config)
+        return None
     if kind == "interval":
         seconds = int(config["seconds"])
         if seconds < 1:

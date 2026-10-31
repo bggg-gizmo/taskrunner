@@ -49,7 +49,7 @@ def generate() -> dict:
                        'name':{'type':'string','minLength':1},
                        'description':{'type':'string'},
                        'enabled':{'oneOf':[{'type':'boolean'},{'type':'integer','enum':[0,1]}]},
-                       'schedule_kind':{'enum':['manual','once','interval','daily','weekly','cron']},
+                       'schedule_kind':{'enum':['manual','once','interval','daily','weekly','cron','file_event']},
                        'schedule':{'type':'object'},
                        'actions':{'type':'array','minItems':1,'items':{'oneOf':action_types}}
                    },'additionalProperties':True}

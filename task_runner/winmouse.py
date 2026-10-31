@@ -144,3 +144,53 @@ def resolve_target(x: int, y: int, window_title: str = '', window_rx: float = 0,
             # the recorded relative location rather than the first match.
             return min(matches_by_id,key=lambda p:(p[0]-expected_x)**2+(p[1]-expected_y)**2)
     return expected_x,expected_y
+
+
+def enable_dpi_awareness():
+    """Keep pixel-based capture and clicks consistent across mixed-DPI monitors.
+
+    Called before QApplication is created; a process with existing DPI context
+    cannot change awareness and simply retains the already-selected mode.
+    """
+    if sys.platform!='win32':return False
+    user=ctypes.WinDLL('user32',use_last_error=True)
+    try:
+        # DPI_AWARENESS_CONTEXT_PER_MONITOR_AWARE_V2 = -4
+        user.SetProcessDpiAwarenessContext.argtypes=[ctypes.c_void_p]
+        user.SetProcessDpiAwarenessContext.restype=wintypes.BOOL
+        if user.SetProcessDpiAwarenessContext(ctypes.c_void_p(-4)):
+            return True
+    except (OSError,AttributeError):
+        pass
+    try:
+        return bool(user.SetProcessDPIAware())
+    except (OSError,AttributeError):
+        return False
+
+
+def window_candidates(title,expected):
+    """Return a recorded window's geometry and visible, enabled UIA targets."""
+    from pywinauto import Desktop
+    candidates=[window for window in Desktop(backend='uia').windows()
+                if title.casefold() in window.window_text().casefold()]
+    if not candidates:return None
+    def distance(window):
+        box=window.rectangle()
+        return (box.left+box.width()/2-expected[0])**2+(box.top+box.height()/2-expected[1])**2
+    window=min(candidates,key=distance)
+    bounds=window.rectangle()
+    if bounds.width()<=0 or bounds.height()<=0:
+        raise RuntimeError(f'Window has invalid geometry: {title}')
+    controls=[]
+    for element in window.descendants()[:1500]:
+        try:
+            info=element.element_info
+            if not element.is_visible() or not element.is_enabled():continue
+            rect=element.rectangle()
+            if rect.width()<1 or rect.height()<1:continue
+            controls.append({'x':int(rect.left+rect.width()/2),
+                             'y':int(rect.top+rect.height()/2),
+                             'automation_id':str(info.automation_id or ''),
+                             'control_name':str(info.name or '')})
+        except Exception:continue
+    return {'bounds':(bounds.left,bounds.top,bounds.width(),bounds.height()),'controls':controls}

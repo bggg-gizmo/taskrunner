@@ -2,6 +2,21 @@
 
 All notable public-facing changes are documented here. Archived source versions are available in [`old builds/`](old%20builds/). Source-only release status is distinguished from completed Windows acceptance testing.
 
+## v1.4.0 — Adaptive replay, local intelligence and recovery (source release)
+
+- Added integrated **Visual Playback Debugger** with pause, resume, single-step, failed-step retry, per-step captures and teach-by-correction.
+- Added **Adaptive Precision Engine**: UIA IDs and names, image matching, ambiguity detection, DPI-aware clicks, strict target validation and window-relative fallback.
+- Added local **offline OCR** text conditions with stability frames and recorded variables; ONNX models must be bundled into the Windows EXE.
+- Added **Output Gallery** with image/text previews, duplicate detection and SHA-256 verified exports.
+- Added operator-approved **checkpoint continuation** with workflow checksum and safety checks; no silent rerun of irreversible actions.
+- Added **reusable task modules** with cycle detection, preflight validation and shared workflow variables.
+- Added **file/folder event schedules** with durable baselines and atomic claim checks.
+- Added **Windows DPAPI credential vault** with explicit create/delete controls and runtime secret-variable actions.
+- Added **portable workflow packages** with referenced images/modules, optional scripts, tamper detection, path checks, limits and disabled-on-import safety.
+- Added run-scoped **Ctrl+Shift+F11 emergency stop** while retaining Ctrl+Shift+F12 for recording termination.
+- Preserved original Qt/vaporwave UI elements, all seven sounds, prior actions, scheduling modes, build scripts, installer and uninstaller.
+- Archived the complete public v1.3.0 source in [`old builds/v1.3.0/`](old%20builds/v1.3.0/). Windows acceptance remains required.
+
 ## v1.3.0 — Record, observe, capture, replay (source release)
 
 - **Record & replay:** Record real desktop mouse clicks, dragging, scrolling, text and shortcut key events, and the actual time between actions. Review/edit the timeline before saving. Stop capture with `Ctrl+Shift+F12`.

@@ -26,6 +26,9 @@ CREATE TABLE IF NOT EXISTS executions (
   started_at TEXT NOT NULL, finished_at TEXT,
   status TEXT NOT NULL, message TEXT NOT NULL DEFAULT '',
   runner_pid INTEGER,
+  resume_index INTEGER NOT NULL DEFAULT 0,
+  resumed_from INTEGER,
+  plan_hash TEXT NOT NULL DEFAULT '',
   FOREIGN KEY(job_id) REFERENCES jobs(id) ON DELETE CASCADE
 );
 CREATE TABLE IF NOT EXISTS events (
@@ -36,6 +39,46 @@ CREATE TABLE IF NOT EXISTS events (
 );
 CREATE INDEX IF NOT EXISTS idx_jobs_due ON jobs(enabled, next_run);
 CREATE INDEX IF NOT EXISTS idx_events_execution ON events(execution_id, id);
+CREATE TABLE IF NOT EXISTS execution_checkpoints (
+  execution_id INTEGER PRIMARY KEY,
+  completed INTEGER NOT NULL DEFAULT 0,
+  updated_at TEXT NOT NULL,
+  FOREIGN KEY(execution_id) REFERENCES executions(id) ON DELETE CASCADE
+);
+CREATE TABLE IF NOT EXISTS file_watch_state (
+  job_id INTEGER PRIMARY KEY,
+  fingerprint TEXT NOT NULL,
+  FOREIGN KEY(job_id) REFERENCES jobs(id) ON DELETE CASCADE
+);
+CREATE TABLE IF NOT EXISTS debug_controls (
+  execution_id INTEGER PRIMARY KEY,
+  enabled INTEGER NOT NULL DEFAULT 0,
+  mode TEXT NOT NULL DEFAULT 'run',
+  state TEXT NOT NULL DEFAULT 'idle',
+  step_index INTEGER NOT NULL DEFAULT 0,
+  break_on_failure INTEGER NOT NULL DEFAULT 0,
+  snapshots INTEGER NOT NULL DEFAULT 0,
+  last_error TEXT NOT NULL DEFAULT '',
+  updated_at TEXT NOT NULL,
+  FOREIGN KEY(execution_id) REFERENCES executions(id) ON DELETE CASCADE
+);
+CREATE TABLE IF NOT EXISTS debug_artifacts (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  execution_id INTEGER NOT NULL,
+  step_index INTEGER NOT NULL,
+  phase TEXT NOT NULL,
+  path TEXT NOT NULL,
+  recorded_at TEXT NOT NULL,
+  FOREIGN KEY(execution_id) REFERENCES executions(id) ON DELETE CASCADE
+);
+CREATE INDEX IF NOT EXISTS idx_debug_artifacts_run ON debug_artifacts(execution_id, id);
+CREATE TABLE IF NOT EXISTS debug_corrections (
+  execution_id INTEGER NOT NULL,
+  step_index INTEGER NOT NULL,
+  params_json TEXT NOT NULL,
+  PRIMARY KEY(execution_id, step_index),
+  FOREIGN KEY(execution_id) REFERENCES executions(id) ON DELETE CASCADE
+);
 """
 
 
@@ -48,6 +91,10 @@ class Store:
             columns={r[1] for r in db.execute("PRAGMA table_info(executions)")}
             if "runner_pid" not in columns:
                 db.execute("ALTER TABLE executions ADD COLUMN runner_pid INTEGER")
+            for name,definition in (('resume_index','INTEGER NOT NULL DEFAULT 0'),
+                                    ('resumed_from','INTEGER'),('plan_hash',"TEXT NOT NULL DEFAULT ''")):
+                if name not in columns:
+                    db.execute(f'ALTER TABLE executions ADD COLUMN {name} {definition}')
 
     @contextmanager
     def connection(self):
@@ -189,6 +236,47 @@ class Store:
                 claimed.append((job_id,exec_id))
         return claimed
 
+    def claim_file_events(self):
+        """Atomically claim changed watched files without duplicate worker runs.
+
+        Uses a durable first-observation baseline. A change while another run
+        remains active is left pending, rather than silently discarded.
+        """
+        from .file_events import fingerprint, event_between
+        claimed=[]
+        with self.connection() as db:
+            db.execute('BEGIN IMMEDIATE')
+            jobs=[self.decode(row) for row in db.execute(
+                "SELECT * FROM jobs WHERE enabled=1 AND schedule_kind='file_event' ORDER BY id")]
+            for job in jobs:
+                config=job['schedule']
+                current=fingerprint(config['path'])
+                baseline=db.execute('SELECT fingerprint FROM file_watch_state WHERE job_id=?',
+                                    (job['id'],)).fetchone()
+                if baseline is None:
+                    db.execute('INSERT INTO file_watch_state(job_id,fingerprint) VALUES(?,?)',
+                               (job['id'],current))
+                    continue
+                detected=event_between(baseline['fingerprint'],current)
+                if not detected:
+                    continue
+                event=config.get('event','modified')
+                if event not in ('any',detected):
+                    db.execute('UPDATE file_watch_state SET fingerprint=? WHERE job_id=?',
+                               (current,job['id']))
+                    continue
+                if job['status']=='running':
+                    continue
+                now=utc_text(utc_now())
+                db.execute("UPDATE jobs SET status='running',last_run=?,last_error=NULL WHERE id=?",
+                           (now,job['id']))
+                execution=db.execute("INSERT INTO executions(job_id,started_at,status) VALUES(?,?,'running')",
+                                     (job['id'],now))
+                db.execute('UPDATE file_watch_state SET fingerprint=? WHERE job_id=?',
+                           (current,job['id']))
+                claimed.append((job['id'],execution.lastrowid))
+        return claimed
+
     def register_runner(self, execution_id: int, pid: int):
         with self.connection() as db:
             db.execute("UPDATE executions SET runner_pid=? WHERE id=? AND status='running'",(pid,execution_id))
@@ -241,6 +329,152 @@ class Store:
                 if cur.rowcount:
                     db.execute("UPDATE jobs SET status='failed',last_error=? WHERE id=? AND status='running'",
                                ("Previous worker exited unexpectedly",run["job_id"]))
+
+    def execution_plan(self, execution_id: int, actions):
+        from .recovery import plan_hash
+        digest=plan_hash(actions)
+        with self.connection() as db:
+            row=db.execute('SELECT plan_hash FROM executions WHERE id=?',(execution_id,)).fetchone()
+            if row is None:raise LookupError('Execution is missing')
+            if row['plan_hash'] and row['plan_hash']!=digest:
+                raise RuntimeError('The current workflow differs from the resume checkpoint plan')
+            db.execute('UPDATE executions SET plan_hash=? WHERE id=?',(digest,execution_id))
+        return digest
+
+    def execution_checkpoint(self, execution_id: int, completed: int):
+        with self.connection() as db:
+            db.execute("""INSERT INTO execution_checkpoints(execution_id,completed,updated_at)
+                         VALUES(?,?,?) ON CONFLICT(execution_id) DO UPDATE SET
+                         completed=excluded.completed,updated_at=excluded.updated_at""",
+                       (execution_id,int(completed),utc_text(utc_now())))
+
+    def checkpoint_for(self, execution_id: int):
+        with self.connection() as db:
+            row=db.execute('SELECT * FROM execution_checkpoints WHERE execution_id=?',(execution_id,)).fetchone()
+            return dict(row) if row else None
+
+    def claim_resume(self, previous_execution_id: int):
+        from .recovery import validate_resume
+        previous=self.execution_by_id(previous_execution_id)
+        if previous is None or previous['status'] not in ('failed','cancelled'):
+            raise ValueError('A failed/cancelled execution is required for checkpoint continuation')
+        checkpoint=self.checkpoint_for(previous_execution_id)
+        if checkpoint is None or not previous['plan_hash']:
+            raise ValueError('The selected execution has no verified checkpoint')
+        job=self.get_job(previous['job_id'])
+        if job is None:raise LookupError('Task was deleted')
+        validate_resume(job['actions'],checkpoint['completed'])
+        if previous['plan_hash']!=__import__('task_runner.recovery',fromlist=['plan_hash']).plan_hash(job['actions']):
+            raise ValueError('Task changed since the failed run; refusing to resume')
+        new_id=self.claim(job['id'],force=True)
+        if new_id is None:raise RuntimeError('Task is already running')
+        with self.connection() as db:
+            db.execute('UPDATE executions SET resume_index=?,resumed_from=?,plan_hash=? WHERE id=?',
+                       (checkpoint['completed'],previous_execution_id,previous['plan_hash'],new_id))
+        return job['id'],new_id
+
+    def execution_by_id(self, execution_id: int):
+        with self.connection() as db:
+            row=db.execute('SELECT * FROM executions WHERE id=?',(execution_id,)).fetchone()
+            return dict(row) if row else None
+
+    def debug_enable(self, execution_id: int, paused: bool = True,
+                     break_on_failure: bool = True, snapshots: bool = True):
+        with self.connection() as db:
+            row=db.execute("SELECT status FROM executions WHERE id=?",(execution_id,)).fetchone()
+            if row is None or row['status']!='running':
+                raise RuntimeError('Cannot debug an execution that is not running')
+            db.execute("""INSERT INTO debug_controls(execution_id,enabled,mode,state,step_index,
+                         break_on_failure,snapshots,updated_at) VALUES(?,1,?,'pending',0,?,?,?)
+                         ON CONFLICT(execution_id) DO UPDATE SET enabled=1,mode=excluded.mode,
+                         break_on_failure=excluded.break_on_failure,snapshots=excluded.snapshots,
+                         updated_at=excluded.updated_at""",
+                       (execution_id,'pause' if paused else 'run',int(break_on_failure),int(snapshots),utc_text(utc_now())))
+
+    def debug_status(self, execution_id: int):
+        with self.connection() as db:
+            row=db.execute('SELECT * FROM debug_controls WHERE execution_id=?',(execution_id,)).fetchone()
+            return dict(row) if row else None
+
+    def debug_command(self, execution_id: int, command: str):
+        if command not in ('run','pause','step','retry','cancel'):
+            raise ValueError('Unrecognized debugger command')
+        with self.connection() as db:
+            row=db.execute('SELECT enabled,state,mode FROM debug_controls WHERE execution_id=?',(execution_id,)).fetchone()
+            if row is None or not row['enabled']:
+                raise RuntimeError('Debugger is not enabled for this execution')
+            if command=='retry' and row['state']!='failed_paused':
+                raise RuntimeError('Retry is only available after a failed step')
+            if command=='step' and row['state'] not in ('pending','paused','completed_step','idle'):
+                raise RuntimeError('Single step requires a paused workflow')
+            db.execute('UPDATE debug_controls SET mode=?,updated_at=? WHERE execution_id=?',
+                       (command,utc_text(utc_now()),execution_id))
+
+    def debug_consume_step(self, execution_id: int) -> bool:
+        with self.connection() as db:
+            result=db.execute("UPDATE debug_controls SET mode='pause' WHERE execution_id=? AND mode='step'",(execution_id,))
+            return bool(result.rowcount)
+
+    def debug_consume_retry(self, execution_id: int) -> bool:
+        with self.connection() as db:
+            result=db.execute("UPDATE debug_controls SET mode='pause' WHERE execution_id=? AND mode='retry'",(execution_id,))
+            return bool(result.rowcount)
+
+    def debug_state(self, execution_id: int, state: str, step_index: int, error: str):
+        with self.connection() as db:
+            db.execute('UPDATE debug_controls SET state=?,step_index=?,last_error=?,updated_at=? WHERE execution_id=?',
+                       (state,int(step_index),str(error),utc_text(utc_now()),execution_id))
+
+    def debug_artifact(self, execution_id: int, step_index: int, phase: str, path: str):
+        with self.connection() as db:
+            db.execute('INSERT INTO debug_artifacts(execution_id,step_index,phase,path,recorded_at) VALUES(?,?,?,?,?)',
+                       (execution_id,step_index,phase,str(path),utc_text(utc_now())))
+
+    def debug_artifacts_for(self, execution_id: int):
+        with self.connection() as db:
+            return [dict(x) for x in db.execute('SELECT * FROM debug_artifacts WHERE execution_id=? ORDER BY id',
+                                                 (execution_id,))]
+
+    def correction_for(self, execution_id: int, step_index: int):
+        with self.connection() as db:
+            row=db.execute('SELECT params_json FROM debug_corrections WHERE execution_id=? AND step_index=?',
+                           (execution_id,step_index)).fetchone()
+            return json.loads(row['params_json']) if row else None
+
+    def teach_click(self, execution_id: int, step_index: int, params: dict):
+        """Persist a target correction for both this run and future replays.
+
+        Reject editing an already completed step or any non-click action.
+        """
+        from .flow import validate_workflow
+        with self.connection() as db:
+            db.execute('BEGIN IMMEDIATE')
+            session=db.execute('SELECT state,step_index FROM debug_controls WHERE execution_id=? AND enabled=1',
+                               (execution_id,)).fetchone()
+            run=db.execute('SELECT job_id,status FROM executions WHERE id=?',(execution_id,)).fetchone()
+            if not session or not run or run['status']!='running' or session['state'] not in ('paused','failed_paused'):
+                raise RuntimeError('Pause a running debugger before teaching a target')
+            if session['step_index']!=step_index or step_index<1:
+                raise RuntimeError('Selected correction must match the paused workflow step')
+            job=db.execute('SELECT actions_json FROM jobs WHERE id=?',(run['job_id'],)).fetchone()
+            if not job:raise LookupError('Task not found')
+            actions=json.loads(job['actions_json'])
+            if step_index>len(actions) or actions[step_index-1]['type']!='click':
+                raise ValueError('Only click steps can be re-taught')
+            allowed={'x','y','window_title','window_rx','window_ry','control_name','automation_id',
+                     'reference_image','confidence','allow_relative_fallback','strict_target','target_timeout'}
+            patch={k:v for k,v in params.items() if k in allowed}
+            if 'x' not in patch or 'y' not in patch:
+                raise ValueError('A corrected click requires X and Y')
+            updated=dict(actions[step_index-1]['params'])
+            updated.update(patch)
+            actions[step_index-1]['params']=updated
+            validate_workflow(actions)
+            db.execute('UPDATE jobs SET actions_json=?,updated_at=? WHERE id=?',
+                       (json.dumps(actions,ensure_ascii=False),utc_text(utc_now()),run['job_id']))
+            db.execute('INSERT INTO debug_corrections(execution_id,step_index,params_json) VALUES(?,?,?) '
+                       'ON CONFLICT(execution_id,step_index) DO UPDATE SET params_json=excluded.params_json',
+                       (execution_id,step_index,json.dumps(updated,ensure_ascii=False)))
 
     def event(self, execution_id: int, level: str, message: str, step_index: int | None = None):
         with self.connection() as db:

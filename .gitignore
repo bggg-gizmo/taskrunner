@@ -62,3 +62,10 @@ Desktop.ini
 .DS_Store
 *.tmp
 *.bak
+
+# v1.4 private runtime/debug/credential data
+vault/
+*.dpapi
+debug-runs/
+workflow-assets/
+*.trpkg

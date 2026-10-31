@@ -30,3 +30,13 @@ Workflows are user-authored automation with the signed-in account's access, not 
 ## Known Windows limitations
 
 Native application accessibility varies by program; UIA text/dropdown extraction may fail if the application does not expose controls. Windows desktop automation cannot operate against UAC secure desktops or locked sessions. A compiling executable does not prove that mouse coordinates, monitor DPI, focus, task scheduling or clipboard access work correctly. `WINDOWS_ACCEPTANCE.md` is the on-device certification checklist.
+
+## 1.4 local intelligence and control-plane additions
+
+`precision.py` ranks target candidates independent of Windows input APIs, while `winmouse.py` supplies UI Automation window/control information and requests per-monitor DPI awareness before QApplication starts. Legacy absolute coordinates remain an explicitly lower-confidence fallback. `debugger.py` coordinates pause/step/retry through `Store.debug_controls`, which is shared across GUI threads and CLI worker subprocesses. `Store.debug_corrections` links operator corrections to an execution; a correction also updates the saved job after workflow validation. `Store.debug_artifacts` tracks on-disk screenshots in the local user data directory.
+
+`recovery.py` hashes the preflight-expanded execution plan and validates conservative checkpoint continuation restrictions. `Store.execution_checkpoints` records verified completed steps; `Store.claim_resume` creates a new execution only after explicit GUI confirmation and matching plan validation. A resumed run never assumes that an incomplete external operation was automatically rolled back.
+
+`ocr.py` uses locally bundled RapidOCR ONNX resources. `file_events.py` supplies a stable file/folder fingerprint and transition classification; `Store.file_watch_state` persists watcher baselines, and both the GUI polling loop and the Windows scheduler heartbeat use SQLite atomic claims. `gallery.py` indexes local capture directories, hashes duplicate files and creates checksummed exports without sending data anywhere.
+
+`vault.py` persists Windows DPAPI user-bound secret blobs under the local application data directory. No silent plaintext fallback is allowed. `modules.py` preflights reusable task expansion and recursion. `packages.py` securely imports/exports `.trpkg` archives with SHA-256 checks, asset path validation, size limits and disabled-by-default imported jobs. All new SQLite tables are created with `CREATE TABLE IF NOT EXISTS` on existing installations; previous task and execution data are preserved.

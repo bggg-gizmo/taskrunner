@@ -4,30 +4,30 @@
 
 # TASK RUNNER
 
-[![Release v1.3.0](https://img.shields.io/badge/Release-v1.3.0-b45cff?style=for-the-badge)](V1.3_RELEASE_NOTES.md)
-[![Windows 10 and 11](https://img.shields.io/badge/Windows-10%20%7C%2011-00c5f8?style=for-the-badge&logo=windows&logoColor=white)](#windows-quick-start)
-[![Python 3.11 to 3.13](https://img.shields.io/badge/Python-3.11%20to%203.13-4169e1?style=for-the-badge&logo=python&logoColor=white)](requirements.txt)
-
-[![PySide6 / Qt](https://img.shields.io/badge/UI-PySide6%20%2F%20Qt-ff5fb7?style=flat-square)](#the-visual-identity)
-[![Playwright](https://img.shields.io/badge/Browser-Playwright-32c48d?style=flat-square)](#what-you-can-do)
-[![Local-first](https://img.shields.io/badge/Privacy-Local--first-8556e9?style=flat-square)](SECURITY.md)
-[![Source tests](https://img.shields.io/badge/Source%20tests-91%20passing-27ae60?style=flat-square)](#quality-gates)
-
-### RECORD · REPLAY · OBSERVE · CAPTURE · SCHEDULE
+### RECORD · REPLAY · OBSERVE · CAPTURE · DEBUG · RECOVER
 
 **Visual desktop automation and workflow scheduling for Windows.**
+
+[![Version 1.4.0](https://img.shields.io/badge/Release-v1.4.0-b45cff?style=for-the-badge)](V1.4_RELEASE_NOTES.md)
+[![Windows 10 and 11](https://img.shields.io/badge/Windows-10%20%7C%2011-00c5f8?style=for-the-badge&logo=windows&logoColor=white)](#windows-quick-start)
+[![Python 3.11–3.13](https://img.shields.io/badge/Python-3.11%20to%203.13-4169e1?style=for-the-badge&logo=python&logoColor=white)](requirements.txt)
+
+[![PySide6](https://img.shields.io/badge/UI-PySide6%20%2F%20Qt-ff5fb7?style=flat-square)](#the-visual-identity)
+[![Playwright](https://img.shields.io/badge/Browser-Playwright-32c48d?style=flat-square)](#what-you-can-do)
+[![Local first](https://img.shields.io/badge/Privacy-Local--first-8556e9?style=flat-square)](SECURITY.md)
+[![Local tests](https://img.shields.io/badge/Source%20tests-110%20passing-27ae60?style=flat-square)](#quality-gates)
 
 **Background Gremlin Group**  
 *Creating Unique Tools for Unique Individuals*
 
-[Explore features](#what-you-can-do) · [Build on Windows](#windows-quick-start) · [Action guide](docs/USER_GUIDE.md) · [Release notes](V1.3_RELEASE_NOTES.md) · [Previous releases](old%20builds/README.md)
+[Explore features](#what-you-can-do) · [Build on Windows](#windows-quick-start) · [Action guide](docs/USER_GUIDE.md) · [v1.4 release notes](V1.4_RELEASE_NOTES.md) · [Previous releases](old%20builds/README.md)
 
 </div>
 
 ---
 
 > [!IMPORTANT]
-> **Version 1.3.0 — source release.** Global input capture and Windows uninstall still require native Windows acceptance testing.
+> **Version 1.4.0 — Windows source release.** Build from source on Windows 10/11. New desktop-recording, debugging, OCR, and installer paths require hands-on Windows verification before a prebuilt executable is offered.
 
 ```mermaid
 flowchart LR
@@ -43,7 +43,19 @@ Task Runner is a native Windows application for composing, scheduling, monitorin
 
 The interface takes inspiration from vaporwave aesthetics and classic Windows desktop software. Seven original short retro interface sounds—selection, execution, saving, completion, failure, startup, and exit—can be switched off in Settings without affecting workflows.
 
-**Release status:** v1.3 Windows source/build package. A previous version compiled successfully on Windows; new global recording, UI Automation, output capture and uninstall paths require fresh on-device acceptance testing. This source package is not evidence of a tested v1.3 Windows EXE.
+**Current release:** v1.4.0 source with a local Windows build system. Native Windows verification of the new features is pending; a signed or acceptance-tested executable is not yet advertised.
+
+## New in Task Runner 1.4
+
+Task Runner now has an **interactive playback debugger**. Start **▶ Debug replay** from the Dashboard, inspect the live action timeline in Execution Logs, pause or single-step, and retry a failed step only when you authorize it. Use **Teach current click…** to take a fresh desktop screenshot and correct the saved target. **Ctrl+Shift+F11** is the emergency stop hotkey during an active run (the recorder still stops with Ctrl+Shift+F12).
+
+**Precision:** Click steps can resolve UI Automation control IDs/names, reference images, and recorded window-relative positions, with strict matching to reject ambiguous targets. Legacy coordinate-only tasks remain compatible.
+
+**Watch and capture:** Offline OCR supports stable text-on-screen triggers; file/folder event schedules react to changes, and the Output Gallery previews local images/text and exports checksummed private bundles.
+
+**Recover and reuse:** Resume from a verified checkpoint after explicit review when the task is linear and no volatile state is missing. Reuse existing tasks as modules, store named secrets using Windows DPAPI, and exchange portable `.trpkg` bundles containing references and disabled-by-default workflows.
+
+[Full v1.4 notes and limitations](V1.4_RELEASE_NOTES.md) · [Previous v1.3.0 source](old%20builds/v1.3.0/) · [Public changelog](CHANGELOG.md)
 
 ## What you can do
 
@@ -115,10 +127,10 @@ taskrunner/
   task_runner/                 Application GUI, scheduler, workflow engine, storage, Windows input
   assets/                      Original icon, Windows executable resource and seven WAV cues
   tests/                       Regression tests and source-validation checks
-  scripts/                     Shared dependency checker, schema generator and privacy audit
+  scripts/                     Build utilities and workflow schema generator
   schemas/taskrunner-job.schema.json
   docs/                        Full user guide and system architecture
-  .github/                     Issue forms and example main-branch protection ruleset
+  .github/                     Public issue forms and repository configuration
   BUILD_WINDOWS.cmd            Windows standalone-directory EXE build
   CHECK_DEPENDENCIES.cmd       Install/check reusable Python dependencies
   RUN_FROM_SOURCE.cmd          Launch the Windows GUI from source
@@ -133,7 +145,7 @@ taskrunner/
 
 ## Quality gates
 
-Run the source checks locally:
+Run these checks locally before building:
 
 ```powershell
 python -m pytest tests -q
@@ -141,11 +153,15 @@ python -m compileall -q task_runner scripts tests launcher.py
 python scripts/prepublish_audit.py
 ```
 
+The source checks validate workflows and code paths; desktop targeting, the debugger, installer, and other Windows-specific behavior should also be checked on the intended machine.
+
 Workflow export JSON structure is documented in [`schemas/taskrunner-job.schema.json`](schemas/taskrunner-job.schema.json). If action fields change, run `python scripts/generate_workflow_schema.py` and include the synchronized schema and tests.
+
+The Windows build script runs checks before packaging the application.
 
 ## Previous releases and changelog
 
-The full v1.2.1 source tree is preserved under [**old builds/v1.2.1**](old%20builds/v1.2.1/). Review the [**Changelog**](CHANGELOG.md) for version-by-version features and fixes. The archived tree contains source and build scripts; it is not presented as a previously verified executable.
+Browse preserved source snapshots for [**v1.3.0**](old%20builds/v1.3.0/) and [**v1.2.1**](old%20builds/v1.2.1/), or read the [**Changelog**](CHANGELOG.md) for version-by-version features and fixes. Archived builds contain source and build scripts, not verified executables.
 
 ## Documentation
 
@@ -153,7 +169,8 @@ The full v1.2.1 source tree is preserved under [**old builds/v1.2.1**](old%20bui
 - [v1.3 release notes](V1.3_RELEASE_NOTES.md) — recording, visual triggers, output capture, installation and removal.
 - [Security policy](SECURITY.md) — local trust boundaries and private vulnerability reporting.
 - [Contributing](CONTRIBUTING.md) — no-regression and change verification expectations.
-- [Licensing status](LICENSING.md) — no license has been selected by the owner yet. Public is not automatically open-source.
+- [Licensing](LICENSING.md) — copyright and reuse terms.
+
 
 
 ---

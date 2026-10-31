@@ -13,7 +13,7 @@ from .paths import asset_path,setup_browser_path
 
 
 def run_diagnostics(report_path: str | Path) -> bool:
-    report={"application":"Task Runner","version":"1.3.0","developer":"Background Gremlin Group","test_started_utc":datetime.now(timezone.utc).isoformat(),
+    report={"application":"Task Runner","version":"1.4.0","developer":"Background Gremlin Group","test_started_utc":datetime.now(timezone.utc).isoformat(),
             "python":sys.version,"platform":platform.platform(),
             "frozen":bool(getattr(sys,"frozen",False)),"checks":[]}
 
@@ -28,8 +28,12 @@ def run_diagnostics(report_path: str | Path) -> bool:
 
     def dependencies():
         for package in ("PySide6","playwright","bs4","lxml","croniter","tzlocal",
-                        "mss","PIL","pyautogui","pywinauto","pyperclip","cv2"):
+                        "mss","PIL","pyautogui","pywinauto","pyperclip","cv2","rapidocr_onnxruntime"):
             importlib.import_module(package)
+
+    def local_ocr():
+        from .ocr import _engine
+        assert callable(_engine())
 
     def assets():
         from PIL import Image
@@ -88,6 +92,7 @@ def run_diagnostics(report_path: str | Path) -> bool:
 
     check("All runtime Python modules can import",dependencies)
     check("Icon and all seven audio assets",assets)
+    check("Offline OCR models bundled and initialized",local_ocr)
     check("Time-zone-aware cron engine",scheduling)
     check("SQLite save, claim, execute, verify and persistence",workflow)
     check("Playwright bundled Chromium headless startup",browser)

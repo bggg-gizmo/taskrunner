@@ -38,7 +38,7 @@ try {
     $key='HKCU:\Software\Microsoft\Windows\CurrentVersion\Uninstall\BackgroundGremlinGroup.TaskRunner'
     New-Item -Path $key -Force | Out-Null
     New-ItemProperty -Path $key -Name DisplayName -Value 'Task Runner' -PropertyType String -Force | Out-Null
-    New-ItemProperty -Path $key -Name DisplayVersion -Value '1.3.0' -PropertyType String -Force | Out-Null
+    New-ItemProperty -Path $key -Name DisplayVersion -Value '1.4.0' -PropertyType String -Force | Out-Null
     New-ItemProperty -Path $key -Name Publisher -Value 'Background Gremlin Group' -PropertyType String -Force | Out-Null
     New-ItemProperty -Path $key -Name InstallLocation -Value $install -PropertyType String -Force | Out-Null
     New-ItemProperty -Path $key -Name DisplayIcon -Value (Join-Path $install 'TaskRunner.exe') -PropertyType String -Force | Out-Null

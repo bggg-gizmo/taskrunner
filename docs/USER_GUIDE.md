@@ -137,3 +137,43 @@ Use **Save clipboard image** when you specifically copied a rendered image into 
 ### Install and uninstall
 
 First compile with `BUILD_WINDOWS.cmd`. Run `INSTALL_WINDOWS.cmd` for a per-user application installation in `%LOCALAPPDATA%\Programs\TaskRunner` with a Start Menu entry and Installed Apps uninstall registration. To remove, use the Windows Installed Apps Task Runner entry or `UNINSTALL_WINDOWS.cmd`. It removes the app, shortcut, and TaskRunnerScheduler entry. The local data directory `%LOCALAPPDATA%\TaskRunner` remains unless you explicitly request and confirm removal. It never uninstalls shared Python packages or the shared Playwright browser cache.
+
+---
+
+## Task Runner 1.4: Adaptive Precision and Visual Playback Debugger
+
+**Enable the debugger:** Select a task on Dashboard, then choose **▶ Debug replay**. Task Runner claims the run and opens Execution Logs with a live step list. The run starts paused so you can review it before any mouse/keyboard action executes. **Step once** authorizes exactly one action, including its configured delays and verification. **Continue** runs until the next failure or completion. **Pause** takes effect at the next step boundary. **Emergency stop** cancels cooperative waits and requests cancellation of the running workflow; **Ctrl+Shift+F11** works during an active Windows task when the global listener is available.
+
+**Teach a failed click:** With a debug run paused at a click action, choose **Teach current click…**. The application hides, takes a real virtual-desktop screenshot, and opens the existing pixel/region selection dialog. Choose the button or a tight, distinctive region. The new absolute position, available window/UI Automation target and reference image are saved to the task and linked to that execution. For a failed action, explicitly choose **Retry failed step**; simply correcting a target never replays a potentially irreversible operation.
+
+**Click certainty options:** In the step editor, a click can specify a reference PNG, minimum matching confidence, search timeout, strict verified targeting, and whether to fall back to a window-relative coordinate. With strict matching enabled, a missing or ambiguous control/image is an error, not an invitation to click the last recorded screen position. Existing v1.3 coordinate-only clicks retain their previous behavior by default.
+
+## Observing screen text with offline OCR
+
+Use **Wait for visible text (offline OCR)** to watch a selected desktop region and wait for text to appear, disappear or change. Set a confidence threshold, polling interval, maximum wait, and consecutive matching screenshot count. The recognized text is stored in a named variable. RapidOCR uses its locally bundled ONNX inference models; this action does not require an online OCR service. The Windows builder includes those files and the self-test verifies model initialization. Use a small, stable region rather than a full animated desktop whenever possible.
+
+## File-trigger schedules and watcher latency
+
+In a task's schedule editor choose **When a file or folder changes**, supply an absolute path, and choose **created**, **modified**, **removed** or **any**. The first observation establishes a baseline instead of firing unexpectedly at startup. The current GUI checks approximately once per second; the installed Windows background heartbeat checks approximately once per minute. Both use an atomic SQLite execution claim so two processes do not launch the same event simultaneously. File watches are polling-based, not native filesystem notification subscriptions.
+
+## Output Gallery and private captures
+
+Use **Output Gallery** in the left navigation, select the folder where the existing live-capture action writes its files, and refresh the listing. PNG/JPG and other supported images display a preview; UTF-8 text or log files show a readable excerpt. Equal-sized captures are hashed to identify real byte-identical duplicates. **Export capture bundle** creates a ZIP with a SHA-256 manifest for each included file. You choose and confirm the export, because captured screenshots and logs can contain personal or confidential information.
+
+## Reusable task modules
+
+Create a normal saved task containing the reusable steps. In another workflow add **Run reusable task module**, entering the saved task's numerical ID. Task Runner expands nested modules before executing any action and rejects missing jobs, cycles, excessive nesting and oversized expansions. Child actions share the invoking workflow's variables. Modules do not automatically activate their own schedules. If a sub-action needs verification or retries, configure those on the action inside the module.
+
+## Local credential vault
+
+Open **Settings → Local credential vault** to store or update a named secret. On Windows the secret bytes are encrypted using the signed-in user's DPAPI protection. Add **Read protected vault credential** to a task to load the value into a variable, then use normal `${variable}` interpolation where authorized. Secrets are not placed in JSON task exports or `.trpkg` bundles. If you intentionally type or write a secret to a target app, that app or output file can of course receive it. Deleting the Task Runner installation preserves the encrypted vault with the other local user data until you explicitly remove it.
+
+## Portable `.trpkg` workflow bundles
+
+The Dashboard's **Export package** button creates a ZIP-format `.trpkg` containing the root task, referenced saved modules and reference images. It hashes each attached file; the export dialog asks separately before bundling referenced executable scripts. **Import package** checks manifest format, path safety, archive size, module references and SHA-256 hashes before saving anything. Imported module jobs and the root job are created **disabled** with attached images copied under local workflow assets. Review target paths, scripts and side-effecting actions before enabling an imported workflow. Existing JSON import/export still works.
+
+## Resume failed run safely
+
+Every successful verified step saves a new checkpoint. Choose a failed or cancelled execution in **Execution Logs → Resume failed run…** and review the confirmation. Task Runner refuses continuation if the job changed, if the workflow uses unsupported branching or module expansion, or if a prior action left volatile browser, variable or capture state that cannot be safely reconstructed. It starts a **new execution** at the first unfinished step and never silently replays earlier successful steps. An action that failed might have partially changed an external program before it returned an error, so review your program's state before confirming continuation.
+
+For actual Windows UI screenshots, execute `CAPTURE_UI_WINDOWS.cmd` from the extracted source directory. It launches the real PySide6 screens against a temporary isolated task database and saves screenshots under `ui-shots/`. This avoids misrepresenting designed mockups as real runtime captures.

@@ -1,5 +1,6 @@
 """Windows scheduled agent and direct execution entrypoints."""
 import os
+import threading
 import subprocess
 import sys
 from pathlib import Path
@@ -18,13 +19,34 @@ def request_stop(execution_id:int):
     marker(execution_id).touch()
 
 
+def emergency_shortcut(execution_id:int):
+    """Global emergency stop while the current user's task is executing.
+
+    Listening never starts outside an active workflow, and the listener is
+    always shut down in run_claimed's finally block.
+    """
+    if sys.platform!='win32':return None
+    from pynput.keyboard import GlobalHotKeys
+    listener=GlobalHotKeys({'<ctrl>+<shift>+<f11>':lambda:request_stop(execution_id)})
+    listener.start()
+    return listener
+
+
 def run_claimed(job_id:int,execution_id:int):
     stop=marker(execution_id)
+    listener=None
     try:
         db=Store()
+        try:listener=emergency_shortcut(execution_id)
+        except Exception as error:
+            db.event(execution_id,'WARNING',f'Global emergency stop hotkey unavailable: {error}')
         db.register_runner(execution_id,os.getpid())
         return WorkflowEngine(db,should_stop=stop.exists).execute(job_id,execution_id)
     finally:
+        if listener is not None:
+            listener.stop()
+            if listener.is_alive() and threading.current_thread() is not listener:
+                listener.join(timeout=2)
         stop.unlink(missing_ok=True)
 
 
@@ -51,7 +73,7 @@ def spawn_claimed(job_id:int,execution_id:int):
 def tick():
     store=Store()
     store.recover_abandoned()
-    jobs=store.claim_due()
+    jobs=store.claim_due()+store.claim_file_events()
     for job_id,execution_id in jobs:
         try:
             spawn_claimed(job_id,execution_id)

@@ -12,6 +12,7 @@ from .paths import data_root, setup_browser_path
 from .actions import ACTIONS
 from .flow import compile_flow, condition, validate_workflow
 from .fileops import atomic_copy_file, atomic_write_text
+from .debugger import PlaybackDebugger, DebugAbort
 
 INTERPOLATE=re.compile(r"\$\{([a-zA-Z_][a-zA-Z0-9_]*)\}")
 
@@ -74,7 +75,18 @@ class WorkflowEngine:
             raise ValueError(f"Unknown action: {kind}")
         p={k:self.expand(v) for k,v in step.get("params",{}).items()}
         self.abort_if_requested()
-        if kind=="click_image":
+        if kind=='wait_ocr':
+            from .ocr import read_region,stable_text_condition
+            result=stable_text_condition(
+                lambda:read_region(p.get('region',''),float(p.get('confidence',.45))),
+                str(p.get('text','')),p.get('condition','contains'),int(p.get('stable_frames',2)),
+                bool(p.get('case_sensitive',False)),abort=self.abort_if_requested,
+                sleep=self.sleep,timeout=float(p.get('timeout',180)),poll=float(p.get('poll',.8)))
+            self.vars[p.get('name','ocr_text')]=result
+        elif kind=="load_secret":
+            from .vault import Vault
+            self.vars[p['name']]=Vault().get(p['secret_name'])
+        elif kind=="click_image":
             from .observability import wait_until, image_location
             point=[None]
             def locate():
@@ -179,10 +191,27 @@ class WorkflowEngine:
             if native_mouse:
                 from . import winmouse
                 if kind=="click":
-                    x,y=winmouse.resolve_target(int(p["x"]),int(p["y"]),p.get("window_title", ""),
-                         float(p.get("window_rx",0)),float(p.get("window_ry",0)),
-                         p.get("control_name", ""),p.get("automation_id", ""))
-                    winmouse.click(x,y,p.get("button","left"),int(p.get("clicks",1)))
+                    from .precision import resolve_adaptive
+                    from .observability import wait_until
+                    destination=[None]
+                    def find_target():
+                        try:
+                            destination[0]=resolve_adaptive(
+                                int(p['x']),int(p['y']),p.get('window_title',''),
+                                float(p.get('window_rx',0)),float(p.get('window_ry',0)),
+                                p.get('control_name',''),p.get('automation_id',''),
+                                p.get('reference_image',''),float(p.get('confidence',.88)),
+                                bool(p.get('allow_relative_fallback',True)),
+                                bool(p.get('strict_target',False)))
+                            return True
+                        except LookupError:
+                            return False
+                    wait_until(find_target,float(p.get('target_timeout',20)),.35,
+                               self.sleep,self.abort_if_requested)
+                    target=destination[0]
+                    self.vars['last_target_method']=target.method
+                    self.vars['last_target_confidence']=f'{target.confidence:.3f}'
+                    winmouse.click(target.x,target.y,p.get('button','left'),int(p.get('clicks',1)))
                 elif kind=="move":winmouse.move(int(p["x"]),int(p["y"]),float(p.get("duration",0.2)))
                 elif kind=="drag":winmouse.drag(int(p["x1"]),int(p["y1"]),int(p["x2"]),int(p["y2"]),float(p.get("duration",0.5)))
                 elif kind=="scroll":winmouse.scroll(int(p["amount"]))
@@ -487,11 +516,20 @@ class WorkflowEngine:
         status="success"
         result="Completed all workflow steps"
         try:
-            steps=job["actions"]
+            from .modules import expand_modules
+            steps=expand_modules(self.store,job["actions"],ancestors=(job_id,))
             validate_workflow(steps)  # Preflight before any potentially destructive action.
+            self.store.execution_plan(execution_id,steps)
+            previous_run=self.store.execution_by_id(execution_id)
+            resume_index=int(previous_run.get('resume_index',0)) if previous_run else 0
+            if resume_index:
+                from .recovery import validate_resume
+                validate_resume(steps,resume_index)
+                self.store.event(execution_id,'WARNING',f'Operator-approved checkpoint continuation at step {resume_index+1}')
             jumps=compile_flow(steps)
+            debugger=PlaybackDebugger(self.store,execution_id,self.should_stop)
             repeats: dict[int,int]={}
-            index=0
+            index=resume_index
             operations=0
             while index<len(steps):
                 self.abort_if_requested()
@@ -501,8 +539,16 @@ class WorkflowEngine:
                 step=steps[index]
                 kind=step["type"]
                 step_number=index+1
+                debugger.before(step_number)
+                debugger.capture(step_number,'before')
                 attempts=max(1,1+int(step.get("retry_count",0)))
-                for attempt in range(1,attempts+1):
+                attempt=0
+                manual_retries=0
+                while True:
+                    attempt+=1
+                    correction=self.store.correction_for(execution_id,step_number)
+                    if correction is not None:
+                        step=dict(step,params=dict(correction))
                     try:
                         started=time.monotonic()
                         self.store.event(execution_id,"INFO",f"{ACTIONS[kind].name} (attempt {attempt}/{attempts}; before={step.get('delay_before',0)}s; after={step.get('delay_after',0)}s)",step_number)
@@ -560,14 +606,23 @@ class WorkflowEngine:
                         self.sleep(step.get("delay_after",0))
                         self.store.event(execution_id,"SUCCESS",f"Completed in {time.monotonic()-started:.2f}s (action plus delays and verification)",step_number)
                         self.on_event("success",step_number,step)
+                        debugger.capture(step_number,'after')
+                        debugger.completed(step_number)
+                        if jump is None or jump==index+1:
+                            self.store.execution_checkpoint(execution_id,step_number)
                         index=jump if jump is not None else index+1
                         break
-                    except Cancelled:raise
+                    except (Cancelled, DebugAbort):raise
                     except Exception as error:
                         self.store.event(execution_id,"ERROR",f"attempt {attempt}: {type(error).__name__}: {error}",step_number)
-                        if attempt==attempts:raise
+                        debugger.capture(step_number,'failed')
+                        if attempt>=attempts:
+                            if manual_retries>=25 or not debugger.failed(step_number,error):
+                                raise
+                            manual_retries+=1
+                            continue
                         self.sleep(step.get("retry_delay",1.0))
-        except Cancelled as error:
+        except (Cancelled, DebugAbort) as error:
             status="cancelled";result=str(error)
         except Exception as error:
             status="failed";result=f"{type(error).__name__}: {error}"
@@ -589,5 +644,7 @@ class WorkflowEngine:
         finally:
             self.cleanup()
             self.store.finish(job_id,execution_id,status,result)
+            if self.store.debug_status(execution_id):
+                self.store.debug_state(execution_id, status, 0, result if status!='success' else '')
             self.on_event("finish",0,{"status":status,"message":result})
         return status

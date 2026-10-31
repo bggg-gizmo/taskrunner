@@ -55,7 +55,8 @@
             "interval",
             "daily",
             "weekly",
-            "cron"
+            "cron",
+            "file_event"
           ]
         },
         "schedule": {
@@ -616,6 +617,31 @@
                         "type": "string",
                         "title": "UI Automation ID (optional)",
                         "default": ""
+                      },
+                      "reference_image": {
+                        "type": "string",
+                        "title": "Reference image (optional)",
+                        "default": ""
+                      },
+                      "confidence": {
+                        "type": "number",
+                        "title": "Minimum visual match (0–1)",
+                        "default": 0.88
+                      },
+                      "target_timeout": {
+                        "type": "number",
+                        "title": "Wait for precise target (seconds)",
+                        "default": 20.0
+                      },
+                      "allow_relative_fallback": {
+                        "type": "boolean",
+                        "title": "Allow original window-relative fallback",
+                        "default": true
+                      },
+                      "strict_target": {
+                        "type": "boolean",
+                        "title": "Require verified control or image (no coordinate fallback)",
+                        "default": false
                       }
                     },
                     "required": [],
@@ -1616,6 +1642,207 @@
                     },
                     "required": [
                       "name"
+                    ],
+                    "additionalProperties": true
+                  },
+                  "verify": {
+                    "$ref": "#/$defs/verification"
+                  },
+                  "retry_count": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 100
+                  },
+                  "retry_delay": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 3600
+                  },
+                  "delay_before": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 3600
+                  },
+                  "delay_after": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 3600
+                  }
+                },
+                "additionalProperties": true
+              },
+              {
+                "type": "object",
+                "required": [
+                  "type",
+                  "params"
+                ],
+                "properties": {
+                  "type": {
+                    "const": "wait_ocr"
+                  },
+                  "params": {
+                    "type": "object",
+                    "properties": {
+                      "region": {
+                        "type": "string",
+                        "title": "Screen region x,y,width,height (blank = all screens)",
+                        "default": ""
+                      },
+                      "condition": {
+                        "type": "string",
+                        "title": "Wait until",
+                        "default": "contains",
+                        "enum": [
+                          "contains",
+                          "absent",
+                          "changed"
+                        ]
+                      },
+                      "text": {
+                        "type": "string",
+                        "title": "Expected screen text",
+                        "default": ""
+                      },
+                      "confidence": {
+                        "type": "number",
+                        "title": "Minimum OCR confidence (0–1)",
+                        "default": 0.45
+                      },
+                      "stable_frames": {
+                        "type": "integer",
+                        "title": "Consecutive matching screenshots",
+                        "default": 2
+                      },
+                      "case_sensitive": {
+                        "type": "boolean",
+                        "title": "Case-sensitive match",
+                        "default": false
+                      },
+                      "timeout": {
+                        "type": "number",
+                        "title": "Timeout (seconds)",
+                        "default": 180.0
+                      },
+                      "poll": {
+                        "type": "number",
+                        "title": "Poll every seconds",
+                        "default": 0.8
+                      },
+                      "name": {
+                        "type": "string",
+                        "title": "Save recognized text as variable",
+                        "default": "ocr_text"
+                      }
+                    },
+                    "required": [
+                      "name"
+                    ],
+                    "additionalProperties": true
+                  },
+                  "verify": {
+                    "$ref": "#/$defs/verification"
+                  },
+                  "retry_count": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 100
+                  },
+                  "retry_delay": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 3600
+                  },
+                  "delay_before": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 3600
+                  },
+                  "delay_after": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 3600
+                  }
+                },
+                "additionalProperties": true
+              },
+              {
+                "type": "object",
+                "required": [
+                  "type",
+                  "params"
+                ],
+                "properties": {
+                  "type": {
+                    "const": "load_secret"
+                  },
+                  "params": {
+                    "type": "object",
+                    "properties": {
+                      "secret_name": {
+                        "type": "string",
+                        "title": "Stored vault name",
+                        "default": ""
+                      },
+                      "name": {
+                        "type": "string",
+                        "title": "Variable name",
+                        "default": "credential"
+                      }
+                    },
+                    "required": [
+                      "secret_name",
+                      "name"
+                    ],
+                    "additionalProperties": true
+                  },
+                  "verify": {
+                    "$ref": "#/$defs/verification"
+                  },
+                  "retry_count": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 100
+                  },
+                  "retry_delay": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 3600
+                  },
+                  "delay_before": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 3600
+                  },
+                  "delay_after": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 3600
+                  }
+                },
+                "additionalProperties": true
+              },
+              {
+                "type": "object",
+                "required": [
+                  "type",
+                  "params"
+                ],
+                "properties": {
+                  "type": {
+                    "const": "run_module"
+                  },
+                  "params": {
+                    "type": "object",
+                    "properties": {
+                      "task_id": {
+                        "type": "integer",
+                        "title": "Saved Task ID",
+                        "default": 1
+                      }
+                    },
+                    "required": [
+                      "task_id"
                     ],
                     "additionalProperties": true
                   },

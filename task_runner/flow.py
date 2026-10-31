@@ -122,7 +122,9 @@ def validate_workflow(steps: list[dict]) -> None:
             "desktop_scroll_text": {"pause_seconds": (0, 60)},
             "wait_window": {"timeout": (0, 3600)},
             "click_image": {"timeout":(0.1,3600),"poll":(0.1,60),"confidence":(0.01,1)},
+            "click": {"confidence":(0.01,1),"target_timeout":(0.1,3600)},
             "wait_screen": {"timeout": (0.1, 3600), "poll": (0.1, 60), "confidence": (0.01, 1)},
+            "wait_ocr": {"timeout": (0.1,3600), "poll": (0.1,60), "confidence":(0.01,1)},
             "wait_content": {"timeout": (0.1, 3600), "poll": (0.1, 60)},
             "capture_live_start": {"interval": (0.1,60)},
             "capture_program_output": {"timeout": (0.1,86400)},
@@ -142,7 +144,13 @@ def validate_workflow(steps: list[dict]) -> None:
             for xy in ("window_rx","window_ry"):
                 if not 0 <= float(params.get(xy,0)) <= 1:
                     raise ValueError(f"Step {number}: {xy} must be in 0–1")
-        if code in ("wait_screen","capture_live_start","click_image"):
+        if code=='wait_ocr':
+            count=int(params.get('stable_frames',2))
+            if not 1<=count<=30:
+                raise ValueError(f'Step {number}: OCR stability frames must be 1–30')
+            if params.get('condition')!='changed' and not params.get('text'):
+                raise ValueError(f'Step {number}: OCR text condition requires expected text')
+        if code in ("wait_screen","capture_live_start","click_image","wait_ocr"):
             from .visual_verification import parse_region
             region=str(params.get("region", ""))
             if region:parse_region(region)

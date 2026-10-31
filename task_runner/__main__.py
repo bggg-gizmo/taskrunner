@@ -30,6 +30,9 @@ def main():
         ok,msg=(install_scheduler() if options.install_scheduler else remove_scheduler())
         print(msg)
         return 0 if ok else 1
+    if sys.platform == "win32":
+        from .winmouse import enable_dpi_awareness
+        enable_dpi_awareness()
     from PySide6.QtWidgets import QApplication
     from PySide6.QtGui import QIcon
     from .paths import asset_path, setup_browser_path
@@ -40,7 +43,7 @@ def main():
     app.setApplicationName("Task Runner")
     app.setOrganizationName("Background Gremlin Group")
     app.setOrganizationDomain("background-gremlin-group")
-    app.setApplicationVersion("1.3.0")
+    app.setApplicationVersion("1.4.0")
     app.setStyleSheet(APP_STYLE)
     app.setWindowIcon(QIcon(str(asset_path("task-runner.ico"))))
     window=MainWindow()

@@ -227,7 +227,8 @@ class StepEditor(QDialog):
 
 class ScheduleEditor(QGroupBox):
     KINDS=[("Manual / Run on demand","manual"),("Once","once"),("Every N seconds","interval"),
-           ("Daily","daily"),("Weekly","weekly"),("Cron expression","cron")]
+           ("Daily","daily"),("Weekly","weekly"),("Cron expression","cron"),
+           ("When a file or folder changes","file_event")]
 
     def __init__(self,kind="manual",config=None,parent=None):
         super().__init__("Schedule",parent)
@@ -264,6 +265,15 @@ class ScheduleEditor(QGroupBox):
         f.addRow("Minute hour day month weekday",self.cron)
         f.addRow("Example",QLabel("*/15 * * * * = every 15 minutes; local time"))
         self.stack.addWidget(cron)
+        watcher=QWidget();wf=QFormLayout(watcher)
+        self.watch_path=QLineEdit()
+        self.watch_path.setPlaceholderText('C:\\Users\\...\\output.txt')
+        wf.addRow('Absolute file/folder path',self.watch_path)
+        self.watch_event=QComboBox()
+        self.watch_event.addItems(['created','modified','removed','any'])
+        wf.addRow('Trigger when',self.watch_event)
+        wf.addRow(QLabel('GUI watches every 1s; Windows heartbeat watches about once per minute.'))
+        self.stack.addWidget(watcher)
         self.choice.currentIndexChanged.connect(self.stack.setCurrentIndex)
         self.choice.setCurrentIndex(max(0,self.choice.findData(kind)))
         if kind=="once" and config.get("at"):
@@ -275,6 +285,9 @@ class ScheduleEditor(QGroupBox):
             self.weekday.setCurrentIndex(int(config.get("weekday",0)))
             self.weekly.setTime(QTime.fromString(config.get("time","08:00"),"HH:mm"))
         if kind=="cron":self.cron.setText(str(config.get("expression","0 8 * * *")))
+        if kind=='file_event':
+            self.watch_path.setText(str(config.get('path','')))
+            self.watch_event.setCurrentIndex(max(0,self.watch_event.findText(config.get('event','modified'))))
 
     def result(self):
         kind=self.choice.currentData()
@@ -283,7 +296,8 @@ class ScheduleEditor(QGroupBox):
         elif kind=="interval":config={"seconds":self.seconds.value()}
         elif kind=="daily":config={"time":self.daily.time().toString("HH:mm")}
         elif kind=="weekly":config={"weekday":self.weekday.currentIndex(),"time":self.weekly.time().toString("HH:mm")}
-        else:config={"expression":self.cron.text().strip()}
+        elif kind=='cron':config={"expression":self.cron.text().strip()}
+        else:config={'path':self.watch_path.text().strip(),'event':self.watch_event.currentText()}
         compute_next(kind,config)
         return kind,config
 
@@ -347,11 +361,14 @@ class TaskWizard(QDialog):
                    ("Copy scrolling webpage text", "browser_scroll_text"),
                    ("Copy scrolling program text", "desktop_scroll_text"),
                    ("Pause / delay", "wait"),
+                   ("Run reusable task module", "run_module"),
+                   ("Load protected credential", "load_secret"),
                    ("Wait for program window", "wait_window"),
                    ("Wait for file", "wait_file"),
                    ("Wait for browser element", "browser_wait_state"),
                    ("Choose dropdown option", "browser_select"),
                    ("Wait for screen/image change", "wait_screen"),
+                   ("Wait for visible text (offline OCR)", "wait_ocr"),
                    ("Click matching on-screen image", "click_image"),
                    ("Wait for output/text", "wait_content"),
                    ("Start saving live output/images", "capture_live_start"),
@@ -621,9 +638,10 @@ class MainWindow(QMainWindow):
         nav.addWidget(btn("Dashboard",lambda:self.set_page(0),primary=True))
         nav.addWidget(btn("+ New Task",self.new_task))
         nav.addWidget(btn("Execution Logs",lambda:self.set_page(1)))
+        nav.addWidget(btn("Output Gallery",lambda:self.set_page(3)))
         nav.addWidget(btn("Settings",lambda:self.set_page(2)))
         nav.addStretch()
-        nav.addWidget(QLabel("TASK RUNNER  /  1.3.0"))
+        nav.addWidget(QLabel("TASK RUNNER  /  1.4.0"))
         by=QLabel("BACKGROUND GREMLIN GROUP")
         by.setWordWrap(True);by.setObjectName("Muted");nav.addWidget(by)
         motto=QLabel("Creating Unique Tools\nfor Unique Individuals")
@@ -644,6 +662,7 @@ class MainWindow(QMainWindow):
         self.build_dashboard()
         self.build_logs()
         self.build_settings()
+        self.build_gallery()
         self.set_page(0)
         self.statusBar().showMessage("Ready — use New Task to configure a workflow")
         self.timer=QTimer(self);self.timer.setInterval(3000)
@@ -663,12 +682,15 @@ class MainWindow(QMainWindow):
         toolbar=QHBoxLayout()
         toolbar.addWidget(btn("New Task",self.new_task,primary=True))
         toolbar.addWidget(btn("Run now",self.run_selected))
+        toolbar.addWidget(btn("▶ Debug replay",self.run_debug_selected,primary=True))
         toolbar.addWidget(btn("Stop",self.stop_selected,danger=True))
         toolbar.addWidget(btn("Edit",self.edit_selected))
         toolbar.addWidget(btn("Duplicate",self.duplicate_selected))
         toolbar.addWidget(btn("Enable / Disable",self.toggle_selected))
         toolbar.addWidget(btn("Delete",self.delete_selected,danger=True))
         toolbar.addWidget(btn("Import JSON",self.import_task))
+        toolbar.addWidget(btn('Import package',self.import_portable))
+        toolbar.addWidget(btn('Export package',self.export_portable))
         toolbar.addWidget(btn("Export JSON",self.export_selected))
         toolbar.addWidget(btn("Refresh",self.refresh))
         toolbar.addStretch()
@@ -699,6 +721,7 @@ class MainWindow(QMainWindow):
         name=QLabel("Execution history");name.setObjectName("SectionTitle")
         bar.addWidget(name);bar.addStretch()
         bar.addWidget(btn("Export selected log",self.export_run_log))
+        bar.addWidget(btn('Resume failed run…',self.resume_from_checkpoint))
         bar.addWidget(btn("Refresh logs",self.refresh_logs))
         vertical.addLayout(bar)
         split=QSplitter(Qt.Orientation.Vertical)
@@ -715,8 +738,132 @@ class MainWindow(QMainWindow):
         self.run_details.setReadOnly(True)
         split.addWidget(self.run_details)
         split.setSizes([360,320])
-        vertical.addWidget(split)
+        vertical.addWidget(split,1)
+        debug=QGroupBox("Playback Debugger · Live Timeline / Teach a Click")
+        panel=QVBoxLayout(debug)
+        buttons=QHBoxLayout()
+        buttons.addWidget(btn("⏸ Pause",lambda:self.debug_command('pause')))
+        buttons.addWidget(btn('⏹ Emergency stop',lambda:self.debug_command('cancel'),danger=True))
+        buttons.addWidget(btn("▶ Continue",lambda:self.debug_command('run'),primary=True))
+        buttons.addWidget(btn("Step once",lambda:self.debug_command('step')))
+        buttons.addWidget(btn("Retry failed step",lambda:self.debug_command('retry')))
+        buttons.addWidget(btn("Teach current click…",self.teach_debug_click))
+        buttons.addStretch()
+        panel.addLayout(buttons)
+        self.debug_status_label=QLabel("Select a debug run to inspect its live actions and screenshots")
+        self.debug_status_label.setObjectName("Muted")
+        panel.addWidget(self.debug_status_label)
+        timeline=QHBoxLayout()
+        self.debug_steps=QListWidget()
+        self.debug_steps.setMinimumHeight(110)
+        self.debug_steps.setMaximumHeight(210)
+        self.debug_steps.itemSelectionChanged.connect(self.show_debug_capture)
+        timeline.addWidget(self.debug_steps,2)
+        self.debug_image=QLabel("Per-step capture preview · local only")
+        self.debug_image.setObjectName("Muted")
+        self.debug_image.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        self.debug_image.setMinimumSize(220,110)
+        self.debug_image.setMaximumHeight(210)
+        timeline.addWidget(self.debug_image,2)
+        panel.addLayout(timeline)
+        vertical.addWidget(debug)
+        self.debug_timer=QTimer(self)
+        self.debug_timer.setInterval(500)
+        self.debug_timer.timeout.connect(self.refresh_debugger)
+        self.debug_timer.start()
         self.stack.addWidget(page)
+
+    def build_gallery(self):
+        page=QWidget();vertical=QVBoxLayout(page)
+        title=QLabel('OUTPUT CAPTURE GALLERY');title.setObjectName('SectionTitle');vertical.addWidget(title)
+        bar=QHBoxLayout()
+        self.gallery_root=QLineEdit(str(data_root()/'captures'))
+        self.gallery_root.setReadOnly(True)
+        bar.addWidget(self.gallery_root,1)
+        bar.addWidget(btn('Choose folder…',self.gallery_choose))
+        bar.addWidget(btn('Refresh',self.gallery_refresh))
+        bar.addWidget(btn('Export capture bundle…',self.gallery_export))
+        vertical.addLayout(bar)
+        main=QSplitter(Qt.Orientation.Horizontal)
+        self.gallery_list=QListWidget()
+        self.gallery_list.itemSelectionChanged.connect(self.gallery_show)
+        main.addWidget(self.gallery_list)
+        detail=QWidget();detail_layout=QVBoxLayout(detail)
+        self.gallery_preview=QLabel('Select a captured image or output text to preview')
+        self.gallery_preview.setObjectName('Muted')
+        self.gallery_preview.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        self.gallery_preview.setMinimumHeight(220)
+        detail_layout.addWidget(self.gallery_preview,2)
+        self.gallery_text=QPlainTextEdit();self.gallery_text.setReadOnly(True)
+        detail_layout.addWidget(self.gallery_text,1)
+        detail_layout.addWidget(btn('Copy selected file path',self.gallery_copy))
+        main.addWidget(detail);main.setSizes([430,650])
+        vertical.addWidget(main,1)
+        self.gallery_summary=QLabel('Local captures only. Contents may include private desktop data.')
+        self.gallery_summary.setObjectName('Muted');vertical.addWidget(self.gallery_summary)
+        self._gallery_entries=[]
+        self.stack.addWidget(page)
+        self.gallery_refresh()
+
+    def gallery_choose(self):
+        folder=QFileDialog.getExistingDirectory(self,'Select captured-output folder',self.gallery_root.text())
+        if folder:self.gallery_root.setText(folder);self.gallery_refresh()
+
+    def gallery_refresh(self):
+        from .gallery import gallery_entries,duplicates
+        folder=Path(self.gallery_root.text())
+        if not folder.exists():folder.mkdir(parents=True,exist_ok=True)
+        try:
+            self._gallery_entries=gallery_entries(folder)
+            duplicated=duplicates(self._gallery_entries)
+        except Exception as error:
+            self._gallery_entries=[]
+            message(self,'Capture gallery unavailable',error,True)
+        self.gallery_list.clear()
+        for entry in self._gallery_entries:
+            icon='▣' if entry['kind']=='image' else '≡'
+            self.gallery_list.addItem(f'{icon}  {entry["relative"]}  ·  {entry["bytes"]:,} bytes')
+        self.gallery_summary.setText(
+            f'{len(self._gallery_entries)} local captures  ·  {len(duplicated) if self._gallery_entries else 0} duplicate groups  '
+            '·  Select Export to create a private archive with SHA-256 manifest')
+
+    def gallery_show(self):
+        index=self.gallery_list.currentRow()
+        if not 0<=index<len(self._gallery_entries):return
+        entry=self._gallery_entries[index]
+        path=Path(entry['path'])
+        self.gallery_preview.setPixmap(QPixmap())
+        self.gallery_text.clear()
+        if entry['kind']=='image':
+            image=QPixmap(str(path))
+            if image.isNull():self.gallery_preview.setText('Image preview unavailable')
+            else:self.gallery_preview.setPixmap(image.scaled(650,350,Qt.AspectRatioMode.KeepAspectRatio,
+                                                             Qt.TransformationMode.SmoothTransformation))
+        else:
+            self.gallery_preview.setText(entry['relative'])
+            with path.open('r',encoding='utf-8',errors='replace') as stream:
+                self.gallery_text.setPlainText(stream.read(250000))
+
+    def gallery_copy(self):
+        i=self.gallery_list.currentRow()
+        if not 0<=i<len(self._gallery_entries):return
+        QApplication.clipboard().setText(self._gallery_entries[i]['path'])
+        self.statusBar().showMessage('Captured file path copied')
+
+    def gallery_export(self):
+        from .gallery import export_gallery
+        if not self._gallery_entries:
+            message(self,'Nothing to export','Choose a folder with captured output first.');return
+        if not confirm(self,'Export private captures',
+                       'This archive will include screenshots and text that may contain private information. Export it?'):
+            return
+        suggested=str(Path.home()/'TaskRunner-Captures.zip')
+        path,_=QFileDialog.getSaveFileName(self,'Export capture archive',suggested,'Zip archives (*.zip)')
+        if not path:return
+        try:
+            result=export_gallery(self.gallery_root.text(),path,self._gallery_entries)
+            message(self,'Capture export complete',f'Saved {len(self._gallery_entries)} files to {result}')
+        except Exception as error:message(self,'Export failed',error,True)
 
     def build_settings(self):
         page=QWidget();layout=QVBoxLayout(page)
@@ -730,6 +877,12 @@ class MainWindow(QMainWindow):
         a.addWidget(self.sounds_toggle)
         a.addWidget(btn("Test sound",lambda:self.preferences.play("select")))
         layout.addWidget(audio)
+        vault=QGroupBox('Local credential vault · Windows DPAPI')
+        vault_layout=QHBoxLayout(vault)
+        vault_layout.addWidget(btn('Store / update secret…',self.vault_save))
+        vault_layout.addWidget(btn('Delete secret…',self.vault_delete,danger=True))
+        vault_layout.addWidget(QLabel('Secrets are encrypted for this Windows account; not included in JSON exports.'))
+        layout.addWidget(vault)
         options=QGroupBox("Execution safety and diagnostics")
         o=QVBoxLayout(options)
         self.failure_captures=QCheckBox("Save desktop screenshot after a failed workflow (contains desktop contents)")
@@ -762,7 +915,7 @@ class MainWindow(QMainWindow):
         layout.addWidget(paths)
         credits=QGroupBox("About Task Runner")
         credits_layout=QVBoxLayout(credits)
-        credits_layout.addWidget(QLabel("Task Runner v1.3.0  ·  Vaporwave Edition"))
+        credits_layout.addWidget(QLabel("Task Runner v1.4.0  ·  Vaporwave Edition"))
         credits_layout.addWidget(QLabel("Developed by the Background Gremlin Group"))
         credits_layout.addWidget(QLabel("Creating Unique Tools for Unique Individuals"))
         layout.addWidget(credits)
@@ -872,6 +1025,39 @@ class MainWindow(QMainWindow):
         self.refresh();self.select_task(job_id)
         message(self,"Task imported","Task imported in disabled state. Review its actions and schedule before enabling it.")
 
+    def export_portable(self):
+        job_id=self.require_selection()
+        if job_id is None:return
+        from .packages import export_package
+        job=self.store.get_job(job_id)
+        target,_=QFileDialog.getSaveFileName(self,'Export complete portable workflow',
+                                              str(Path.home()/(job['name']+'.trpkg')),
+                                              'Task Runner packages (*.trpkg)')
+        if not target:return
+        scripts=confirm(self,'Bundle referenced scripts?',
+                        'Include locally referenced Python/PowerShell/CMD/BAT launch scripts? '
+                        'These may contain private code or credentials; choose No to exclude them.')
+        try:
+            path=export_package(self.store,job_id,target,include_scripts=scripts)
+            message(self,'Portable workflow exported',f'Exported source, referenced images and modules to {path}')
+        except Exception as error:message(self,'Export failed',error,True)
+
+    def import_portable(self):
+        from .packages import import_package
+        source,_=QFileDialog.getOpenFileName(self,'Import portable workflow',str(Path.home()),
+                                              'Task Runner packages (*.trpkg)')
+        if not source:return
+        if not confirm(self,'Import untrusted workflow',
+                       'This file may include commands, scripts, file writes or shutdown actions. '
+                       'All imported jobs will be DISABLED until you review them. Import now?'):
+            return
+        try:
+            job_id=import_package(self.store,source)
+            self.refresh();self.select_task(job_id)
+            message(self,'Portable workflow imported',
+                    'Imported workflow and referenced assets. It is disabled. Review every step, path and target before enabling.')
+        except Exception as error:message(self,'Import failed',error,True)
+
     def export_run_log(self):
         row=self.runs.currentRow()
         if row<0 or not self.runs.item(row,0):
@@ -914,7 +1100,10 @@ class MainWindow(QMainWindow):
         except Exception as exc:message(self,"Delete failed",exc,True);return
         self.preferences.play("select");self.refresh()
 
-    def run_selected(self):
+    def run_debug_selected(self):
+        self.run_selected(debug=True)
+
+    def run_selected(self, debug=False):
         job_id=self.require_selection()
         if job_id is None:return
         job=self.store.get_job(job_id)
@@ -926,6 +1115,20 @@ class MainWindow(QMainWindow):
         if claimed is None:
             message(self,"Already running","The selected task already has a running execution.")
             return
+        if debug:
+            try:
+                self.store.debug_enable(claimed,paused=True,break_on_failure=True,snapshots=True)
+            except Exception as error:
+                self.store.finish(job_id,claimed,'failed',f'Debugger startup failed: {error}')
+                message(self,'Cannot start debugger',error,True)
+                return
+            self.set_page(1)
+            self.refresh_logs()
+            for row in range(self.runs.rowCount()):
+                cell=self.runs.item(row,0)
+                if cell and cell.data(Qt.ItemDataRole.UserRole)==claimed:
+                    self.runs.selectRow(row)
+                    break
         self.preferences.play("run")
         th=threading.Thread(target=run_claimed,args=(job_id,claimed),daemon=False,
                             name=f"taskrunner-job-{job_id}")
@@ -991,7 +1194,7 @@ class MainWindow(QMainWindow):
         # If GUI is open, it also acts as a scheduler. SQLite claims prevent duplication with the heartbeat.
         try:
             self.store.recover_abandoned()
-            for job_id,execution_id in self.store.claim_due():
+            for job_id,execution_id in self.store.claim_due()+self.store.claim_file_events():
                 th=threading.Thread(target=run_claimed,args=(job_id,execution_id),daemon=False)
                 self.active_workers[execution_id]=th
                 th.start()
@@ -1016,6 +1219,129 @@ class MainWindow(QMainWindow):
         elif entries:self.runs.selectRow(0)
         else:self.run_details.setPlainText("No executions recorded yet.")
 
+    def resume_from_checkpoint(self):
+        previous=self.selected_debug_run()
+        if previous is None:
+            message(self,'Select a failed run','Choose a failed/cancelled execution with a checkpoint.');return
+        progress=self.store.checkpoint_for(previous)
+        if not progress:
+            message(self,'No checkpoint','The selected run has no completed action checkpoint.');return
+        if not confirm(self,'Resume from checkpoint',
+                       f'Continue after step {progress["completed"]}? This requires a linear workflow with no lost browser/variable state. '
+                       'The previously failed action may have partially changed the desktop; verify your target program is ready. '
+                       'A new execution will be created, and completed steps will not be rerun.'):
+            return
+        try:
+            job_id,execution=self.store.claim_resume(previous)
+            self.active_workers[execution]=threading.Thread(target=run_claimed,args=(job_id,execution),daemon=False,
+                                                              name=f'taskrunner-resume-{job_id}')
+            self.active_workers[execution].start()
+            self.statusBar().showMessage(f'Checkpoint continuation started as run {execution}')
+            self.refresh_logs()
+        except Exception as error:
+            message(self,'Cannot resume checkpoint',error,True)
+
+    def selected_debug_run(self):
+        row=self.runs.currentRow()
+        cell=self.runs.item(row,0) if row>=0 else None
+        return cell.data(Qt.ItemDataRole.UserRole) if cell else None
+
+    def debug_command(self, command):
+        execution_id=self.selected_debug_run()
+        if execution_id is None:
+            message(self,'Select an execution','Choose a debug execution from the history table.');return
+        try:
+            self.store.debug_command(execution_id,command)
+            if command=='cancel':request_stop(execution_id)
+            self.refresh_debugger()
+        except Exception as error:
+            message(self,'Debugger control unavailable',error,True)
+
+    def refresh_debugger(self):
+        if self.stack.currentIndex()!=1:return
+        execution_id=self.selected_debug_run()
+        if execution_id is None:return
+        session=self.store.debug_status(execution_id)
+        if not session or not session['enabled']:
+            self.debug_status_label.setText('Standard execution · Choose ▶ Debug replay to enable interactive step controls')
+            return
+        run=self.store.execution_by_id(execution_id)
+        job=self.store.get_job(run['job_id']) if run else None
+        steps=job['actions'] if job else []
+        if self.debug_steps.count()!=len(steps) or self.debug_steps.property('job_id')!=(run['job_id'] if run else None):
+            self.debug_steps.clear()
+            for n,step in enumerate(steps,1):
+                self.debug_steps.addItem(f'{n:03d}  {ACTIONS[step["type"]].name}')
+            self.debug_steps.setProperty('job_id',run['job_id'] if run else None)
+        current=int(session['step_index'])
+        if current and 0<=current-1<self.debug_steps.count() and self.debug_steps.currentRow()!=current-1:
+            self.debug_steps.setCurrentRow(current-1)
+        self.debug_status_label.setText(
+            f'Run {execution_id}  ·  {session["state"].upper()}  ·  Step {current}/{len(steps)}  ·  Control: {session["mode"].upper()}'
+            + (f'  ·  {session["last_error"]}' if session['last_error'] else ''))
+        self.show_debug_capture()
+
+    def show_debug_capture(self):
+        execution_id=self.selected_debug_run()
+        if execution_id is None:return
+        entries=self.store.debug_artifacts_for(execution_id)
+        current=self.debug_steps.currentRow()+1
+        matching=[x for x in entries if x['step_index']==current]
+        if not matching:
+            self.debug_image.setText('No screenshot captured for this step')
+            self.debug_image.setPixmap(QPixmap())
+            return
+        path=Path(matching[-1]['path'])
+        if not path.is_file():
+            self.debug_image.setPixmap(QPixmap())
+            self.debug_image.setText('Screenshot no longer exists')
+            return
+        preview=QPixmap(str(path))
+        self.debug_image.setPixmap(preview.scaled(400,200,Qt.AspectRatioMode.KeepAspectRatio,
+                                                 Qt.TransformationMode.SmoothTransformation))
+        self.debug_image.setToolTip(str(path))
+
+    def teach_debug_click(self):
+        execution_id=self.selected_debug_run()
+        if execution_id is None:
+            message(self,'Select an execution','Choose a paused debug run first.');return
+        status=self.store.debug_status(execution_id)
+        if not status or status['state'] not in ('paused','failed_paused'):
+            message(self,'Pause to teach','Pause the debugger at a click action before capturing its replacement.');return
+        run=self.store.execution_by_id(execution_id)
+        job=self.store.get_job(run['job_id']) if run else None
+        step_num=status['step_index']
+        if not job or not 1<=step_num<=len(job['actions']) or job['actions'][step_num-1]['type']!='click':
+            message(self,'Click required','The paused step is not a click action.');return
+        if not confirm(self,'Teach a new click target',
+                       'Task Runner will hide for an exact desktop screenshot. Select the correct button; '
+                       'the new target will be saved to this task for future runs. Continue or Retry afterward.'):
+            return
+        self.hide()
+        QTimer.singleShot(600,lambda:self._finish_teach_click(execution_id,step_num))
+
+    def _finish_teach_click(self,execution_id,step_num):
+        try:
+            filename,left,top=capture_desktop()
+        except Exception as error:
+            self.show();message(self,'Capture failed',error,True);return
+        self.show();self.raise_()
+        picker=CaptureDialog(filename,left,top,self)
+        if picker.exec()!=QDialog.DialogCode.Accepted:return
+        sel=picker.selection
+        try:
+            from .recorder import window_at_point
+            evidence=window_at_point(sel['x'],sel['y']) if os.name=='nt' else {}
+            path=picker.save_region()
+            patch={'x':sel['x'],'y':sel['y'],**evidence,
+                   'reference_image':str(path) if path else '',
+                   'confidence':0.9,'strict_target':True,'target_timeout':30.0}
+            self.store.teach_click(execution_id,step_num,patch)
+            self.statusBar().showMessage(f'Saved corrected target for step {step_num}. Choose Retry or Continue.')
+            self.refresh_debugger()
+        except Exception as error:
+            message(self,'Could not save click correction',error,True)
+
     def show_run(self):
         row=self.runs.currentRow()
         if row<0:return
@@ -1027,6 +1353,31 @@ class MainWindow(QMainWindow):
             lines.append(f"[{local_text(event['recorded_at'])}] [{event['level']}] " +
                          (f"Step {event['step_index']}: " if event['step_index'] else "") + event["message"])
         self.run_details.setPlainText("\n".join(lines) if lines else "No step events recorded yet.")
+        self.refresh_debugger()
+
+    def vault_save(self):
+        from .vault import Vault
+        name,ok=QInputDialog.getText(self,'Protected credential','Vault name (identifier):')
+        if not ok or not name:return
+        value,accepted=QInputDialog.getText(self,'Protected credential','Credential value:',QLineEdit.EchoMode.Password)
+        if not accepted or not value:return
+        try:
+            Vault().put(name,value)
+            message(self,'Credential protected',f'Saved {name} using Windows user-bound DPAPI. The value is not displayed.')
+        except Exception as error:message(self,'Vault error',error,True)
+
+    def vault_delete(self):
+        from .vault import Vault
+        try:names=Vault().list_names()
+        except Exception as error:message(self,'Vault unavailable',error,True);return
+        if not names:
+            message(self,'Vault empty','No protected credentials are stored.');return
+        name,ok=QInputDialog.getItem(self,'Delete credential','Select credential:',names,0,False)
+        if not ok or not name:return
+        if not confirm(self,'Delete protected credential',f'Permanently delete stored credential {name}?'):
+            return
+        try:Vault().remove(name)
+        except Exception as error:message(self,'Vault error',error,True)
 
     def install_agent(self):
         ok,details=install_scheduler()
