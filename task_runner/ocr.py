@@ -1,7 +1,8 @@
-"""Offline OCR on an exact desktop region, with confidence filtering.
+"""Local OCR on an exact desktop region, including confidence filtering.
 
-RapidOCR includes local ONNX models inside the dependency distribution; this
-module has no network calls, cloud inference, or remote service fallback.
+Uses maintained RapidOCR 3.x and ONNX Runtime with models bundled locally.
+No cloud inference, model downloads, or remote service fallback.
+The result normalizer preserves support for legacy injected OCR callbacks.
 """
 from __future__ import annotations
 from functools import lru_cache
@@ -10,10 +11,33 @@ from functools import lru_cache
 @lru_cache(maxsize=1)
 def _engine():
     try:
-        from rapidocr_onnxruntime import RapidOCR
+        from rapidocr import RapidOCR
     except ImportError as exc:
-        raise RuntimeError('Offline OCR requires rapidocr-onnxruntime. Run CHECK_DEPENDENCIES.cmd.') from exc
+        raise RuntimeError('Offline OCR requires rapidocr and onnxruntime. Run CHECK_DEPENDENCIES.cmd.') from exc
+    try:
+        import onnxruntime  # noqa: F401 - fail early if the ONNX inference engine is absent
+    except ImportError as exc:
+        raise RuntimeError('Offline OCR requires onnxruntime. Run CHECK_DEPENDENCIES.cmd.') from exc
     return RapidOCR()
+
+
+def _lines_from_result(result):
+    """Normalize RapidOCR 3.x (`txts`/`scores`) or older tuple results.
+
+    Legacy tuple-shaped return values occur in injected adapters and old
+    dependencies, but the production engine is always the maintained RapidOCR.
+    """
+    if result is None:
+        return ()
+    if hasattr(result, 'txts') and hasattr(result, 'scores'):
+        texts=result.txts
+        scores=result.scores
+        if texts is None or scores is None:
+            return ()
+        return zip(texts, scores)
+    if isinstance(result, tuple) and len(result)==2:
+        result=result[0]
+    return ((line[1],line[2]) for line in (result or ()) if len(line)>=3)
 
 
 def read_region(region='', confidence=.45, engine=None, image=None):
@@ -24,14 +48,13 @@ def read_region(region='', confidence=.45, engine=None, image=None):
     if image is None:
         raise ValueError('No screenshot available to recognize')
     frame=np.asarray(image.convert('RGB'))
-    result,_=(engine or _engine())(frame)
+    output=(engine if engine is not None else _engine())(frame)
     pieces=[]
-    for line in (result or []):
-        if len(line)<3:continue
-        value=str(line[1])
-        probability=float(line[2])
-        if probability>=float(confidence) and value.strip():
-            pieces.append(value)
+    for value, probability in _lines_from_result(output):
+        if value is None or probability is None:
+            continue
+        if float(probability)>=float(confidence) and str(value).strip():
+            pieces.append(str(value))
     return '\n'.join(pieces)
 
 

@@ -34,16 +34,16 @@
       "sha256": "a5ea31bf93a546f80b4808569dd0cdd50a0770726967cea960fc830a202151d3"
     },
     "BUILD_WINDOWS.cmd": {
-      "bytes": 3316,
-      "sha256": "a22022bc6f4200ec2584c2767e9c5abaa1504f689500702aa7cabbaf070065ec"
+      "bytes": 3304,
+      "sha256": "5fc3b121893e94a594e5e0c03517b76b1fa322fbc045d1bdd777ae27e6bc15a0"
     },
     "CAPTURE_UI_WINDOWS.cmd": {
       "bytes": 396,
       "sha256": "7fe4da8d03b18cd559d4e2b3f1ff8039b3becbbbc17f0a552267a5a65abae243"
     },
     "CHANGELOG.md": {
-      "bytes": 5378,
-      "sha256": "ad28472b61c62b62ca2f2de8521faa5689b40a6d6e01cb70f630d59685aa106c"
+      "bytes": 6021,
+      "sha256": "b81a3dae09ceede1886d29e374ae596fb03bc48b98a2725538eb95e7c4a54706"
     },
     "CHECK_DEPENDENCIES.cmd": {
       "bytes": 792,
@@ -150,8 +150,8 @@
       "sha256": "698058b6b262cd0d69154da761b1752fed33f1afd47283d09d7f4e216c24e8fb"
     },
     "docs/V1.4_WINDOWS_ACCEPTANCE.md": {
-      "bytes": 4759,
-      "sha256": "fed1583086f0b390902fcd0ca2c8ae65c5eda291f30ce1bffd634cc8d3390d80"
+      "bytes": 4764,
+      "sha256": "96358916470a2585510f73effd7d82e28c351cda37bc654950aa4ba4f095aeda"
     },
     "launcher.py": {
       "bytes": 176,
@@ -778,8 +778,8 @@
       "sha256": "aabbfc6336ad32c1cf80defb4bab1a05badb7f285496f056c31e152d42863f04"
     },
     "requirements.txt": {
-      "bytes": 278,
-      "sha256": "3e0802841fd9e895332beead4712765a4bda858b510f388828b0daeaf507aff8"
+      "bytes": 290,
+      "sha256": "ed6b9e283cef12c7068c15eedd730ce2ca792b46a52806dccea054a4e8e410cc"
     },
     "schemas/taskrunner-job.schema.json": {
       "bytes": 128061,
@@ -842,8 +842,8 @@
       "sha256": "ad0251138f2292aa685986b34a4088e5b0e6a3aae28095f0857b2bd1921ecfb0"
     },
     "task_runner/diagnostics.py": {
-      "bytes": 5002,
-      "sha256": "12644c81e5c9fcc7abd6fc4b5e581c92da59002973b2a198b09487a6950f7df4"
+      "bytes": 5305,
+      "sha256": "562c437108e5feeb855c1cac6d6a7338553fd765f2ec78c466922e3e510adecb"
     },
     "task_runner/executor.py": {
       "bytes": 35959,
@@ -878,8 +878,8 @@
       "sha256": "04ca25083210faa17b09f5f67d1479be605a2c6484b92800b06345c38cf892bd"
     },
     "task_runner/ocr.py": {
-      "bytes": 2618,
-      "sha256": "a0fcd01182d4bf1b7db1bf86d212ee3bb668b3fa7e494c092a3bdd723b6d055d"
+      "bytes": 3629,
+      "sha256": "873cb17b9142588f067fd3774c988190c6904f87f284058198d9f54f5a95608f"
     },
     "task_runner/packages.py": {
       "bytes": 9785,
@@ -952,6 +952,10 @@
     "tests/test_flow.py": {
       "bytes": 5630,
       "sha256": "c6032b15536a03c6670c96efd53941f7a1074fc43146b1cbd5733f68026d17bb"
+    },
+    "tests/test_ocr_windows_313.py": {
+      "bytes": 2420,
+      "sha256": "c14b0a00b2f55b0620157c9a99167180201d4d0c7e66f43d8f96283b2a646698"
     },
     "tests/test_repo_readiness.py": {
       "bytes": 2684,

@@ -2,6 +2,13 @@
 
 All notable public-facing changes are documented here. Archived source versions are available in [`old builds/`](old%20builds/). Source-only release status is distinguished from completed Windows acceptance testing.
 
+## v1.4.0 — Windows Python 3.13 OCR build fix
+
+- Corrected the OCR dependency for Python 3.13: replaced the legacy `rapidocr-onnxruntime` constraint with the maintained `rapidocr` and the separately installed `onnxruntime` inference engine.
+- Adapted the OCR result reader to the current RapidOCR `txts`/`scores` API while preserving legacy injected OCR test adapters.
+- Updated PyInstaller to bundle the maintained OCR module, ONNX engine and local models; packaged self-test performs an OCR inference to detect missing model assets.
+- Preserved all workflows, user data, automation features, visuals, build scripts and archived releases.
+
 ## v1.4.0 — Adaptive replay, local intelligence and recovery (source release)
 
 - Added integrated **Visual Playback Debugger** with pause, resume, single-step, failed-step retry, per-step captures and teach-by-correction.

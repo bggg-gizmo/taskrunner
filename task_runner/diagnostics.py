@@ -28,12 +28,17 @@ def run_diagnostics(report_path: str | Path) -> bool:
 
     def dependencies():
         for package in ("PySide6","playwright","bs4","lxml","croniter","tzlocal",
-                        "mss","PIL","pyautogui","pywinauto","pyperclip","cv2","rapidocr_onnxruntime"):
+                        "mss","PIL","pyautogui","pywinauto","pyperclip","cv2","rapidocr","onnxruntime"):
             importlib.import_module(package)
 
     def local_ocr():
-        from .ocr import _engine
+        from PIL import Image
+        from .ocr import _engine, read_region
         assert callable(_engine())
+        # First inference initializes lazy ONNX models and catches missing
+        # package data in the frozen EXE, regardless of recognized text.
+        detected=read_region(image=Image.new('RGB',(128,64),'white'))
+        assert isinstance(detected,str)
 
     def assets():
         from PIL import Image
