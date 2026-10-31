@@ -118,10 +118,24 @@ class CaptureDialog(QDialog):
                         "region":(r.left(),r.top(),r.width()+1,r.height()+1),"screenshot":str(self.file)}
         self.accept()
 
-    def save_region(self):
+    def reference_region(self, minimum_size: int = 48):
+        """Avoid unusable one-pixel templates when the user single-clicks."""
         if not self.selection:return None
+        x,y,w,h = self.selection['region']
         from PIL import Image
-        x,y,w,h=self.selection["region"]
+        with Image.open(self.file) as image:
+            width,height=image.size
+        wanted_w=min(width,max(int(minimum_size),w))
+        wanted_h=min(height,max(int(minimum_size),h))
+        left=min(max(0,x+(w-wanted_w)//2),width-wanted_w)
+        top=min(max(0,y+(h-wanted_h)//2),height-wanted_h)
+        return left,top,wanted_w,wanted_h
+
+    def save_region(self):
+        bounds=self.reference_region()
+        if bounds is None:return None
+        from PIL import Image
+        x,y,w,h=bounds
         path=data_root()/"captures"/f"reference-{datetime.now().strftime('%Y%m%d-%H%M%S-%f')}.png"
         with Image.open(self.file) as image:
             image.crop((x,y,x+w,y+h)).save(path)

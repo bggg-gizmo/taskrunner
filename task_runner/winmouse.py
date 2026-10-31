@@ -91,3 +91,56 @@ def drag(x1:int,y1:int,x2:int,y2:int,duration=0.5):
 def scroll(notches:int):
     emergency_stop()
     _event(WHEEL,int(notches)*120)
+
+
+def resolve_target(x: int, y: int, window_title: str = '', window_rx: float = 0,
+                   window_ry: float = 0, control_name: str = '',
+                   automation_id: str = '') -> tuple[int, int]:
+    """Prefer UI Automation targets and window-relative geometry over stale pixels.
+
+    A recorded click with a named window must find that window before it clicks;
+    it will never silently click a different application at the old coordinates.
+    """
+    if not window_title.strip():
+        return int(x), int(y)
+    from pywinauto import Desktop
+    matches = [w for w in Desktop(backend='uia').windows()
+               if window_title.casefold() in w.window_text().casefold()]
+    if not matches:
+        raise LookupError(f'Recorded target window is not open: {window_title}')
+    # Multiple windows can share a title. Prefer the one nearest the original
+    # recorded click rather than assuming enumeration order is stable.
+    def distance(candidate):
+        rect=candidate.rectangle()
+        center_x=rect.left+rect.width()/2
+        center_y=rect.top+rect.height()/2
+        return (center_x-x)**2+(center_y-y)**2
+    window = min(matches,key=distance)
+    box = window.rectangle()
+    if box.width() <= 0 or box.height() <= 0:
+        raise RuntimeError(f'Window target has invalid bounds: {window_title}')
+    expected_x = round(box.left + float(window_rx)*box.width())
+    expected_y = round(box.top + float(window_ry)*box.height())
+    if automation_id:
+        matches_by_id = []
+        for element in window.descendants()[:1500]:
+            try:
+                info = element.element_info
+                if info.automation_id != automation_id:
+                    continue
+                if control_name and info.name != control_name:
+                    continue
+                if not element.is_visible() or not element.is_enabled():
+                    continue
+                bounds = element.rectangle()
+                if bounds.width()>0 and bounds.height()>0:
+                    cx=int(bounds.left + bounds.width()/2)
+                    cy=int(bounds.top + bounds.height()/2)
+                    matches_by_id.append((cx,cy))
+            except Exception:
+                continue
+        if matches_by_id:
+            # An app may reuse an automation ID. Prefer the element nearest
+            # the recorded relative location rather than the first match.
+            return min(matches_by_id,key=lambda p:(p[0]-expected_x)**2+(p[1]-expected_y)**2)
+    return expected_x,expected_y

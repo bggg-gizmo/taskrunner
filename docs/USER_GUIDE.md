@@ -113,3 +113,27 @@ As of the current source audit, **61 offline tests pass and 3 timezone/cron test
 **Run focus and audio:** Settings now has **Minimize Task Runner while manually running desktop workflows** (enabled by default). Manually started mouse/keyboard jobs allow 900 ms for Windows to finish minimizing and restore Task Runner after completion, avoiding dashboard clicks. Jobs started by the scheduler are not automatically minimized by this setting. Two new original sounds (`startup.wav`, `exit.wav`) play when the GUI starts or successfully closes, controlled by the existing *Sounds* checkbox. All five earlier cues and visual styling remain unchanged.
 
 **Actual validation:** 61 offline regression tests passed, 3 skipped due to unavailable cron/timezone packages. The new tests check mouse-step retry defaults, real workflow retry semantics, Unicode SendInput event formation, screen region verification, action shortcuts, and seven valid WAV assets. The actual Windows EXE and screen/keyboard/multimonitor interactions must still pass `BUILD_WINDOWS.cmd` and `WINDOWS_ACCEPTANCE.md` on your Windows desktop.
+
+## Version 1.3: record, replay, observe and install
+
+### Record a complete desktop task
+
+In the Task Setup Wizard, click **● Record actions / Replay**. Task Runner hides for two seconds, then records global mouse clicks, drags, scroll wheel, printable typing, keyboard shortcuts and keypresses in the active Windows session. Perform the intended task normally, including the pauses required by slow-opening applications. Press **Ctrl+Shift+F12** to stop. Task Runner returns and offers to insert the recorded actions; review every step, then use the existing Save/Save + Run now functionality. Intervals between captured actions are added as `delay_before`; a change to a new titled Windows program adds a window-appears checkpoint so slow startup need not be replayed as a hard-coded wait. Recording is capped at thirty minutes.
+
+The recorder does **not** record everything in a whole operating system: secure UAC desktops, inaccessible applications, and password-protected surfaces may not expose events. Keyboard recording can store passwords as plain workflow text. **Do not type secrets while recording.** There is no always-on recording; recording is explicitly started and stopped in the wizard.
+
+### Watch for things to appear or change
+
+Use **Wait for visual change** with a selected screen region or a saved reference PNG. The condition can be that the region changes, that an image appears, or that it disappears. Set the polling period and maximum timeout. For textual output use **Wait for text / code / output** and choose `window`, `browser`, `file`, or `clipboard`, then select `contains`, `absent` or `changed`. The observed text is stored in your chosen workflow variable. When a condition becomes true, the next step executes. Pixel changes can be triggered by animation; choose a small meaningful region or a stable visual/text condition rather than the entire animated desktop.
+
+Use **Click on-screen image** for target buttons or icons whose position moves between runs. Capture a distinctive crop with the screenshot picker or supply a reference PNG. The action searches the selected region (all screens if blank) and clicks the matching location. This is preferable to absolute coordinates when a resizable program changes layout. Recorder-generated clicks also store the window name, relative coordinates and accessible automation ID when available.
+
+### Collect text and rendered images as output appears
+
+Place **Start live output / image capture** before the actions you want to monitor. Choose a source: desktop/screen region (PNG snapshots on change), Windows-window accessibility text, a changing text file, clipboard text, clipboard image, or an **image output folder** (copies newly completed original PNG/JPEG/WebP/BMP/GIF files). Provide a local output directory, sampling interval and a maximum number of changed captures. Later workflow steps continue while the capture worker runs. Place **Stop live output capture** after them; the output directory includes a `capture-manifest.json` with the saved filenames. Capture also terminates when a workflow completes or is cancelled.
+
+Use **Save clipboard image** when you specifically copied a rendered image into the Windows clipboard. Use **Run process and continuously save output** to capture a program's stdout and stderr into a file as the process runs. The latter waits for the program to finish or its timeout. For browser pages, the existing **Save browser screenshot**, **Capture entire scrolling web text**, and **Get browser HTML** remain available.
+
+### Install and uninstall
+
+First compile with `BUILD_WINDOWS.cmd`. Run `INSTALL_WINDOWS.cmd` for a per-user application installation in `%LOCALAPPDATA%\Programs\TaskRunner` with a Start Menu entry and Installed Apps uninstall registration. To remove, use the Windows Installed Apps Task Runner entry or `UNINSTALL_WINDOWS.cmd`. It removes the app, shortcut, and TaskRunnerScheduler entry. The local data directory `%LOCALAPPDATA%\TaskRunner` remains unless you explicitly request and confirm removal. It never uninstalls shared Python packages or the shared Playwright browser cache.

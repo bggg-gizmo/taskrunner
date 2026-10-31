@@ -1,33 +1,43 @@
-# Changelog
+# Task Runner Changelog
 
-## 1.2.1 hardening candidate — repository preparation (unreleased)
+All notable public-facing changes are documented here. Archived source versions are available in [`old builds/`](old%20builds/). Source-only release status is distinguished from completed Windows acceptance testing.
 
-- Preserve the full 1.2.1 GUI, screenshot workflow, original audio, icon, build scripts and action catalog.
-- Stage UTF-8 file replacements and file copies atomically, so incomplete writes/copies cannot first destroy the old file.
-- Add a Settings → Backup task database control using SQLite's online backup and integrity check.
-- Prevent a late/recovered worker from overwriting the state of a newer execution.
-- Provide schema-backed portable job-export documentation and an action-catalog synchronization test.
-- Add a public GitHub preparation package: `.gitignore`, `.gitattributes`, `.editorconfig`, issue forms, Dependabot configuration, pull request template, branch ruleset proposal, security policy, contributor guide, architecture notes and prepublication audit.
-- No paid or credit-consuming GitHub Actions have been added; no remote repository has been modified.
+## v1.3.0 — Record, observe, capture, replay (source release)
 
-## 1.2.1 — corrective Windows integration
+- **Record & replay:** Record real desktop mouse clicks, dragging, scrolling, text and shortcut key events, and the actual time between actions. Review/edit the timeline before saving. Stop capture with `Ctrl+Shift+F12`.
+- **Slow application startup:** Record a named-window appearance checkpoint and configure event-driven waits instead of relying solely on fixed sleeps.
+- **Visual triggers:** Wait for screen changes or the appearance/disappearance of reference images. Match an image at its current desktop location before clicking.
+- **Output triggers:** Wait for content in Windows windows, browser elements, clipboard, or files, then branch/continue and store the result in workflow variables.
+- **Live capture:** Capture evolving screen images, clipboard images, window text, files, and completed images in an output directory; save a manifest.
+- **Program output:** Stream subprocess standard output and errors to a file as the process runs.
+- **More resilient clicking:** Preserve recorded absolute and window-relative positions, with accessibility identifiers when available.
+- **Windows installation:** Added per-user `INSTALL_WINDOWS.cmd`, Start Menu and Installed Apps registration.
+- **Proper uninstall:** Added `UNINSTALL_WINDOWS.cmd`, removing the app and its own scheduler task, retaining user data unless its deletion is explicitly confirmed.
+- **Preservation:** Previous automation actions, existing wizard/editor interface, local scheduler, database, custom app icon, and seven original sounds remain supported.
+- **Validation:** Source tests passed locally. Windows GUI integration, global input hooks, EXE, and installer/uninstaller require fresh native Windows acceptance testing before distributing a verified binary.
 
-- Independent native Unicode typing and cursor API isolation.
-- Delayed desktop screenshot capture of transient right-click menus.
-- Direct wizard shortcuts for dropdown and scrolling text actions, waits and select controls.
-- Configurable click verification, retry and settling defaults, and a bulk timing editor for saved tasks.
-- Startup and exit sound cues, governed by the existing sound toggle.
-- Optional auto-minimize while a manual desktop workflow executes.
+## v1.2.1 — Reliability and public release baseline
 
-## 1.2.0 — extended action catalog
+- Corrected Unicode keyboard injection on Windows, isolated native input from PyAutoGUI cursor handling.
+- Delayed screenshot capture of context menus and transient controls.
+- Added direct wizard shortcuts for dropdowns, scrolling text, and wait actions.
+- Added optional screen-change verification, configurable retries and settling time, plus bulk timing adjustments for existing workflows.
+- Added optional automatic window minimizing during manual desktop execution and the startup/exit sound cues.
+- Made local file replacement safer through staged writes and copies.
+- Added SQLite live backup support and prevented late workers from overwriting newer execution status.
+- Added portable JSON workflow schema and improved JSON export compatibility.
+- Added public security, contribution, and license documentation.
+- **Archived complete source:** [`old builds/v1.2.1/`](old%20builds/v1.2.1/).
 
-- Browser and Windows dropdown inspection, scrolling text capture and intelligent waits.
-- Builder recovery from pip wheel-cache permission issues.
-- Background Gremlin Group developer attribution and Windows version resource metadata.
+## v1.2.0 — Expanded automation controls
 
-## Initial integration line
+- Expanded browser and Windows dropdown inspection and selection.
+- Added scrolling text capture, extra waits, retry/timing controls and output collection.
+- Improved Windows shared-Python dependency installation when pip's wheel cache is inaccessible.
+- Added Background Gremlin Group Windows executable version metadata.
 
-- Native Windows PySide6 dashboard and visual workflow wizard, Playwright/Beautiful Soup, desktop automations, SQLite history, scheduling, build scripts, original vaporwave assets and sound effects.
+## Initial Task Runner release
 
-- Added `CHECK_GITHUB_READINESS.cmd`, an entirely local pre-publication scan/compile/test command.
-- Made GUI JSON exports serialize `enabled` as a boolean and kept the portable JSON Schema backward-compatible with existing 0/1 export values.
+- Windows PySide6 task dashboard and visual screenshot-driven wizard.
+- Ordered desktop automation, Playwright browser actions, Beautiful Soup extraction, clipboard/file operations, and conditional flows.
+- SQLite task storage, execution logging, import/export, scheduling, original vaporwave visual assets, and selectable retro sound effects.

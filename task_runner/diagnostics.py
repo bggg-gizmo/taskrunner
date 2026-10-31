@@ -13,7 +13,7 @@ from .paths import asset_path,setup_browser_path
 
 
 def run_diagnostics(report_path: str | Path) -> bool:
-    report={"application":"Task Runner","version":"1.2.1","developer":"Background Gremlin Group","test_started_utc":datetime.now(timezone.utc).isoformat(),
+    report={"application":"Task Runner","version":"1.3.0","developer":"Background Gremlin Group","test_started_utc":datetime.now(timezone.utc).isoformat(),
             "python":sys.version,"platform":platform.platform(),
             "frozen":bool(getattr(sys,"frozen",False)),"checks":[]}
 

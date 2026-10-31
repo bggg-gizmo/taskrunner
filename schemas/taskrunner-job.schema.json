@@ -74,6 +74,494 @@
                 ],
                 "properties": {
                   "type": {
+                    "const": "click_image"
+                  },
+                  "params": {
+                    "type": "object",
+                    "properties": {
+                      "image": {
+                        "type": "string",
+                        "title": "Reference image PNG",
+                        "default": ""
+                      },
+                      "region": {
+                        "type": "string",
+                        "title": "Search region x,y,width,height (blank = all monitors)",
+                        "default": ""
+                      },
+                      "confidence": {
+                        "type": "number",
+                        "title": "Confidence (0–1)",
+                        "default": 0.88
+                      },
+                      "timeout": {
+                        "type": "number",
+                        "title": "Wait for image (seconds)",
+                        "default": 45.0
+                      },
+                      "poll": {
+                        "type": "number",
+                        "title": "Check every (seconds)",
+                        "default": 0.4
+                      },
+                      "button": {
+                        "type": "string",
+                        "title": "Button",
+                        "default": "left",
+                        "enum": [
+                          "left",
+                          "right",
+                          "middle"
+                        ]
+                      }
+                    },
+                    "required": [
+                      "image"
+                    ],
+                    "additionalProperties": true
+                  },
+                  "verify": {
+                    "$ref": "#/$defs/verification"
+                  },
+                  "retry_count": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 100
+                  },
+                  "retry_delay": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 3600
+                  },
+                  "delay_before": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 3600
+                  },
+                  "delay_after": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 3600
+                  }
+                },
+                "additionalProperties": true
+              },
+              {
+                "type": "object",
+                "required": [
+                  "type",
+                  "params"
+                ],
+                "properties": {
+                  "type": {
+                    "const": "wait_screen"
+                  },
+                  "params": {
+                    "type": "object",
+                    "properties": {
+                      "mode": {
+                        "type": "string",
+                        "title": "Condition",
+                        "default": "changed",
+                        "enum": [
+                          "changed",
+                          "image_appears",
+                          "image_disappears"
+                        ]
+                      },
+                      "region": {
+                        "type": "string",
+                        "title": "Screen region: x,y,width,height (blank = full screen)",
+                        "default": ""
+                      },
+                      "image": {
+                        "type": "string",
+                        "title": "Reference image file (for image conditions)",
+                        "default": ""
+                      },
+                      "confidence": {
+                        "type": "number",
+                        "title": "Image matching confidence",
+                        "default": 0.88
+                      },
+                      "timeout": {
+                        "type": "number",
+                        "title": "Wait up to (seconds)",
+                        "default": 180.0
+                      },
+                      "poll": {
+                        "type": "number",
+                        "title": "Check every (seconds)",
+                        "default": 0.5
+                      }
+                    },
+                    "required": [],
+                    "additionalProperties": true
+                  },
+                  "verify": {
+                    "$ref": "#/$defs/verification"
+                  },
+                  "retry_count": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 100
+                  },
+                  "retry_delay": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 3600
+                  },
+                  "delay_before": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 3600
+                  },
+                  "delay_after": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 3600
+                  }
+                },
+                "additionalProperties": true
+              },
+              {
+                "type": "object",
+                "required": [
+                  "type",
+                  "params"
+                ],
+                "properties": {
+                  "type": {
+                    "const": "wait_content"
+                  },
+                  "params": {
+                    "type": "object",
+                    "properties": {
+                      "source": {
+                        "type": "string",
+                        "title": "Monitor",
+                        "default": "window",
+                        "enum": [
+                          "window",
+                          "browser",
+                          "file",
+                          "clipboard"
+                        ]
+                      },
+                      "target": {
+                        "type": "string",
+                        "title": "Window title, CSS selector, file path (blank = clipboard)",
+                        "default": ""
+                      },
+                      "condition": {
+                        "type": "string",
+                        "title": "Condition",
+                        "default": "contains",
+                        "enum": [
+                          "contains",
+                          "absent",
+                          "changed"
+                        ]
+                      },
+                      "text": {
+                        "type": "string",
+                        "title": "Expected text (contains/absent)",
+                        "default": ""
+                      },
+                      "timeout": {
+                        "type": "number",
+                        "title": "Wait up to (seconds)",
+                        "default": 180.0
+                      },
+                      "poll": {
+                        "type": "number",
+                        "title": "Check every (seconds)",
+                        "default": 0.5
+                      },
+                      "name": {
+                        "type": "string",
+                        "title": "Store captured text as variable",
+                        "default": "observed_text"
+                      }
+                    },
+                    "required": [],
+                    "additionalProperties": true
+                  },
+                  "verify": {
+                    "$ref": "#/$defs/verification"
+                  },
+                  "retry_count": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 100
+                  },
+                  "retry_delay": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 3600
+                  },
+                  "delay_before": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 3600
+                  },
+                  "delay_after": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 3600
+                  }
+                },
+                "additionalProperties": true
+              },
+              {
+                "type": "object",
+                "required": [
+                  "type",
+                  "params"
+                ],
+                "properties": {
+                  "type": {
+                    "const": "capture_live_start"
+                  },
+                  "params": {
+                    "type": "object",
+                    "properties": {
+                      "mode": {
+                        "type": "string",
+                        "title": "Capture source",
+                        "default": "screen",
+                        "enum": [
+                          "screen",
+                          "window",
+                          "file",
+                          "clipboard",
+                          "clipboard_image",
+                          "image_folder"
+                        ]
+                      },
+                      "source": {
+                        "type": "string",
+                        "title": "Window title or file path",
+                        "default": ""
+                      },
+                      "destination": {
+                        "type": "string",
+                        "title": "Output folder",
+                        "default": ""
+                      },
+                      "region": {
+                        "type": "string",
+                        "title": "Screen region x,y,width,height (optional)",
+                        "default": ""
+                      },
+                      "interval": {
+                        "type": "number",
+                        "title": "Capture every (seconds)",
+                        "default": 0.5
+                      },
+                      "max_captures": {
+                        "type": "integer",
+                        "title": "Maximum changed captures",
+                        "default": 1000
+                      }
+                    },
+                    "required": [
+                      "destination"
+                    ],
+                    "additionalProperties": true
+                  },
+                  "verify": {
+                    "$ref": "#/$defs/verification"
+                  },
+                  "retry_count": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 100
+                  },
+                  "retry_delay": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 3600
+                  },
+                  "delay_before": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 3600
+                  },
+                  "delay_after": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 3600
+                  }
+                },
+                "additionalProperties": true
+              },
+              {
+                "type": "object",
+                "required": [
+                  "type",
+                  "params"
+                ],
+                "properties": {
+                  "type": {
+                    "const": "capture_live_stop"
+                  },
+                  "params": {
+                    "type": "object",
+                    "properties": {},
+                    "required": [],
+                    "additionalProperties": true
+                  },
+                  "verify": {
+                    "$ref": "#/$defs/verification"
+                  },
+                  "retry_count": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 100
+                  },
+                  "retry_delay": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 3600
+                  },
+                  "delay_before": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 3600
+                  },
+                  "delay_after": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 3600
+                  }
+                },
+                "additionalProperties": true
+              },
+              {
+                "type": "object",
+                "required": [
+                  "type",
+                  "params"
+                ],
+                "properties": {
+                  "type": {
+                    "const": "clipboard_image"
+                  },
+                  "params": {
+                    "type": "object",
+                    "properties": {
+                      "path": {
+                        "type": "string",
+                        "title": "Save image to PNG",
+                        "default": ""
+                      }
+                    },
+                    "required": [
+                      "path"
+                    ],
+                    "additionalProperties": true
+                  },
+                  "verify": {
+                    "$ref": "#/$defs/verification"
+                  },
+                  "retry_count": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 100
+                  },
+                  "retry_delay": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 3600
+                  },
+                  "delay_before": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 3600
+                  },
+                  "delay_after": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 3600
+                  }
+                },
+                "additionalProperties": true
+              },
+              {
+                "type": "object",
+                "required": [
+                  "type",
+                  "params"
+                ],
+                "properties": {
+                  "type": {
+                    "const": "capture_program_output"
+                  },
+                  "params": {
+                    "type": "object",
+                    "properties": {
+                      "path": {
+                        "type": "string",
+                        "title": "Executable path",
+                        "default": ""
+                      },
+                      "arguments": {
+                        "type": "string",
+                        "title": "Arguments",
+                        "default": ""
+                      },
+                      "output": {
+                        "type": "string",
+                        "title": "Output log file",
+                        "default": ""
+                      },
+                      "timeout": {
+                        "type": "number",
+                        "title": "Maximum seconds",
+                        "default": 300.0
+                      }
+                    },
+                    "required": [
+                      "path",
+                      "output"
+                    ],
+                    "additionalProperties": true
+                  },
+                  "verify": {
+                    "$ref": "#/$defs/verification"
+                  },
+                  "retry_count": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 100
+                  },
+                  "retry_delay": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 3600
+                  },
+                  "delay_before": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 3600
+                  },
+                  "delay_after": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 3600
+                  }
+                },
+                "additionalProperties": true
+              },
+              {
+                "type": "object",
+                "required": [
+                  "type",
+                  "params"
+                ],
+                "properties": {
+                  "type": {
                     "const": "click"
                   },
                   "params": {
@@ -103,6 +591,31 @@
                         "type": "integer",
                         "title": "Clicks",
                         "default": 1
+                      },
+                      "window_title": {
+                        "type": "string",
+                        "title": "Target window title (optional)",
+                        "default": ""
+                      },
+                      "window_rx": {
+                        "type": "number",
+                        "title": "Horizontal position inside window (0–1)",
+                        "default": 0.0
+                      },
+                      "window_ry": {
+                        "type": "number",
+                        "title": "Vertical position inside window (0–1)",
+                        "default": 0.0
+                      },
+                      "control_name": {
+                        "type": "string",
+                        "title": "UI Automation control name (optional)",
+                        "default": ""
+                      },
+                      "automation_id": {
+                        "type": "string",
+                        "title": "UI Automation ID (optional)",
+                        "default": ""
                       }
                     },
                     "required": [],

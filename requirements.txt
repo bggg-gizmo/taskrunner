@@ -11,3 +11,4 @@ croniter>=6,<8
 tzlocal>=5,<6
 tzdata>=2025.1
 opencv-python-headless>=4.10,<5
+pynput>=1.7.7,<2

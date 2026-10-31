@@ -17,6 +17,7 @@ from PySide6.QtWidgets import (
  QMessageBox,QInputDialog,QFileDialog,QGroupBox,QSizePolicy,QScrollArea
 )
 from .actions import ACTIONS,VERIFY_KINDS,default_step,describe_step
+from .recorder import DesktopRecorder
 from .flow import validate_workflow
 from .capture import capture_desktop,CaptureDialog
 from .paths import asset_path,data_root
@@ -175,7 +176,10 @@ class StepEditor(QDialog):
         action=self.kind.currentData()
         current=control.text().strip()
         start=current or str(Path.home())
-        if action in ("mkdir","list_dir") or key=="cwd":
+        if (action in ("mkdir","list_dir") or key=="cwd"
+              or (action=="capture_live_start" and key=="destination")
+              or (action=="capture_live_start" and key=="source"
+                  and field_value(self.controls.get("mode"))=="image_folder")):
             path=QFileDialog.getExistingDirectory(self,"Select folder",start)
         elif action=="open_path":
             choice,ok=QInputDialog.getItem(self,"Choose path type", "Open a file or folder?",
@@ -184,7 +188,7 @@ class StepEditor(QDialog):
             if choice=="Folder":path=QFileDialog.getExistingDirectory(self,"Open folder",start)
             else:path,_=QFileDialog.getOpenFileName(self,"Open file",start)
         elif key=="destination" or action in ("write_file","save_clipboard","screenshot",
-                                                   "browser_screenshot","browser_download"):
+                                                   "browser_screenshot","browser_download","clipboard_image","capture_program_output") or key=="output":
             path,_=QFileDialog.getSaveFileName(self,"Select output file",start)
         else:
             path,_=QFileDialog.getOpenFileName(self,"Select input file",start)
@@ -291,6 +295,9 @@ class TaskWizard(QDialog):
         self.previous=copy.deepcopy(job or {})
         self.actions=copy.deepcopy(self.previous.get("actions",[]))
         self.run_after_save=False
+        self.recorder=None
+        self.recording_timer=None
+        self.recording_started=0.0
         self.setWindowTitle("Task Runner — Task Setup Wizard")
         self.resize(1040,850)
         root=QVBoxLayout(self)
@@ -317,7 +324,9 @@ class TaskWizard(QDialog):
         controls=QHBoxLayout()
         controls.addWidget(btn("Capture full screen + select",lambda:self.begin_capture("click"),primary=True))
         controls.addWidget(btn("Select area + type",lambda:self.begin_capture("type")))
+        controls.addWidget(btn("Capture trigger area",lambda:self.begin_capture("condition")))
         controls.addWidget(btn("Add action",lambda:self.add_action()))
+        controls.addWidget(btn("● Record actions / Replay",self.begin_recording,primary=True))
         controls.addStretch()
         v.addLayout(controls)
         capture_control=QHBoxLayout()
@@ -328,6 +337,8 @@ class TaskWizard(QDialog):
         capture_control.addWidget(btn("Capture RIGHT-CLICK MENU in 5s",lambda:self.begin_capture("click",5),primary=True))
         capture_control.addStretch()
         v.addLayout(capture_control)
+        v.addWidget(QLabel("Recording: Task Runner hides, you perform the task, and Ctrl+Shift+F12 stops capture. "
+                           "It saves mouse/keyboard actions and measured pauses for later replay."))
         v.addWidget(QLabel("For transient menus: click the timed-capture button, right-click in your program, and keep the menu open until the screenshot freezes."))
         quick=QGroupBox("Quick actions · no screenshot required")
         quick_grid=QGridLayout(quick)
@@ -339,7 +350,14 @@ class TaskWizard(QDialog):
                    ("Wait for program window", "wait_window"),
                    ("Wait for file", "wait_file"),
                    ("Wait for browser element", "browser_wait_state"),
-                   ("Choose dropdown option", "browser_select")]
+                   ("Choose dropdown option", "browser_select"),
+                   ("Wait for screen/image change", "wait_screen"),
+                   ("Click matching on-screen image", "click_image"),
+                   ("Wait for output/text", "wait_content"),
+                   ("Start saving live output/images", "capture_live_start"),
+                   ("Stop live capture", "capture_live_stop"),
+                   ("Save clipboard image", "clipboard_image"),
+                   ("Stream program output", "capture_program_output")]
         for index,(label,kind) in enumerate(shortcuts):
             quick_grid.addWidget(btn(label,lambda checked=False,k=kind:self.add_action(k)),index//3,index%3)
         v.addWidget(quick)
@@ -487,6 +505,24 @@ class TaskWizard(QDialog):
         picker=CaptureDialog(file,left,top,self)
         if picker.exec()!=QDialog.DialogCode.Accepted:return
         selected=picker.selection
+        if mode=="condition":
+            options=["Wait until selected region changes","Wait for reference image to appear","Click matching reference image"]
+            choice,ok=QInputDialog.getItem(self,"Visual trigger","What should happen?",options,0,False)
+            if not ok:return
+            x,y,w,h=picker.reference_region()
+            area=f"{x+left},{y+top},{w},{h}"
+            if choice==options[0]:
+                step=default_step("wait_screen")
+                step["params"]["region"]=area
+            elif choice==options[1]:
+                step=default_step("wait_screen")
+                step["params"].update({"mode":"image_appears","region":area,"image":str(picker.save_region())})
+            else:
+                step=default_step("click_image")
+                step["params"].update({"image":str(picker.save_region()),"region":""})
+            self.actions.append(step)
+            self.refresh_actions(len(self.actions)-1)
+            return
         if mode=="click":
             options=["Click once","Double-click","Right-click",
                      "Save region as verification image",
@@ -498,7 +534,7 @@ class TaskWizard(QDialog):
                 if index < 0:
                     message(self,"No selected action","Select the action whose effect you want to verify.",True)
                     return
-                x,y,w,h=selected["region"]
+                x,y,w,h=picker.reference_region()
                 self.actions[index]["verify"]={"kind":"screen_changed",
                      "target":f"{x+left},{y+top},{w},{h}","timeout":10.0}
                 self.actions[index]["retry_count"]=max(2,int(self.actions[index].get("retry_count",0)))
@@ -587,7 +623,7 @@ class MainWindow(QMainWindow):
         nav.addWidget(btn("Execution Logs",lambda:self.set_page(1)))
         nav.addWidget(btn("Settings",lambda:self.set_page(2)))
         nav.addStretch()
-        nav.addWidget(QLabel("TASK RUNNER  /  1.2.1"))
+        nav.addWidget(QLabel("TASK RUNNER  /  1.3.0"))
         by=QLabel("BACKGROUND GREMLIN GROUP")
         by.setWordWrap(True);by.setObjectName("Muted");nav.addWidget(by)
         motto=QLabel("Creating Unique Tools\nfor Unique Individuals")
@@ -726,7 +762,7 @@ class MainWindow(QMainWindow):
         layout.addWidget(paths)
         credits=QGroupBox("About Task Runner")
         credits_layout=QVBoxLayout(credits)
-        credits_layout.addWidget(QLabel("Task Runner v1.2.1  ·  Vaporwave Edition"))
+        credits_layout.addWidget(QLabel("Task Runner v1.3.0  ·  Vaporwave Edition"))
         credits_layout.addWidget(QLabel("Developed by the Background Gremlin Group"))
         credits_layout.addWidget(QLabel("Creating Unique Tools for Unique Individuals"))
         layout.addWidget(credits)

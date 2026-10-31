@@ -40,7 +40,7 @@ def main():
     app.setApplicationName("Task Runner")
     app.setOrganizationName("Background Gremlin Group")
     app.setOrganizationDomain("background-gremlin-group")
-    app.setApplicationVersion("1.2.1")
+    app.setApplicationVersion("1.3.0")
     app.setStyleSheet(APP_STYLE)
     app.setWindowIcon(QIcon(str(asset_path("task-runner.ico"))))
     window=MainWindow()

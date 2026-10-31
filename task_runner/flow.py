@@ -115,11 +115,17 @@ def validate_workflow(steps: list[dict]) -> None:
             "desktop_expand_all": {"max_controls": (1, 2000)},
             "browser_scroll_text": {"max_scrolls": (1, 10000), "step_px": (1, 5000)},
             "desktop_scroll_text": {"max_scrolls": (1, 10000), "wheel_notches": (1, 100)},
+            "capture_live_start": {"max_captures": (1, 100000)},
         }
         bounded_float = {
             "browser_scroll_text": {"pause_seconds": (0, 60)},
             "desktop_scroll_text": {"pause_seconds": (0, 60)},
             "wait_window": {"timeout": (0, 3600)},
+            "click_image": {"timeout":(0.1,3600),"poll":(0.1,60),"confidence":(0.01,1)},
+            "wait_screen": {"timeout": (0.1, 3600), "poll": (0.1, 60), "confidence": (0.01, 1)},
+            "wait_content": {"timeout": (0.1, 3600), "poll": (0.1, 60)},
+            "capture_live_start": {"interval": (0.1,60)},
+            "capture_program_output": {"timeout": (0.1,86400)},
             "wait_file": {"timeout": (0, 3600)},
             "browser_wait_state": {"timeout": (0, 3600)},
         }
@@ -132,6 +138,18 @@ def validate_workflow(steps: list[dict]) -> None:
             amount=float(params.get(key,defaults[key]))
             if not low<=amount<=high:
                 raise ValueError(f"Step {number}: {key} must be {low}–{high}")
+        if code == "click" and str(params.get("window_title", "")).strip():
+            for xy in ("window_rx","window_ry"):
+                if not 0 <= float(params.get(xy,0)) <= 1:
+                    raise ValueError(f"Step {number}: {xy} must be in 0–1")
+        if code in ("wait_screen","capture_live_start","click_image"):
+            from .visual_verification import parse_region
+            region=str(params.get("region", ""))
+            if region:parse_region(region)
+        if code=="wait_screen" and params.get("mode") in ("image_appears","image_disappears") and not params.get("image"):
+            raise ValueError(f"Step {number}: reference image is required")
+        if code=="wait_content" and params.get("source")=="file" and not params.get("target"):
+            raise ValueError(f"Step {number}: monitored file path is required")
         if code == "browser_select" and params.get("method", "label") == "index":
             try:
                 if int(params.get("choice", "")) < 0:

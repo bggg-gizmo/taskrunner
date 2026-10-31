@@ -1,0 +1,3165 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "taskrunner-job.schema.json",
+  "title": "Task Runner portable job export",
+  "description": "JSON created by Task Runner Export JSON. Imported jobs are disabled until reviewed.",
+  "type": "object",
+  "required": [
+    "format",
+    "version",
+    "job"
+  ],
+  "properties": {
+    "format": {
+      "const": "TaskRunnerJob"
+    },
+    "version": {
+      "const": 1
+    },
+    "job": {
+      "type": "object",
+      "required": [
+        "name",
+        "description",
+        "enabled",
+        "schedule_kind",
+        "schedule",
+        "actions"
+      ],
+      "properties": {
+        "name": {
+          "type": "string",
+          "minLength": 1
+        },
+        "description": {
+          "type": "string"
+        },
+        "enabled": {
+          "oneOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "integer",
+              "enum": [
+                0,
+                1
+              ]
+            }
+          ]
+        },
+        "schedule_kind": {
+          "enum": [
+            "manual",
+            "once",
+            "interval",
+            "daily",
+            "weekly",
+            "cron"
+          ]
+        },
+        "schedule": {
+          "type": "object"
+        },
+        "actions": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "oneOf": [
+              {
+                "type": "object",
+                "required": [
+                  "type",
+                  "params"
+                ],
+                "properties": {
+                  "type": {
+                    "const": "click"
+                  },
+                  "params": {
+                    "type": "object",
+                    "properties": {
+                      "x": {
+                        "type": "integer",
+                        "title": "Screen X",
+                        "default": 0
+                      },
+                      "y": {
+                        "type": "integer",
+                        "title": "Screen Y",
+                        "default": 0
+                      },
+                      "button": {
+                        "type": "string",
+                        "title": "Mouse button",
+                        "default": "left",
+                        "enum": [
+                          "left",
+                          "right",
+                          "middle"
+                        ]
+                      },
+                      "clicks": {
+                        "type": "integer",
+                        "title": "Clicks",
+                        "default": 1
+                      }
+                    },
+                    "required": [],
+                    "additionalProperties": true
+                  },
+                  "verify": {
+                    "$ref": "#/$defs/verification"
+                  },
+                  "retry_count": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 100
+                  },
+                  "retry_delay": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 3600
+                  },
+                  "delay_before": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 3600
+                  },
+                  "delay_after": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 3600
+                  }
+                },
+                "additionalProperties": true
+              },
+              {
+                "type": "object",
+                "required": [
+                  "type",
+                  "params"
+                ],
+                "properties": {
+                  "type": {
+                    "const": "move"
+                  },
+                  "params": {
+                    "type": "object",
+                    "properties": {
+                      "x": {
+                        "type": "integer",
+                        "title": "Screen X",
+                        "default": 0
+                      },
+                      "y": {
+                        "type": "integer",
+                        "title": "Screen Y",
+                        "default": 0
+                      },
+                      "duration": {
+                        "type": "number",
+                        "title": "Duration (seconds)",
+                        "default": 0.2
+                      }
+                    },
+                    "required": [],
+                    "additionalProperties": true
+                  },
+                  "verify": {
+                    "$ref": "#/$defs/verification"
+                  },
+                  "retry_count": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 100
+                  },
+                  "retry_delay": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 3600
+                  },
+                  "delay_before": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 3600
+                  },
+                  "delay_after": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 3600
+                  }
+                },
+                "additionalProperties": true
+              },
+              {
+                "type": "object",
+                "required": [
+                  "type",
+                  "params"
+                ],
+                "properties": {
+                  "type": {
+                    "const": "drag"
+                  },
+                  "params": {
+                    "type": "object",
+                    "properties": {
+                      "x1": {
+                        "type": "integer",
+                        "title": "From X",
+                        "default": 0
+                      },
+                      "y1": {
+                        "type": "integer",
+                        "title": "From Y",
+                        "default": 0
+                      },
+                      "x2": {
+                        "type": "integer",
+                        "title": "To X",
+                        "default": 0
+                      },
+                      "y2": {
+                        "type": "integer",
+                        "title": "To Y",
+                        "default": 0
+                      },
+                      "duration": {
+                        "type": "number",
+                        "title": "Duration (seconds)",
+                        "default": 0.5
+                      }
+                    },
+                    "required": [],
+                    "additionalProperties": true
+                  },
+                  "verify": {
+                    "$ref": "#/$defs/verification"
+                  },
+                  "retry_count": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 100
+                  },
+                  "retry_delay": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 3600
+                  },
+                  "delay_before": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 3600
+                  },
+                  "delay_after": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 3600
+                  }
+                },
+                "additionalProperties": true
+              },
+              {
+                "type": "object",
+                "required": [
+                  "type",
+                  "params"
+                ],
+                "properties": {
+                  "type": {
+                    "const": "scroll"
+                  },
+                  "params": {
+                    "type": "object",
+                    "properties": {
+                      "amount": {
+                        "type": "integer",
+                        "title": "Notches",
+                        "default": -3
+                      }
+                    },
+                    "required": [],
+                    "additionalProperties": true
+                  },
+                  "verify": {
+                    "$ref": "#/$defs/verification"
+                  },
+                  "retry_count": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 100
+                  },
+                  "retry_delay": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 3600
+                  },
+                  "delay_before": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 3600
+                  },
+                  "delay_after": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 3600
+                  }
+                },
+                "additionalProperties": true
+              },
+              {
+                "type": "object",
+                "required": [
+                  "type",
+                  "params"
+                ],
+                "properties": {
+                  "type": {
+                    "const": "type"
+                  },
+                  "params": {
+                    "type": "object",
+                    "properties": {
+                      "text": {
+                        "type": "string",
+                        "title": "Text to type",
+                        "default": ""
+                      },
+                      "interval": {
+                        "type": "number",
+                        "title": "Key interval (seconds)",
+                        "default": 0.02
+                      }
+                    },
+                    "required": [
+                      "text"
+                    ],
+                    "additionalProperties": true
+                  },
+                  "verify": {
+                    "$ref": "#/$defs/verification"
+                  },
+                  "retry_count": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 100
+                  },
+                  "retry_delay": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 3600
+                  },
+                  "delay_before": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 3600
+                  },
+                  "delay_after": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 3600
+                  }
+                },
+                "additionalProperties": true
+              },
+              {
+                "type": "object",
+                "required": [
+                  "type",
+                  "params"
+                ],
+                "properties": {
+                  "type": {
+                    "const": "key"
+                  },
+                  "params": {
+                    "type": "object",
+                    "properties": {
+                      "key": {
+                        "type": "string",
+                        "title": "Key",
+                        "default": "enter"
+                      },
+                      "presses": {
+                        "type": "integer",
+                        "title": "Repetitions",
+                        "default": 1
+                      }
+                    },
+                    "required": [
+                      "key"
+                    ],
+                    "additionalProperties": true
+                  },
+                  "verify": {
+                    "$ref": "#/$defs/verification"
+                  },
+                  "retry_count": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 100
+                  },
+                  "retry_delay": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 3600
+                  },
+                  "delay_before": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 3600
+                  },
+                  "delay_after": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 3600
+                  }
+                },
+                "additionalProperties": true
+              },
+              {
+                "type": "object",
+                "required": [
+                  "type",
+                  "params"
+                ],
+                "properties": {
+                  "type": {
+                    "const": "hotkey"
+                  },
+                  "params": {
+                    "type": "object",
+                    "properties": {
+                      "keys": {
+                        "type": "string",
+                        "title": "Shortcut",
+                        "default": "ctrl+c"
+                      }
+                    },
+                    "required": [
+                      "keys"
+                    ],
+                    "additionalProperties": true
+                  },
+                  "verify": {
+                    "$ref": "#/$defs/verification"
+                  },
+                  "retry_count": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 100
+                  },
+                  "retry_delay": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 3600
+                  },
+                  "delay_before": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 3600
+                  },
+                  "delay_after": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 3600
+                  }
+                },
+                "additionalProperties": true
+              },
+              {
+                "type": "object",
+                "required": [
+                  "type",
+                  "params"
+                ],
+                "properties": {
+                  "type": {
+                    "const": "paste"
+                  },
+                  "params": {
+                    "type": "object",
+                    "properties": {},
+                    "required": [],
+                    "additionalProperties": true
+                  },
+                  "verify": {
+                    "$ref": "#/$defs/verification"
+                  },
+                  "retry_count": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 100
+                  },
+                  "retry_delay": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 3600
+                  },
+                  "delay_before": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 3600
+                  },
+                  "delay_after": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 3600
+                  }
+                },
+                "additionalProperties": true
+              },
+              {
+                "type": "object",
+                "required": [
+                  "type",
+                  "params"
+                ],
+                "properties": {
+                  "type": {
+                    "const": "copy"
+                  },
+                  "params": {
+                    "type": "object",
+                    "properties": {},
+                    "required": [],
+                    "additionalProperties": true
+                  },
+                  "verify": {
+                    "$ref": "#/$defs/verification"
+                  },
+                  "retry_count": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 100
+                  },
+                  "retry_delay": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 3600
+                  },
+                  "delay_before": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 3600
+                  },
+                  "delay_after": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 3600
+                  }
+                },
+                "additionalProperties": true
+              },
+              {
+                "type": "object",
+                "required": [
+                  "type",
+                  "params"
+                ],
+                "properties": {
+                  "type": {
+                    "const": "wait"
+                  },
+                  "params": {
+                    "type": "object",
+                    "properties": {
+                      "seconds": {
+                        "type": "number",
+                        "title": "Seconds",
+                        "default": 1.0
+                      }
+                    },
+                    "required": [],
+                    "additionalProperties": true
+                  },
+                  "verify": {
+                    "$ref": "#/$defs/verification"
+                  },
+                  "retry_count": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 100
+                  },
+                  "retry_delay": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 3600
+                  },
+                  "delay_before": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 3600
+                  },
+                  "delay_after": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 3600
+                  }
+                },
+                "additionalProperties": true
+              },
+              {
+                "type": "object",
+                "required": [
+                  "type",
+                  "params"
+                ],
+                "properties": {
+                  "type": {
+                    "const": "wait_window"
+                  },
+                  "params": {
+                    "type": "object",
+                    "properties": {
+                      "title": {
+                        "type": "string",
+                        "title": "Window title contains",
+                        "default": ""
+                      },
+                      "state": {
+                        "type": "string",
+                        "title": "Wait until",
+                        "default": "appears",
+                        "enum": [
+                          "appears",
+                          "disappears"
+                        ]
+                      },
+                      "timeout": {
+                        "type": "number",
+                        "title": "Maximum wait (seconds)",
+                        "default": 30.0
+                      }
+                    },
+                    "required": [
+                      "title"
+                    ],
+                    "additionalProperties": true
+                  },
+                  "verify": {
+                    "$ref": "#/$defs/verification"
+                  },
+                  "retry_count": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 100
+                  },
+                  "retry_delay": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 3600
+                  },
+                  "delay_before": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 3600
+                  },
+                  "delay_after": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 3600
+                  }
+                },
+                "additionalProperties": true
+              },
+              {
+                "type": "object",
+                "required": [
+                  "type",
+                  "params"
+                ],
+                "properties": {
+                  "type": {
+                    "const": "wait_file"
+                  },
+                  "params": {
+                    "type": "object",
+                    "properties": {
+                      "path": {
+                        "type": "string",
+                        "title": "File or folder path",
+                        "default": ""
+                      },
+                      "state": {
+                        "type": "string",
+                        "title": "Wait until",
+                        "default": "exists",
+                        "enum": [
+                          "exists",
+                          "missing"
+                        ]
+                      },
+                      "timeout": {
+                        "type": "number",
+                        "title": "Maximum wait (seconds)",
+                        "default": 30.0
+                      }
+                    },
+                    "required": [
+                      "path"
+                    ],
+                    "additionalProperties": true
+                  },
+                  "verify": {
+                    "$ref": "#/$defs/verification"
+                  },
+                  "retry_count": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 100
+                  },
+                  "retry_delay": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 3600
+                  },
+                  "delay_before": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 3600
+                  },
+                  "delay_after": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 3600
+                  }
+                },
+                "additionalProperties": true
+              },
+              {
+                "type": "object",
+                "required": [
+                  "type",
+                  "params"
+                ],
+                "properties": {
+                  "type": {
+                    "const": "browser_wait_state"
+                  },
+                  "params": {
+                    "type": "object",
+                    "properties": {
+                      "selector": {
+                        "type": "string",
+                        "title": "Selector",
+                        "default": ""
+                      },
+                      "state": {
+                        "type": "string",
+                        "title": "Desired state",
+                        "default": "visible",
+                        "enum": [
+                          "visible",
+                          "hidden",
+                          "attached",
+                          "detached"
+                        ]
+                      },
+                      "timeout": {
+                        "type": "number",
+                        "title": "Maximum wait (seconds)",
+                        "default": 20.0
+                      }
+                    },
+                    "required": [
+                      "selector"
+                    ],
+                    "additionalProperties": true
+                  },
+                  "verify": {
+                    "$ref": "#/$defs/verification"
+                  },
+                  "retry_count": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 100
+                  },
+                  "retry_delay": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 3600
+                  },
+                  "delay_before": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 3600
+                  },
+                  "delay_after": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 3600
+                  }
+                },
+                "additionalProperties": true
+              },
+              {
+                "type": "object",
+                "required": [
+                  "type",
+                  "params"
+                ],
+                "properties": {
+                  "type": {
+                    "const": "browser_select"
+                  },
+                  "params": {
+                    "type": "object",
+                    "properties": {
+                      "selector": {
+                        "type": "string",
+                        "title": "Select CSS selector",
+                        "default": "select"
+                      },
+                      "method": {
+                        "type": "string",
+                        "title": "Match by",
+                        "default": "label",
+                        "enum": [
+                          "label",
+                          "value",
+                          "index"
+                        ]
+                      },
+                      "choice": {
+                        "type": "string",
+                        "title": "Option label, value, or zero-based index",
+                        "default": ""
+                      }
+                    },
+                    "required": [
+                      "selector",
+                      "choice"
+                    ],
+                    "additionalProperties": true
+                  },
+                  "verify": {
+                    "$ref": "#/$defs/verification"
+                  },
+                  "retry_count": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 100
+                  },
+                  "retry_delay": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 3600
+                  },
+                  "delay_before": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 3600
+                  },
+                  "delay_after": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 3600
+                  }
+                },
+                "additionalProperties": true
+              },
+              {
+                "type": "object",
+                "required": [
+                  "type",
+                  "params"
+                ],
+                "properties": {
+                  "type": {
+                    "const": "browser_expand_all"
+                  },
+                  "params": {
+                    "type": "object",
+                    "properties": {
+                      "selector": {
+                        "type": "string",
+                        "title": "Within CSS selector",
+                        "default": "body"
+                      },
+                      "max_controls": {
+                        "type": "integer",
+                        "title": "Maximum controls",
+                        "default": 250
+                      },
+                      "name": {
+                        "type": "string",
+                        "title": "Result JSON variable",
+                        "default": "expanded_controls"
+                      }
+                    },
+                    "required": [
+                      "selector",
+                      "name"
+                    ],
+                    "additionalProperties": true
+                  },
+                  "verify": {
+                    "$ref": "#/$defs/verification"
+                  },
+                  "retry_count": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 100
+                  },
+                  "retry_delay": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 3600
+                  },
+                  "delay_before": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 3600
+                  },
+                  "delay_after": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 3600
+                  }
+                },
+                "additionalProperties": true
+              },
+              {
+                "type": "object",
+                "required": [
+                  "type",
+                  "params"
+                ],
+                "properties": {
+                  "type": {
+                    "const": "browser_scroll_text"
+                  },
+                  "params": {
+                    "type": "object",
+                    "properties": {
+                      "selector": {
+                        "type": "string",
+                        "title": "Page/container selector",
+                        "default": "body"
+                      },
+                      "name": {
+                        "type": "string",
+                        "title": "Text output variable",
+                        "default": "page_text"
+                      },
+                      "max_scrolls": {
+                        "type": "integer",
+                        "title": "Max scroll increments",
+                        "default": 100
+                      },
+                      "step_px": {
+                        "type": "integer",
+                        "title": "Pixels each increment",
+                        "default": 700
+                      },
+                      "pause_seconds": {
+                        "type": "number",
+                        "title": "Pause after scroll (seconds)",
+                        "default": 0.3
+                      },
+                      "copy_to_clipboard": {
+                        "type": "boolean",
+                        "title": "Copy gathered text to clipboard",
+                        "default": true
+                      }
+                    },
+                    "required": [
+                      "selector",
+                      "name"
+                    ],
+                    "additionalProperties": true
+                  },
+                  "verify": {
+                    "$ref": "#/$defs/verification"
+                  },
+                  "retry_count": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 100
+                  },
+                  "retry_delay": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 3600
+                  },
+                  "delay_before": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 3600
+                  },
+                  "delay_after": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 3600
+                  }
+                },
+                "additionalProperties": true
+              },
+              {
+                "type": "object",
+                "required": [
+                  "type",
+                  "params"
+                ],
+                "properties": {
+                  "type": {
+                    "const": "desktop_expand_all"
+                  },
+                  "params": {
+                    "type": "object",
+                    "properties": {
+                      "title": {
+                        "type": "string",
+                        "title": "Window title contains (blank = active)",
+                        "default": ""
+                      },
+                      "max_controls": {
+                        "type": "integer",
+                        "title": "Maximum controls",
+                        "default": 100
+                      },
+                      "name": {
+                        "type": "string",
+                        "title": "Result JSON variable",
+                        "default": "window_dropdowns"
+                      }
+                    },
+                    "required": [
+                      "name"
+                    ],
+                    "additionalProperties": true
+                  },
+                  "verify": {
+                    "$ref": "#/$defs/verification"
+                  },
+                  "retry_count": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 100
+                  },
+                  "retry_delay": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 3600
+                  },
+                  "delay_before": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 3600
+                  },
+                  "delay_after": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 3600
+                  }
+                },
+                "additionalProperties": true
+              },
+              {
+                "type": "object",
+                "required": [
+                  "type",
+                  "params"
+                ],
+                "properties": {
+                  "type": {
+                    "const": "desktop_scroll_text"
+                  },
+                  "params": {
+                    "type": "object",
+                    "properties": {
+                      "title": {
+                        "type": "string",
+                        "title": "Window title contains (blank = active)",
+                        "default": ""
+                      },
+                      "name": {
+                        "type": "string",
+                        "title": "Text output variable",
+                        "default": "window_text"
+                      },
+                      "max_scrolls": {
+                        "type": "integer",
+                        "title": "Maximum scroll increments",
+                        "default": 50
+                      },
+                      "wheel_notches": {
+                        "type": "integer",
+                        "title": "Scroll notches per step",
+                        "default": 5
+                      },
+                      "pause_seconds": {
+                        "type": "number",
+                        "title": "Pause after scroll (seconds)",
+                        "default": 0.3
+                      },
+                      "copy_to_clipboard": {
+                        "type": "boolean",
+                        "title": "Copy gathered text to clipboard",
+                        "default": true
+                      }
+                    },
+                    "required": [
+                      "name"
+                    ],
+                    "additionalProperties": true
+                  },
+                  "verify": {
+                    "$ref": "#/$defs/verification"
+                  },
+                  "retry_count": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 100
+                  },
+                  "retry_delay": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 3600
+                  },
+                  "delay_before": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 3600
+                  },
+                  "delay_after": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 3600
+                  }
+                },
+                "additionalProperties": true
+              },
+              {
+                "type": "object",
+                "required": [
+                  "type",
+                  "params"
+                ],
+                "properties": {
+                  "type": {
+                    "const": "set_var"
+                  },
+                  "params": {
+                    "type": "object",
+                    "properties": {
+                      "name": {
+                        "type": "string",
+                        "title": "Variable name",
+                        "default": "result"
+                      },
+                      "value": {
+                        "type": "string",
+                        "title": "Variable value",
+                        "default": ""
+                      }
+                    },
+                    "required": [
+                      "name"
+                    ],
+                    "additionalProperties": true
+                  },
+                  "verify": {
+                    "$ref": "#/$defs/verification"
+                  },
+                  "retry_count": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 100
+                  },
+                  "retry_delay": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 3600
+                  },
+                  "delay_before": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 3600
+                  },
+                  "delay_after": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 3600
+                  }
+                },
+                "additionalProperties": true
+              },
+              {
+                "type": "object",
+                "required": [
+                  "type",
+                  "params"
+                ],
+                "properties": {
+                  "type": {
+                    "const": "clipboard_read"
+                  },
+                  "params": {
+                    "type": "object",
+                    "properties": {
+                      "name": {
+                        "type": "string",
+                        "title": "Variable name",
+                        "default": "clipboard"
+                      }
+                    },
+                    "required": [
+                      "name"
+                    ],
+                    "additionalProperties": true
+                  },
+                  "verify": {
+                    "$ref": "#/$defs/verification"
+                  },
+                  "retry_count": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 100
+                  },
+                  "retry_delay": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 3600
+                  },
+                  "delay_before": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 3600
+                  },
+                  "delay_after": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 3600
+                  }
+                },
+                "additionalProperties": true
+              },
+              {
+                "type": "object",
+                "required": [
+                  "type",
+                  "params"
+                ],
+                "properties": {
+                  "type": {
+                    "const": "clipboard_write"
+                  },
+                  "params": {
+                    "type": "object",
+                    "properties": {
+                      "text": {
+                        "type": "string",
+                        "title": "Clipboard text",
+                        "default": ""
+                      }
+                    },
+                    "required": [
+                      "text"
+                    ],
+                    "additionalProperties": true
+                  },
+                  "verify": {
+                    "$ref": "#/$defs/verification"
+                  },
+                  "retry_count": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 100
+                  },
+                  "retry_delay": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 3600
+                  },
+                  "delay_before": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 3600
+                  },
+                  "delay_after": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 3600
+                  }
+                },
+                "additionalProperties": true
+              },
+              {
+                "type": "object",
+                "required": [
+                  "type",
+                  "params"
+                ],
+                "properties": {
+                  "type": {
+                    "const": "launch"
+                  },
+                  "params": {
+                    "type": "object",
+                    "properties": {
+                      "path": {
+                        "type": "string",
+                        "title": "Executable path",
+                        "default": ""
+                      },
+                      "arguments": {
+                        "type": "string",
+                        "title": "Arguments",
+                        "default": ""
+                      },
+                      "cwd": {
+                        "type": "string",
+                        "title": "Working directory",
+                        "default": ""
+                      },
+                      "wait_for_exit": {
+                        "type": "boolean",
+                        "title": "Wait for process exit",
+                        "default": false
+                      },
+                      "wait_for_window_title": {
+                        "type": "string",
+                        "title": "Wait for window title containing (optional)",
+                        "default": ""
+                      },
+                      "window_timeout": {
+                        "type": "number",
+                        "title": "Wait for window up to (seconds)",
+                        "default": 30.0
+                      }
+                    },
+                    "required": [
+                      "path"
+                    ],
+                    "additionalProperties": true
+                  },
+                  "verify": {
+                    "$ref": "#/$defs/verification"
+                  },
+                  "retry_count": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 100
+                  },
+                  "retry_delay": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 3600
+                  },
+                  "delay_before": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 3600
+                  },
+                  "delay_after": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 3600
+                  }
+                },
+                "additionalProperties": true
+              },
+              {
+                "type": "object",
+                "required": [
+                  "type",
+                  "params"
+                ],
+                "properties": {
+                  "type": {
+                    "const": "open_path"
+                  },
+                  "params": {
+                    "type": "object",
+                    "properties": {
+                      "path": {
+                        "type": "string",
+                        "title": "Path or URL",
+                        "default": ""
+                      },
+                      "wait_for_window_title": {
+                        "type": "string",
+                        "title": "Wait for window title containing (optional)",
+                        "default": ""
+                      },
+                      "window_timeout": {
+                        "type": "number",
+                        "title": "Wait for window up to (seconds)",
+                        "default": 30.0
+                      }
+                    },
+                    "required": [
+                      "path"
+                    ],
+                    "additionalProperties": true
+                  },
+                  "verify": {
+                    "$ref": "#/$defs/verification"
+                  },
+                  "retry_count": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 100
+                  },
+                  "retry_delay": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 3600
+                  },
+                  "delay_before": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 3600
+                  },
+                  "delay_after": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 3600
+                  }
+                },
+                "additionalProperties": true
+              },
+              {
+                "type": "object",
+                "required": [
+                  "type",
+                  "params"
+                ],
+                "properties": {
+                  "type": {
+                    "const": "activate"
+                  },
+                  "params": {
+                    "type": "object",
+                    "properties": {
+                      "title": {
+                        "type": "string",
+                        "title": "Window title contains",
+                        "default": ""
+                      },
+                      "timeout": {
+                        "type": "number",
+                        "title": "Wait up to seconds",
+                        "default": 10.0
+                      }
+                    },
+                    "required": [
+                      "title"
+                    ],
+                    "additionalProperties": true
+                  },
+                  "verify": {
+                    "$ref": "#/$defs/verification"
+                  },
+                  "retry_count": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 100
+                  },
+                  "retry_delay": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 3600
+                  },
+                  "delay_before": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 3600
+                  },
+                  "delay_after": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 3600
+                  }
+                },
+                "additionalProperties": true
+              },
+              {
+                "type": "object",
+                "required": [
+                  "type",
+                  "params"
+                ],
+                "properties": {
+                  "type": {
+                    "const": "close_window"
+                  },
+                  "params": {
+                    "type": "object",
+                    "properties": {},
+                    "required": [],
+                    "additionalProperties": true
+                  },
+                  "verify": {
+                    "$ref": "#/$defs/verification"
+                  },
+                  "retry_count": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 100
+                  },
+                  "retry_delay": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 3600
+                  },
+                  "delay_before": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 3600
+                  },
+                  "delay_after": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 3600
+                  }
+                },
+                "additionalProperties": true
+              },
+              {
+                "type": "object",
+                "required": [
+                  "type",
+                  "params"
+                ],
+                "properties": {
+                  "type": {
+                    "const": "save_clipboard"
+                  },
+                  "params": {
+                    "type": "object",
+                    "properties": {
+                      "path": {
+                        "type": "string",
+                        "title": "Output filename",
+                        "default": ""
+                      },
+                      "append": {
+                        "type": "boolean",
+                        "title": "Append instead of replace",
+                        "default": false
+                      }
+                    },
+                    "required": [
+                      "path"
+                    ],
+                    "additionalProperties": true
+                  },
+                  "verify": {
+                    "$ref": "#/$defs/verification"
+                  },
+                  "retry_count": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 100
+                  },
+                  "retry_delay": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 3600
+                  },
+                  "delay_before": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 3600
+                  },
+                  "delay_after": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 3600
+                  }
+                },
+                "additionalProperties": true
+              },
+              {
+                "type": "object",
+                "required": [
+                  "type",
+                  "params"
+                ],
+                "properties": {
+                  "type": {
+                    "const": "write_file"
+                  },
+                  "params": {
+                    "type": "object",
+                    "properties": {
+                      "path": {
+                        "type": "string",
+                        "title": "Output filename",
+                        "default": ""
+                      },
+                      "text": {
+                        "type": "string",
+                        "title": "Text",
+                        "default": ""
+                      },
+                      "append": {
+                        "type": "boolean",
+                        "title": "Append instead of replace",
+                        "default": false
+                      }
+                    },
+                    "required": [
+                      "path",
+                      "text"
+                    ],
+                    "additionalProperties": true
+                  },
+                  "verify": {
+                    "$ref": "#/$defs/verification"
+                  },
+                  "retry_count": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 100
+                  },
+                  "retry_delay": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 3600
+                  },
+                  "delay_before": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 3600
+                  },
+                  "delay_after": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 3600
+                  }
+                },
+                "additionalProperties": true
+              },
+              {
+                "type": "object",
+                "required": [
+                  "type",
+                  "params"
+                ],
+                "properties": {
+                  "type": {
+                    "const": "read_file"
+                  },
+                  "params": {
+                    "type": "object",
+                    "properties": {
+                      "path": {
+                        "type": "string",
+                        "title": "Filename",
+                        "default": ""
+                      },
+                      "name": {
+                        "type": "string",
+                        "title": "Variable name",
+                        "default": "file_text"
+                      }
+                    },
+                    "required": [
+                      "path",
+                      "name"
+                    ],
+                    "additionalProperties": true
+                  },
+                  "verify": {
+                    "$ref": "#/$defs/verification"
+                  },
+                  "retry_count": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 100
+                  },
+                  "retry_delay": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 3600
+                  },
+                  "delay_before": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 3600
+                  },
+                  "delay_after": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 3600
+                  }
+                },
+                "additionalProperties": true
+              },
+              {
+                "type": "object",
+                "required": [
+                  "type",
+                  "params"
+                ],
+                "properties": {
+                  "type": {
+                    "const": "browser_open"
+                  },
+                  "params": {
+                    "type": "object",
+                    "properties": {
+                      "url": {
+                        "type": "string",
+                        "title": "URL",
+                        "default": ""
+                      },
+                      "headless": {
+                        "type": "boolean",
+                        "title": "Headless browser",
+                        "default": false
+                      },
+                      "wait_until": {
+                        "type": "string",
+                        "title": "Wait until",
+                        "default": "domcontentloaded",
+                        "enum": [
+                          "load",
+                          "domcontentloaded",
+                          "networkidle"
+                        ]
+                      }
+                    },
+                    "required": [
+                      "url"
+                    ],
+                    "additionalProperties": true
+                  },
+                  "verify": {
+                    "$ref": "#/$defs/verification"
+                  },
+                  "retry_count": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 100
+                  },
+                  "retry_delay": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 3600
+                  },
+                  "delay_before": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 3600
+                  },
+                  "delay_after": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 3600
+                  }
+                },
+                "additionalProperties": true
+              },
+              {
+                "type": "object",
+                "required": [
+                  "type",
+                  "params"
+                ],
+                "properties": {
+                  "type": {
+                    "const": "browser_click"
+                  },
+                  "params": {
+                    "type": "object",
+                    "properties": {
+                      "selector": {
+                        "type": "string",
+                        "title": "Locator / CSS selector",
+                        "default": ""
+                      },
+                      "timeout": {
+                        "type": "number",
+                        "title": "Timeout (seconds)",
+                        "default": 20.0
+                      }
+                    },
+                    "required": [
+                      "selector"
+                    ],
+                    "additionalProperties": true
+                  },
+                  "verify": {
+                    "$ref": "#/$defs/verification"
+                  },
+                  "retry_count": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 100
+                  },
+                  "retry_delay": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 3600
+                  },
+                  "delay_before": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 3600
+                  },
+                  "delay_after": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 3600
+                  }
+                },
+                "additionalProperties": true
+              },
+              {
+                "type": "object",
+                "required": [
+                  "type",
+                  "params"
+                ],
+                "properties": {
+                  "type": {
+                    "const": "browser_fill"
+                  },
+                  "params": {
+                    "type": "object",
+                    "properties": {
+                      "selector": {
+                        "type": "string",
+                        "title": "Locator / CSS selector",
+                        "default": ""
+                      },
+                      "text": {
+                        "type": "string",
+                        "title": "Text to enter",
+                        "default": ""
+                      },
+                      "timeout": {
+                        "type": "number",
+                        "title": "Timeout (seconds)",
+                        "default": 20.0
+                      }
+                    },
+                    "required": [
+                      "selector",
+                      "text"
+                    ],
+                    "additionalProperties": true
+                  },
+                  "verify": {
+                    "$ref": "#/$defs/verification"
+                  },
+                  "retry_count": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 100
+                  },
+                  "retry_delay": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 3600
+                  },
+                  "delay_before": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 3600
+                  },
+                  "delay_after": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 3600
+                  }
+                },
+                "additionalProperties": true
+              },
+              {
+                "type": "object",
+                "required": [
+                  "type",
+                  "params"
+                ],
+                "properties": {
+                  "type": {
+                    "const": "browser_press"
+                  },
+                  "params": {
+                    "type": "object",
+                    "properties": {
+                      "selector": {
+                        "type": "string",
+                        "title": "Selector (empty = page)",
+                        "default": ""
+                      },
+                      "key": {
+                        "type": "string",
+                        "title": "Key name",
+                        "default": "Enter"
+                      }
+                    },
+                    "required": [
+                      "key"
+                    ],
+                    "additionalProperties": true
+                  },
+                  "verify": {
+                    "$ref": "#/$defs/verification"
+                  },
+                  "retry_count": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 100
+                  },
+                  "retry_delay": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 3600
+                  },
+                  "delay_before": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 3600
+                  },
+                  "delay_after": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 3600
+                  }
+                },
+                "additionalProperties": true
+              },
+              {
+                "type": "object",
+                "required": [
+                  "type",
+                  "params"
+                ],
+                "properties": {
+                  "type": {
+                    "const": "browser_wait"
+                  },
+                  "params": {
+                    "type": "object",
+                    "properties": {
+                      "selector": {
+                        "type": "string",
+                        "title": "Selector",
+                        "default": ""
+                      },
+                      "timeout": {
+                        "type": "number",
+                        "title": "Timeout (seconds)",
+                        "default": 20.0
+                      }
+                    },
+                    "required": [
+                      "selector"
+                    ],
+                    "additionalProperties": true
+                  },
+                  "verify": {
+                    "$ref": "#/$defs/verification"
+                  },
+                  "retry_count": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 100
+                  },
+                  "retry_delay": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 3600
+                  },
+                  "delay_before": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 3600
+                  },
+                  "delay_after": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 3600
+                  }
+                },
+                "additionalProperties": true
+              },
+              {
+                "type": "object",
+                "required": [
+                  "type",
+                  "params"
+                ],
+                "properties": {
+                  "type": {
+                    "const": "browser_text"
+                  },
+                  "params": {
+                    "type": "object",
+                    "properties": {
+                      "selector": {
+                        "type": "string",
+                        "title": "Selector",
+                        "default": "body"
+                      },
+                      "name": {
+                        "type": "string",
+                        "title": "Variable name",
+                        "default": "web_text"
+                      }
+                    },
+                    "required": [
+                      "selector",
+                      "name"
+                    ],
+                    "additionalProperties": true
+                  },
+                  "verify": {
+                    "$ref": "#/$defs/verification"
+                  },
+                  "retry_count": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 100
+                  },
+                  "retry_delay": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 3600
+                  },
+                  "delay_before": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 3600
+                  },
+                  "delay_after": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 3600
+                  }
+                },
+                "additionalProperties": true
+              },
+              {
+                "type": "object",
+                "required": [
+                  "type",
+                  "params"
+                ],
+                "properties": {
+                  "type": {
+                    "const": "browser_html"
+                  },
+                  "params": {
+                    "type": "object",
+                    "properties": {
+                      "name": {
+                        "type": "string",
+                        "title": "Variable name",
+                        "default": "html"
+                      }
+                    },
+                    "required": [
+                      "name"
+                    ],
+                    "additionalProperties": true
+                  },
+                  "verify": {
+                    "$ref": "#/$defs/verification"
+                  },
+                  "retry_count": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 100
+                  },
+                  "retry_delay": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 3600
+                  },
+                  "delay_before": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 3600
+                  },
+                  "delay_after": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 3600
+                  }
+                },
+                "additionalProperties": true
+              },
+              {
+                "type": "object",
+                "required": [
+                  "type",
+                  "params"
+                ],
+                "properties": {
+                  "type": {
+                    "const": "soup_select"
+                  },
+                  "params": {
+                    "type": "object",
+                    "properties": {
+                      "source": {
+                        "type": "string",
+                        "title": "HTML variable",
+                        "default": "html"
+                      },
+                      "selector": {
+                        "type": "string",
+                        "title": "CSS selector",
+                        "default": "title"
+                      },
+                      "attribute": {
+                        "type": "string",
+                        "title": "Attribute (empty = text)",
+                        "default": ""
+                      },
+                      "name": {
+                        "type": "string",
+                        "title": "Output variable",
+                        "default": "parsed"
+                      },
+                      "all_matches": {
+                        "type": "boolean",
+                        "title": "All matches",
+                        "default": false
+                      }
+                    },
+                    "required": [
+                      "source",
+                      "selector",
+                      "name"
+                    ],
+                    "additionalProperties": true
+                  },
+                  "verify": {
+                    "$ref": "#/$defs/verification"
+                  },
+                  "retry_count": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 100
+                  },
+                  "retry_delay": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 3600
+                  },
+                  "delay_before": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 3600
+                  },
+                  "delay_after": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 3600
+                  }
+                },
+                "additionalProperties": true
+              },
+              {
+                "type": "object",
+                "required": [
+                  "type",
+                  "params"
+                ],
+                "properties": {
+                  "type": {
+                    "const": "browser_screenshot"
+                  },
+                  "params": {
+                    "type": "object",
+                    "properties": {
+                      "path": {
+                        "type": "string",
+                        "title": "PNG output path",
+                        "default": ""
+                      },
+                      "full_page": {
+                        "type": "boolean",
+                        "title": "Full page",
+                        "default": true
+                      }
+                    },
+                    "required": [
+                      "path"
+                    ],
+                    "additionalProperties": true
+                  },
+                  "verify": {
+                    "$ref": "#/$defs/verification"
+                  },
+                  "retry_count": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 100
+                  },
+                  "retry_delay": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 3600
+                  },
+                  "delay_before": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 3600
+                  },
+                  "delay_after": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 3600
+                  }
+                },
+                "additionalProperties": true
+              },
+              {
+                "type": "object",
+                "required": [
+                  "type",
+                  "params"
+                ],
+                "properties": {
+                  "type": {
+                    "const": "screenshot"
+                  },
+                  "params": {
+                    "type": "object",
+                    "properties": {
+                      "path": {
+                        "type": "string",
+                        "title": "PNG output path",
+                        "default": ""
+                      }
+                    },
+                    "required": [
+                      "path"
+                    ],
+                    "additionalProperties": true
+                  },
+                  "verify": {
+                    "$ref": "#/$defs/verification"
+                  },
+                  "retry_count": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 100
+                  },
+                  "retry_delay": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 3600
+                  },
+                  "delay_before": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 3600
+                  },
+                  "delay_after": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 3600
+                  }
+                },
+                "additionalProperties": true
+              },
+              {
+                "type": "object",
+                "required": [
+                  "type",
+                  "params"
+                ],
+                "properties": {
+                  "type": {
+                    "const": "shutdown"
+                  },
+                  "params": {
+                    "type": "object",
+                    "properties": {
+                      "delay": {
+                        "type": "integer",
+                        "title": "Countdown seconds",
+                        "default": 60
+                      }
+                    },
+                    "required": [],
+                    "additionalProperties": true
+                  },
+                  "verify": {
+                    "$ref": "#/$defs/verification"
+                  },
+                  "retry_count": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 100
+                  },
+                  "retry_delay": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 3600
+                  },
+                  "delay_before": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 3600
+                  },
+                  "delay_after": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 3600
+                  }
+                },
+                "additionalProperties": true
+              },
+              {
+                "type": "object",
+                "required": [
+                  "type",
+                  "params"
+                ],
+                "properties": {
+                  "type": {
+                    "const": "abort_shutdown"
+                  },
+                  "params": {
+                    "type": "object",
+                    "properties": {},
+                    "required": [],
+                    "additionalProperties": true
+                  },
+                  "verify": {
+                    "$ref": "#/$defs/verification"
+                  },
+                  "retry_count": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 100
+                  },
+                  "retry_delay": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 3600
+                  },
+                  "delay_before": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 3600
+                  },
+                  "delay_after": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 3600
+                  }
+                },
+                "additionalProperties": true
+              },
+              {
+                "type": "object",
+                "required": [
+                  "type",
+                  "params"
+                ],
+                "properties": {
+                  "type": {
+                    "const": "http_get"
+                  },
+                  "params": {
+                    "type": "object",
+                    "properties": {
+                      "url": {
+                        "type": "string",
+                        "title": "URL",
+                        "default": ""
+                      },
+                      "name": {
+                        "type": "string",
+                        "title": "HTML output variable",
+                        "default": "html"
+                      },
+                      "timeout": {
+                        "type": "number",
+                        "title": "Request timeout (seconds)",
+                        "default": 30.0
+                      }
+                    },
+                    "required": [
+                      "url",
+                      "name"
+                    ],
+                    "additionalProperties": true
+                  },
+                  "verify": {
+                    "$ref": "#/$defs/verification"
+                  },
+                  "retry_count": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 100
+                  },
+                  "retry_delay": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 3600
+                  },
+                  "delay_before": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 3600
+                  },
+                  "delay_after": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 3600
+                  }
+                },
+                "additionalProperties": true
+              },
+              {
+                "type": "object",
+                "required": [
+                  "type",
+                  "params"
+                ],
+                "properties": {
+                  "type": {
+                    "const": "browser_close"
+                  },
+                  "params": {
+                    "type": "object",
+                    "properties": {},
+                    "required": [],
+                    "additionalProperties": true
+                  },
+                  "verify": {
+                    "$ref": "#/$defs/verification"
+                  },
+                  "retry_count": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 100
+                  },
+                  "retry_delay": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 3600
+                  },
+                  "delay_before": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 3600
+                  },
+                  "delay_after": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 3600
+                  }
+                },
+                "additionalProperties": true
+              },
+              {
+                "type": "object",
+                "required": [
+                  "type",
+                  "params"
+                ],
+                "properties": {
+                  "type": {
+                    "const": "browser_download"
+                  },
+                  "params": {
+                    "type": "object",
+                    "properties": {
+                      "selector": {
+                        "type": "string",
+                        "title": "Download trigger selector",
+                        "default": ""
+                      },
+                      "path": {
+                        "type": "string",
+                        "title": "Save to absolute path",
+                        "default": ""
+                      },
+                      "timeout": {
+                        "type": "number",
+                        "title": "Download timeout (seconds)",
+                        "default": 60.0
+                      }
+                    },
+                    "required": [
+                      "selector",
+                      "path"
+                    ],
+                    "additionalProperties": true
+                  },
+                  "verify": {
+                    "$ref": "#/$defs/verification"
+                  },
+                  "retry_count": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 100
+                  },
+                  "retry_delay": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 3600
+                  },
+                  "delay_before": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 3600
+                  },
+                  "delay_after": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 3600
+                  }
+                },
+                "additionalProperties": true
+              },
+              {
+                "type": "object",
+                "required": [
+                  "type",
+                  "params"
+                ],
+                "properties": {
+                  "type": {
+                    "const": "mkdir"
+                  },
+                  "params": {
+                    "type": "object",
+                    "properties": {
+                      "path": {
+                        "type": "string",
+                        "title": "Directory path",
+                        "default": ""
+                      }
+                    },
+                    "required": [
+                      "path"
+                    ],
+                    "additionalProperties": true
+                  },
+                  "verify": {
+                    "$ref": "#/$defs/verification"
+                  },
+                  "retry_count": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 100
+                  },
+                  "retry_delay": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 3600
+                  },
+                  "delay_before": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 3600
+                  },
+                  "delay_after": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 3600
+                  }
+                },
+                "additionalProperties": true
+              },
+              {
+                "type": "object",
+                "required": [
+                  "type",
+                  "params"
+                ],
+                "properties": {
+                  "type": {
+                    "const": "copy_file"
+                  },
+                  "params": {
+                    "type": "object",
+                    "properties": {
+                      "source": {
+                        "type": "string",
+                        "title": "Source file",
+                        "default": ""
+                      },
+                      "destination": {
+                        "type": "string",
+                        "title": "Destination file",
+                        "default": ""
+                      },
+                      "overwrite": {
+                        "type": "boolean",
+                        "title": "Allow overwrite",
+                        "default": false
+                      }
+                    },
+                    "required": [
+                      "source",
+                      "destination"
+                    ],
+                    "additionalProperties": true
+                  },
+                  "verify": {
+                    "$ref": "#/$defs/verification"
+                  },
+                  "retry_count": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 100
+                  },
+                  "retry_delay": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 3600
+                  },
+                  "delay_before": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 3600
+                  },
+                  "delay_after": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 3600
+                  }
+                },
+                "additionalProperties": true
+              },
+              {
+                "type": "object",
+                "required": [
+                  "type",
+                  "params"
+                ],
+                "properties": {
+                  "type": {
+                    "const": "move_file"
+                  },
+                  "params": {
+                    "type": "object",
+                    "properties": {
+                      "source": {
+                        "type": "string",
+                        "title": "Source path",
+                        "default": ""
+                      },
+                      "destination": {
+                        "type": "string",
+                        "title": "Destination path",
+                        "default": ""
+                      },
+                      "overwrite": {
+                        "type": "boolean",
+                        "title": "Allow overwrite",
+                        "default": false
+                      }
+                    },
+                    "required": [
+                      "source",
+                      "destination"
+                    ],
+                    "additionalProperties": true
+                  },
+                  "verify": {
+                    "$ref": "#/$defs/verification"
+                  },
+                  "retry_count": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 100
+                  },
+                  "retry_delay": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 3600
+                  },
+                  "delay_before": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 3600
+                  },
+                  "delay_after": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 3600
+                  }
+                },
+                "additionalProperties": true
+              },
+              {
+                "type": "object",
+                "required": [
+                  "type",
+                  "params"
+                ],
+                "properties": {
+                  "type": {
+                    "const": "delete_file"
+                  },
+                  "params": {
+                    "type": "object",
+                    "properties": {
+                      "path": {
+                        "type": "string",
+                        "title": "Path to file",
+                        "default": ""
+                      }
+                    },
+                    "required": [
+                      "path"
+                    ],
+                    "additionalProperties": true
+                  },
+                  "verify": {
+                    "$ref": "#/$defs/verification"
+                  },
+                  "retry_count": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 100
+                  },
+                  "retry_delay": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 3600
+                  },
+                  "delay_before": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 3600
+                  },
+                  "delay_after": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 3600
+                  }
+                },
+                "additionalProperties": true
+              },
+              {
+                "type": "object",
+                "required": [
+                  "type",
+                  "params"
+                ],
+                "properties": {
+                  "type": {
+                    "const": "list_dir"
+                  },
+                  "params": {
+                    "type": "object",
+                    "properties": {
+                      "path": {
+                        "type": "string",
+                        "title": "Directory",
+                        "default": ""
+                      },
+                      "name": {
+                        "type": "string",
+                        "title": "Output variable",
+                        "default": "files"
+                      }
+                    },
+                    "required": [
+                      "path",
+                      "name"
+                    ],
+                    "additionalProperties": true
+                  },
+                  "verify": {
+                    "$ref": "#/$defs/verification"
+                  },
+                  "retry_count": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 100
+                  },
+                  "retry_delay": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 3600
+                  },
+                  "delay_before": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 3600
+                  },
+                  "delay_after": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 3600
+                  }
+                },
+                "additionalProperties": true
+              },
+              {
+                "type": "object",
+                "required": [
+                  "type",
+                  "params"
+                ],
+                "properties": {
+                  "type": {
+                    "const": "if_var"
+                  },
+                  "params": {
+                    "type": "object",
+                    "properties": {
+                      "name": {
+                        "type": "string",
+                        "title": "Variable name",
+                        "default": ""
+                      },
+                      "operator": {
+                        "type": "string",
+                        "title": "Comparison",
+                        "default": "equals",
+                        "enum": [
+                          "equals",
+                          "not equals",
+                          "contains",
+                          "not contains",
+                          "empty",
+                          "not empty",
+                          "regex matches"
+                        ]
+                      },
+                      "value": {
+                        "type": "string",
+                        "title": "Compare with",
+                        "default": ""
+                      }
+                    },
+                    "required": [
+                      "name"
+                    ],
+                    "additionalProperties": true
+                  },
+                  "verify": {
+                    "$ref": "#/$defs/verification"
+                  },
+                  "retry_count": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 100
+                  },
+                  "retry_delay": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 3600
+                  },
+                  "delay_before": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 3600
+                  },
+                  "delay_after": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 3600
+                  }
+                },
+                "additionalProperties": true
+              },
+              {
+                "type": "object",
+                "required": [
+                  "type",
+                  "params"
+                ],
+                "properties": {
+                  "type": {
+                    "const": "else"
+                  },
+                  "params": {
+                    "type": "object",
+                    "properties": {},
+                    "required": [],
+                    "additionalProperties": true
+                  },
+                  "verify": {
+                    "$ref": "#/$defs/verification"
+                  },
+                  "retry_count": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 100
+                  },
+                  "retry_delay": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 3600
+                  },
+                  "delay_before": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 3600
+                  },
+                  "delay_after": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 3600
+                  }
+                },
+                "additionalProperties": true
+              },
+              {
+                "type": "object",
+                "required": [
+                  "type",
+                  "params"
+                ],
+                "properties": {
+                  "type": {
+                    "const": "endif"
+                  },
+                  "params": {
+                    "type": "object",
+                    "properties": {},
+                    "required": [],
+                    "additionalProperties": true
+                  },
+                  "verify": {
+                    "$ref": "#/$defs/verification"
+                  },
+                  "retry_count": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 100
+                  },
+                  "retry_delay": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 3600
+                  },
+                  "delay_before": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 3600
+                  },
+                  "delay_after": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 3600
+                  }
+                },
+                "additionalProperties": true
+              },
+              {
+                "type": "object",
+                "required": [
+                  "type",
+                  "params"
+                ],
+                "properties": {
+                  "type": {
+                    "const": "repeat"
+                  },
+                  "params": {
+                    "type": "object",
+                    "properties": {
+                      "times": {
+                        "type": "integer",
+                        "title": "Iterations (0–10000)",
+                        "default": 2
+                      }
+                    },
+                    "required": [],
+                    "additionalProperties": true
+                  },
+                  "verify": {
+                    "$ref": "#/$defs/verification"
+                  },
+                  "retry_count": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 100
+                  },
+                  "retry_delay": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 3600
+                  },
+                  "delay_before": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 3600
+                  },
+                  "delay_after": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 3600
+                  }
+                },
+                "additionalProperties": true
+              },
+              {
+                "type": "object",
+                "required": [
+                  "type",
+                  "params"
+                ],
+                "properties": {
+                  "type": {
+                    "const": "end_repeat"
+                  },
+                  "params": {
+                    "type": "object",
+                    "properties": {},
+                    "required": [],
+                    "additionalProperties": true
+                  },
+                  "verify": {
+                    "$ref": "#/$defs/verification"
+                  },
+                  "retry_count": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 100
+                  },
+                  "retry_delay": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 3600
+                  },
+                  "delay_before": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 3600
+                  },
+                  "delay_after": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 3600
+                  }
+                },
+                "additionalProperties": true
+              },
+              {
+                "type": "object",
+                "required": [
+                  "type",
+                  "params"
+                ],
+                "properties": {
+                  "type": {
+                    "const": "break_loop"
+                  },
+                  "params": {
+                    "type": "object",
+                    "properties": {},
+                    "required": [],
+                    "additionalProperties": true
+                  },
+                  "verify": {
+                    "$ref": "#/$defs/verification"
+                  },
+                  "retry_count": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 100
+                  },
+                  "retry_delay": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 3600
+                  },
+                  "delay_before": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 3600
+                  },
+                  "delay_after": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 3600
+                  }
+                },
+                "additionalProperties": true
+              },
+              {
+                "type": "object",
+                "required": [
+                  "type",
+                  "params"
+                ],
+                "properties": {
+                  "type": {
+                    "const": "continue_loop"
+                  },
+                  "params": {
+                    "type": "object",
+                    "properties": {},
+                    "required": [],
+                    "additionalProperties": true
+                  },
+                  "verify": {
+                    "$ref": "#/$defs/verification"
+                  },
+                  "retry_count": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 100
+                  },
+                  "retry_delay": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 3600
+                  },
+                  "delay_before": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 3600
+                  },
+                  "delay_after": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 3600
+                  }
+                },
+                "additionalProperties": true
+              }
+            ]
+          }
+        }
+      },
+      "additionalProperties": true
+    }
+  },
+  "additionalProperties": false,
+  "$defs": {
+    "verification": {
+      "type": "object",
+      "properties": {
+        "kind": {
+          "enum": [
+            "none",
+            "file_exists",
+            "window_exists",
+            "window_missing",
+            "file_missing",
+            "clipboard_contains",
+            "browser_visible",
+            "browser_hidden",
+            "image_visible",
+            "screen_changed"
+          ]
+        },
+        "target": {
+          "type": "string"
+        },
+        "timeout": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 3600
+        }
+      },
+      "additionalProperties": true
+    }
+  }
+}

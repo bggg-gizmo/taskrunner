@@ -29,6 +29,7 @@ class WorkflowEngine:
         self.browser_manager = None
         self.browser = None
         self.page = None
+        self.live_capture = None
 
     def expand(self, value):
         if not isinstance(value,str):
@@ -73,7 +74,103 @@ class WorkflowEngine:
             raise ValueError(f"Unknown action: {kind}")
         p={k:self.expand(v) for k,v in step.get("params",{}).items()}
         self.abort_if_requested()
-        if kind in ("click","move","drag","scroll","type","key","hotkey","paste","copy","close_window","screenshot"):
+        if kind=="click_image":
+            from .observability import wait_until, image_location
+            point=[None]
+            def locate():
+                point[0]=image_location(p["image"],p.get("region", ""),float(p.get("confidence",.88)))
+                return point[0] is not None
+            wait_until(locate,float(p.get("timeout",45)),float(p.get("poll",.4)),self.sleep,self.abort_if_requested)
+            if sys.platform=="win32":
+                from . import winmouse
+                winmouse.click(*point[0],button=p.get("button","left"))
+            else:
+                import pyautogui
+                pyautogui.click(*point[0],button=p.get("button","left"))
+        elif kind=="wait_screen":
+            from .observability import wait_until, screen_image, image_match
+            from .visual_verification import significant_change
+            mode=p.get("mode","changed")
+            region=str(p.get("region", ""))
+            reference=screen_image(region) if mode=="changed" else None
+            def matches():
+                if mode=="changed":return significant_change(reference,screen_image(region))
+                found=image_match(p["image"],region,float(p.get("confidence",.88)))
+                return found if mode=="image_appears" else not found
+            if mode!="changed" and not p.get("image"):
+                raise ValueError("Visual image condition requires a reference image file")
+            wait_until(matches,float(p.get("timeout",180)),float(p.get("poll",.5)),self.sleep,self.abort_if_requested)
+        elif kind=="wait_content":
+            from .observability import wait_until,window_text
+            import pyperclip
+            source=p.get("source","window")
+            def read():
+                if source=="window":return window_text(p["target"])
+                if source=="browser":return self.browser_page().locator(p.get("target") or "body").inner_text(timeout=1000)
+                if source=="file":return Path(p["target"]).expanduser().read_text(encoding="utf-8",errors="replace")[-4_000_000:]
+                return pyperclip.paste()
+            if p.get("condition")=="changed":
+                try:baseline=read()
+                except (LookupError,FileNotFoundError):baseline=""
+            else:baseline=""
+            observed=[None]
+            def condition_matches():
+                observed[0]=read()
+                desired=str(p.get("text", ""))
+                condition=p.get("condition","contains")
+                return ((desired in observed[0]) if condition=="contains" else
+                        (desired not in observed[0]) if condition=="absent" else
+                        observed[0]!=baseline)
+            if p.get("condition")!="changed" and not p.get("text"):
+                raise ValueError("Text appears/absent conditions need expected text")
+            wait_until(condition_matches,float(p.get("timeout",180)),float(p.get("poll",.5)),self.sleep,self.abort_if_requested)
+            self.vars[p.get("name","observed_text")]=observed[0]
+        elif kind=="capture_live_start":
+            from .observability import LiveCapture
+            if getattr(self, "live_capture", None) is not None:
+                raise RuntimeError("A live capture is already active; stop it before starting another")
+            monitor=LiveCapture(p["mode"],p["destination"],p.get("source", ""),
+                float(p.get("interval",.5)),int(p.get("max_captures",1000)),p.get("region", ""))
+            self.live_capture=monitor.start()
+            self.vars["capture_directory"]=str(monitor.destination)
+        elif kind=="capture_live_stop":
+            monitor=getattr(self,"live_capture",None)
+            if monitor is None:raise RuntimeError("No live capture running")
+            self.vars["capture_manifest"]=str(monitor.stop())
+            self.vars["capture_count"]=str(monitor.count)
+            if monitor.error:raise RuntimeError(f"Capture failed: {monitor.error}")
+            self.live_capture=None
+        elif kind=="clipboard_image":
+            from PIL import Image,ImageGrab
+            content=ImageGrab.grabclipboard()
+            if not isinstance(content,Image.Image):
+                raise LookupError("No image is present on the clipboard")
+            dest=Path(p["path"]).expanduser();dest.parent.mkdir(parents=True,exist_ok=True)
+            content.save(dest,format="PNG")
+            self.vars["last_image"]=str(dest)
+        elif kind=="capture_program_output":
+            import shlex
+            path=Path(p["output"]).expanduser();path.parent.mkdir(parents=True,exist_ok=True)
+            if sys.platform=="win32":
+                cmd=subprocess.list2cmdline([p["path"]])+(" "+p.get("arguments", "") if p.get("arguments") else "")
+            else:cmd=[p["path"]]+shlex.split(p.get("arguments", ""))
+            with open(path,"ab", buffering=0) as output:
+                process=subprocess.Popen(cmd,stdout=output,stderr=subprocess.STDOUT)
+                deadline=time.monotonic()+float(p.get("timeout",300))
+                try:
+                    while process.poll() is None:
+                        self.abort_if_requested()
+                        if time.monotonic()>=deadline:
+                            raise TimeoutError(f"Program did not finish in time: {p['path']}")
+                        self.sleep(.1)
+                finally:
+                    if process.poll() is None:
+                        process.terminate()
+                        try:process.wait(timeout=3)
+                        except subprocess.TimeoutExpired:process.kill();process.wait(timeout=3)
+                if process.returncode:raise RuntimeError(f"Program exited with code {process.returncode}")
+            self.vars["last_file"]=str(path)
+        elif kind in ("click","move","drag","scroll","type","key","hotkey","paste","copy","close_window","screenshot"):
             native_mouse = kind in ("click","move","drag","scroll") and sys.platform=="win32"
             if not native_mouse and not (kind=="type" and sys.platform=="win32"):
                 import pyautogui as pg
@@ -81,7 +178,11 @@ class WorkflowEngine:
                 pg.PAUSE = 0.08
             if native_mouse:
                 from . import winmouse
-                if kind=="click":winmouse.click(int(p["x"]),int(p["y"]),p.get("button","left"),int(p.get("clicks",1)))
+                if kind=="click":
+                    x,y=winmouse.resolve_target(int(p["x"]),int(p["y"]),p.get("window_title", ""),
+                         float(p.get("window_rx",0)),float(p.get("window_ry",0)),
+                         p.get("control_name", ""),p.get("automation_id", ""))
+                    winmouse.click(x,y,p.get("button","left"),int(p.get("clicks",1)))
                 elif kind=="move":winmouse.move(int(p["x"]),int(p["y"]),float(p.get("duration",0.2)))
                 elif kind=="drag":winmouse.drag(int(p["x1"]),int(p["y1"]),int(p["x2"]),int(p["y2"]),float(p.get("duration",0.5)))
                 elif kind=="scroll":winmouse.scroll(int(p["amount"]))
@@ -272,7 +373,7 @@ class WorkflowEngine:
             selected=[r.get(p["attribute"],"") if p.get("attribute") else r.get_text(" ",strip=True) for r in results]
             self.vars[p["name"]]="\n".join(map(str,selected)) if p.get("all_matches") else str(selected[0])
         elif kind=="browser_close":
-            self.cleanup()
+            self.close_browser()
         elif kind=="browser_download":
             path=Path(p["path"]).expanduser()
             path.parent.mkdir(parents=True,exist_ok=True)
@@ -357,6 +458,18 @@ class WorkflowEngine:
             self.sleep(.3)
 
     def cleanup(self):
+        monitor=getattr(self,"live_capture",None)
+        if monitor is not None:
+            try:
+                manifest=monitor.stop()
+                self.vars["capture_manifest"]=str(manifest)
+                self.vars["capture_count"]=str(monitor.count)
+            except Exception:
+                pass
+            self.live_capture=None
+        self.close_browser()
+
+    def close_browser(self):
         if self.browser:
             try: self.browser.close()
             except Exception: pass
