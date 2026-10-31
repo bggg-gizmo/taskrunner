@@ -4,11 +4,18 @@
 
 # TASK RUNNER
 
+[![Release v1.3.0](https://img.shields.io/badge/Release-v1.3.0-b45cff?style=for-the-badge)](V1.3_RELEASE_NOTES.md)
+[![Windows 10 and 11](https://img.shields.io/badge/Windows-10%20%7C%2011-00c5f8?style=for-the-badge&logo=windows&logoColor=white)](#windows-quick-start)
+[![Python 3.11 to 3.13](https://img.shields.io/badge/Python-3.11%20to%203.13-4169e1?style=for-the-badge&logo=python&logoColor=white)](requirements.txt)
+
+[![PySide6 / Qt](https://img.shields.io/badge/UI-PySide6%20%2F%20Qt-ff5fb7?style=flat-square)](#the-visual-identity)
+[![Playwright](https://img.shields.io/badge/Browser-Playwright-32c48d?style=flat-square)](#what-you-can-do)
+[![Local-first](https://img.shields.io/badge/Privacy-Local--first-8556e9?style=flat-square)](SECURITY.md)
+[![Source tests](https://img.shields.io/badge/Source%20tests-91%20passing-27ae60?style=flat-square)](#quality-gates)
+
 ### RECORD · REPLAY · OBSERVE · CAPTURE · SCHEDULE
 
 **Visual desktop automation and workflow scheduling for Windows.**
-
-`Windows 10 / 11` · `Qt / PySide6` · `Playwright` · `Beautiful Soup` · `Local-first`
 
 **Background Gremlin Group**  
 *Creating Unique Tools for Unique Individuals*
@@ -20,7 +27,7 @@
 ---
 
 > [!IMPORTANT]
-> **Version 1.3.0 — source release.** Global input capture and Windows uninstall still require native Windows acceptance testing. No paid GitHub Actions, silent desktop monitoring, or hosted builds.
+> **Version 1.3.0 — source release.** Global input capture and Windows uninstall still require native Windows acceptance testing.
 
 ```mermaid
 flowchart LR
@@ -126,7 +133,7 @@ taskrunner/
 
 ## Quality gates
 
-Run locally, with no GitHub Actions or paid hosted runners:
+Run the source checks locally:
 
 ```powershell
 python -m pytest tests -q
@@ -134,17 +141,13 @@ python -m compileall -q task_runner scripts tests launcher.py
 python scripts/prepublish_audit.py
 ```
 
-The pre-publication audit detects obvious private-data filenames, private-key/token signatures, unexpectedly large files, and GitHub Actions workflows. It is not a substitute for manually reviewing the staged diff, enabling GitHub secret scanning, or testing Windows-only functionality.
-
 Workflow export JSON structure is documented in [`schemas/taskrunner-job.schema.json`](schemas/taskrunner-job.schema.json). If action fields change, run `python scripts/generate_workflow_schema.py` and include the synchronized schema and tests.
-
-**No GitHub Actions workflows are included.** Builds and acceptance tests are local. Dependency changes and Windows releases require explicit local review.
 
 ## Previous releases and changelog
 
 The full v1.2.1 source tree is preserved under [**old builds/v1.2.1**](old%20builds/v1.2.1/). Review the [**Changelog**](CHANGELOG.md) for version-by-version features and fixes. The archived tree contains source and build scripts; it is not presented as a previously verified executable.
 
-## Documentation and release governance
+## Documentation
 
 - [Full action and workflow guide](docs/USER_GUIDE.md) — existing and new workflow actions.
 - [v1.3 release notes](V1.3_RELEASE_NOTES.md) — recording, visual triggers, output capture, installation and removal.
@@ -152,8 +155,6 @@ The full v1.2.1 source tree is preserved under [**old builds/v1.2.1**](old%20bui
 - [Contributing](CONTRIBUTING.md) — no-regression and change verification expectations.
 - [Licensing status](LICENSING.md) — no license has been selected by the owner yet. Public is not automatically open-source.
 
-
-**GitHub protections are not activated by files alone.** `.github/rulesets/main-branch-protection.json` contains a GitHub REST ruleset request body, which must be reviewed and applied in repository Settings or by an authorized API call **after** the initial repository setup. GitHub secret scanning, push protection, and private vulnerability reporting also require repository configuration. See the [official GitHub rules API](https://docs.github.com/en/rest/repos/rules).
 
 ---
 
