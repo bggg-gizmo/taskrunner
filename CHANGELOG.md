@@ -2,6 +2,14 @@
 
 All notable public-facing changes are documented here. Archived source versions are available in [`old builds/`](old%20builds/). Source-only release status is distinguished from completed Windows acceptance testing.
 
+## v1.5.1 — Follow-up Qt event-loop and dashboard regression hardening
+
+- Move recurring dashboard SQLite queries/history collection into a nonblocking daemon reader and discard stale snapshots after explicit task edits.
+- Update only table cells that actually changed; do not reconstruct the full dashboard every three seconds.
+- Run New Task, Add Action and Edit smoke tests using the actual visible modal event loops with a bounded watchdog, not mocked `QDialog.exec()`.
+- Keep the existing modal UI but size the action editor to the usable screen. Preserve all action definitions and data.
+- Retain full Windows self-test, offline OCR, browser checks and error diagnostics.
+
 ## v1.5.1 — Windows runtime responsiveness and GUI editor correction
 
 - Move GUI scheduler polls off the Qt event loop, avoid background dashboard table rebuilds during modal editors, and reduce repeated SQLite WAL journal contention.

@@ -43,3 +43,39 @@ def test_scheduler_poll_runs_off_the_gui_thread(monkeypatch):
             window.scheduler_timer.stop()
             window.debug_timer.stop()
             window.close()
+
+
+def test_dashboard_refresh_never_waits_for_slow_db(monkeypatch):
+    pytest.importorskip('PySide6')
+    import time
+    import threading
+    import tempfile
+    if sys.platform != 'win32':
+        monkeypatch.setenv('QT_QPA_PLATFORM','offscreen')
+    from PySide6.QtWidgets import QApplication
+    from task_runner.gui import MainWindow
+    app=QApplication.instance() or QApplication([])
+    with tempfile.TemporaryDirectory(prefix='taskrunner-dashboard-check-') as home:
+        monkeypatch.setenv('TASKRUNNER_HOME',home)
+        window=MainWindow()
+        try:
+            entered=threading.Event()
+            release=threading.Event()
+            def slow_jobs():
+                entered.set()
+                assert release.wait(5)
+                return []
+            monkeypatch.setattr(window.store,'all_jobs',slow_jobs)
+            started=time.monotonic()
+            window.refresh_if_idle()
+            assert time.monotonic()-started < .25
+            assert entered.wait(3)
+            started=time.monotonic()
+            window.refresh_if_idle()
+            assert time.monotonic()-started < .25
+        finally:
+            release.set()
+            window.timer.stop()
+            window.scheduler_timer.stop()
+            window.debug_timer.stop()
+            window.close()

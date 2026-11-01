@@ -26,6 +26,7 @@ from .paths import asset_path,data_root
 from .scheduling import compute_next,local_text
 from .sounds import Preferences
 from .store import Store
+from .dashboard_snapshot import DashboardSnapshotReader
 from .runner import run_claimed,request_stop,install_scheduler,remove_scheduler,scheduler_status,tick
 
 
@@ -77,7 +78,13 @@ class StepEditor(QDialog):
     def __init__(self,step=None,parent=None):
         super().__init__(parent)
         self.setWindowTitle("Action configuration")
-        self.resize(640,680)
+        screen=parent.screen() if parent is not None else QApplication.primaryScreen()
+        if screen is not None:
+            area=screen.availableGeometry()
+            self.resize(min(640,max(360,area.width()-24)),
+                        min(680,max(360,area.height()-48)))
+        else:
+            self.resize(640,680)
         self.step=copy.deepcopy(step or default_step("click"))
         root=QVBoxLayout(self)
         form=QFormLayout()
@@ -337,8 +344,8 @@ class TaskWizard(QDialog):
         screen=parent.screen() if parent is not None else QApplication.primaryScreen()
         if screen is not None:
             area=screen.availableGeometry()
-            self.resize(min(1040,max(540,area.width()-32)),
-                        min(850,max(470,area.height()-48)))
+            self.resize(min(1040,max(320,area.width()-32)),
+                        min(850,max(360,area.height()-48)))
         else:
             self.resize(1040,850)
         root=QVBoxLayout(self)
@@ -430,6 +437,7 @@ class TaskWizard(QDialog):
         content_layout.addWidget(self.schedule)
         foot=QHBoxLayout()
         self.summary=QLabel("")
+        self.summary.setWordWrap(True)
         foot.addWidget(self.summary,1)
         foot.addWidget(btn("Validate workflow",self.validate))
         foot.addWidget(btn("Cancel",self.reject))
@@ -651,6 +659,9 @@ class MainWindow(QMainWindow):
         self._restore_after_run=set()
         self._scheduler_lock=threading.Lock()
         self._scheduler_results=queue.SimpleQueue()
+        self._dashboard_reader=DashboardSnapshotReader(self.store)
+        self._dashboard_generation=0
+        self._dashboard_last_rows=None
         self.selected_job=None
         self.setWindowTitle("Task Runner — Automation Control Panel")
         self.setWindowIcon(QIcon(str(asset_path("task-runner.ico"))))
@@ -1276,23 +1287,38 @@ class MainWindow(QMainWindow):
         self.statusBar().showMessage(f"Stop requested for task {job_id}, run {running}")
         self.preferences.play("select")
 
-    def refresh(self):
-        if self.stack.currentIndex()==4:self.refresh_resources()
+    def _render_dashboard_snapshot(self, jobs, history):
+        """Apply a snapshot only on the GUI thread; skip unchanged table rows."""
+        if self.stack.currentIndex()==4:
+            self.refresh_resources()
         remembered=self.selected_id()
-        jobs=self.store.all_jobs()
-        self.table.setRowCount(len(jobs))
-        for row,job in enumerate(jobs):
-            fields=[str(job["id"]),job["name"],job["status"].upper() if job["enabled"] else "DISABLED",
-                    job["schedule_kind"],local_text(job["next_run"]),local_text(job["last_run"]),job["description"]]
-            for column,value in enumerate(fields):
-                item=QTableWidgetItem(value)
-                if column==0:item.setData(Qt.ItemDataRole.UserRole,job["id"])
-                self.table.setItem(row,column,item)
-        if remembered is not None:self.select_task(remembered)
-        running=sum(j["status"]=="running" for j in jobs)
+        rows=[(str(job["id"]),job["name"],
+               job["status"].upper() if job["enabled"] else "DISABLED",
+               job["schedule_kind"],local_text(job["next_run"]),
+               local_text(job["last_run"]),job["description"]) for job in jobs]
+        if rows!=self._dashboard_last_rows:
+            # QTableWidget used to clear and recreate every cell every three
+            # seconds, even when no task had changed. Freeze repaints during
+            # genuine updates to keep input responsive for large job lists.
+            self.table.setUpdatesEnabled(False)
+            try:
+                self.table.setRowCount(len(rows))
+                for row,fields in enumerate(rows):
+                    for column,value in enumerate(fields):
+                        existing=self.table.item(row,column)
+                        if existing is not None and existing.text()==value:
+                            continue
+                        item=QTableWidgetItem(value)
+                        if column==0:
+                            item.setData(Qt.ItemDataRole.UserRole,int(fields[0]))
+                        self.table.setItem(row,column,item)
+                if remembered is not None:
+                    self.select_task(remembered)
+                self._dashboard_last_rows=rows
+            finally:
+                self.table.setUpdatesEnabled(True)
+        running=sum(job["status"]=="running" for job in jobs)
         self.task_count.setText(f"TASKS  ·  {len(jobs)} total  /  {running} running")
-        # Detect completions from GUI workers or scheduled worker subprocesses.
-        history=self.store.execution_history(limit=200)
         completed=[r for r in history if r["status"]!="running" and (
             r["id"]>self.last_seen_run or self.previous_run_states.get(r["id"])=="running")]
         if completed:
@@ -1309,14 +1335,27 @@ class MainWindow(QMainWindow):
         self.active_workers={key:value for key,value in self.active_workers.items()
                              if value.is_alive() or key in self._restore_after_run}
 
+    def refresh(self):
+        """Immediate refresh on explicit user action; fence older async reads."""
+        self._dashboard_generation+=1
+        jobs=self.store.all_jobs()
+        history=self.store.execution_history(limit=200)
+        self._render_dashboard_snapshot(jobs,history)
+
     def refresh_if_idle(self):
-        # Qt QDialog.exec() enters a nested event loop. Avoid rebuilding the
-        # dashboard and doing synchronously blocking DB work behind a dialog.
-        if QApplication.activeModalWidget() is None:
-            try:
-                self.refresh()
-            except Exception as exc:
-                report_gui_failure(self,"Dashboard refresh failed",exc)
+        """Drain background reads without ever blocking the Qt event loop."""
+        if QApplication.activeModalWidget() is not None:
+            return
+        try:
+            result=self._dashboard_reader.take_latest()
+            if result is not None and result.generation==self._dashboard_generation:
+                if result.error:
+                    self.statusBar().showMessage(f"Dashboard refresh failed: {result.error}")
+                else:
+                    self._render_dashboard_snapshot(result.jobs,result.history)
+            self._dashboard_reader.start(self._dashboard_generation)
+        except Exception as exc:
+            report_gui_failure(self,"Dashboard refresh failed",exc)
 
     def _poll_schedules(self):
         """Run database and watched-path polling off the Qt event loop."""

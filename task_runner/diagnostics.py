@@ -13,57 +13,103 @@ from .paths import asset_path,setup_browser_path
 
 
 def interactive_dialogs():
-    """Exercise actual Qt objects and the New Task / Edit event handlers.
+    """Drive real modal event loops for New Task, Add Action, and Edit.
 
-    The older self-test only imported the classes, missing runtime errors
-    in dialog constructors, signal connections, and persistence.
+    Do not patch QDialog.exec: the previous smoke test could pass even when
+    the actual Windows dialog was invisible, inaccessible or blocked.
     """
-    from unittest.mock import patch
+    from PySide6.QtCore import QTimer
     from PySide6.QtWidgets import QApplication, QDialog, QPushButton
-    from .actions import default_step
-    from .gui import MainWindow,TaskWizard,StepEditor
-    app=QApplication.instance()
-    if app is None:
-        app=QApplication([])
+    from .gui import MainWindow, TaskWizard, StepEditor
+    app = QApplication.instance() or QApplication([])
     with tempfile.TemporaryDirectory(prefix='taskrunner-ui-check-') as temp:
-        original_home=os.environ.get('TASKRUNNER_HOME')
-        os.environ['TASKRUNNER_HOME']=temp
-        window=None
+        original_home = os.environ.get('TASKRUNNER_HOME')
+        os.environ['TASKRUNNER_HOME'] = temp
+        window = None
         try:
-            window=MainWindow()
-            assert window.table is not None and window.stack.count()==5
-            editor=StepEditor(default_step('wait'),parent=window)
-            assert editor.kind.currentData()=='wait'
-            editor.apply()
-            assert editor.result()==QDialog.DialogCode.Accepted
-            editor.deleteLater()
+            window = MainWindow()
+            window.show()
+            dashboard = window.stack.widget(0)
 
-            def scripted_wizard(dialog):
-                dialog.name.setText('GUI smoke test edited' if dialog.previous.get('id') else 'GUI smoke test')
-                if not dialog.actions:
-                    dialog.actions=[default_step('wait')]
-                dialog.refresh_actions()
-                dialog.save(run_now=False)
-                assert dialog.saved_id>0
-                return QDialog.DialogCode.Accepted
+            def button(parent, title):
+                matches = [item for item in parent.findChildren(QPushButton)
+                           if item.text() == title]
+                if len(matches) != 1:
+                    raise AssertionError(f'Expected exactly one {title!r} button, got {len(matches)}')
+                return matches[0]
 
-            # A failed validation must never open a blocking message box
-            # inside the unattended packaged executable self-test.
-            with patch('task_runner.gui.message',side_effect=AssertionError('Unexpected GUI error dialog')):
-                with patch.object(TaskWizard,'exec',scripted_wizard):
-                    dashboard=window.stack.widget(0)
-                    new_button=next(button for button in dashboard.findChildren(QPushButton)
-                                    if button.text()=='New Task')
-                    new_button.click()
-                    jobs=window.store.all_jobs()
-                    assert len(jobs)==1 and jobs[0]['name']=='GUI smoke test'
-                    window.select_task(jobs[0]['id'])
-                    edit_button=next(button for button in dashboard.findChildren(QPushButton)
-                                     if button.text()=='Edit')
-                    edit_button.click()
-                    updated=window.store.get_job(jobs[0]['id'])
-                    assert updated['name']=='GUI smoke test edited'
-                    assert len(updated['actions'])==1
+            def drive_modal(trigger, editing):
+                errors = []
+                finished = [False]
+
+                def safe(callback):
+                    try:
+                        callback()
+                    except BaseException as error:
+                        errors.append(error)
+                        modal = QApplication.activeModalWidget()
+                        if modal is not None:
+                            modal.reject()
+
+                def create_wait_step():
+                    editor = QApplication.activeModalWidget()
+                    assert isinstance(editor, StepEditor) and editor.isVisible(), \
+                        'Add Action did not open a visible modal StepEditor'
+                    index = editor.kind.findData('wait')
+                    assert index >= 0
+                    editor.kind.setCurrentIndex(index)
+                    button(editor, 'Save action').click()
+                    assert editor.result() == QDialog.DialogCode.Accepted
+
+                def drive_wizard():
+                    wizard = QApplication.activeModalWidget()
+                    assert isinstance(wizard, TaskWizard) and wizard.isVisible(), \
+                        'New Task / Edit did not open a visible modal TaskWizard'
+                    wizard.name.setText('GUI smoke test edited' if editing else 'GUI smoke test')
+                    if not editing:
+                        QTimer.singleShot(0, lambda: safe(create_wait_step))
+                        button(wizard, 'Add action').click()
+                        if errors:
+                            raise errors[0]
+                        assert len(wizard.actions) == 1
+                        assert wizard.actions[0]['type'] == 'wait'
+                    else:
+                        assert len(wizard.actions) == 1
+                    button(wizard, 'Verify & save task').click()
+                    assert wizard.result() == QDialog.DialogCode.Accepted, \
+                        'Task could not be saved using the real wizard button'
+
+                def watchdog():
+                    if finished[0]:
+                        return
+                    errors.append(TimeoutError('New Task/Edit modal event loop exceeded 10 seconds'))
+                    modal = QApplication.activeModalWidget()
+                    if modal is not None:
+                        modal.reject()
+
+                timeout = QTimer(window)
+                timeout.setSingleShot(True)
+                timeout.timeout.connect(watchdog)
+                timeout.start(10000)
+                try:
+                    QTimer.singleShot(0, lambda: safe(drive_wizard))
+                    trigger.click()
+                finally:
+                    finished[0] = True
+                    timeout.stop()
+                    timeout.deleteLater()
+                if errors:
+                    raise errors[0]
+
+            drive_modal(button(dashboard, 'New Task'), editing=False)
+            jobs = window.store.all_jobs()
+            assert len(jobs) == 1 and jobs[0]['name'] == 'GUI smoke test'
+            window.select_task(jobs[0]['id'])
+            drive_modal(button(dashboard, 'Edit'), editing=True)
+            updated = window.store.get_job(jobs[0]['id'])
+            assert updated['name'] == 'GUI smoke test edited'
+            assert len(updated['actions']) == 1
+            assert updated['actions'][0]['type'] == 'wait'
         finally:
             if window is not None:
                 window.timer.stop()
@@ -72,9 +118,9 @@ def interactive_dialogs():
                 window.close()
                 window.deleteLater()
             if original_home is None:
-                os.environ.pop('TASKRUNNER_HOME',None)
+                os.environ.pop('TASKRUNNER_HOME', None)
             else:
-                os.environ['TASKRUNNER_HOME']=original_home
+                os.environ['TASKRUNNER_HOME'] = original_home
 
 
 def run_diagnostics(report_path: str | Path) -> bool:

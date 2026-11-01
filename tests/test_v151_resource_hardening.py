@@ -125,6 +125,6 @@ def test_release_version_and_readme_reference_actual_current_source():
     assert "1.5.1" in (root/'assets/version_info.txt').read_text()
     readme=(root/'README.md').read_text(encoding='utf-8')
     assert 'Release-v1.5.1' in readme
-    assert 'Source%20tests-139%20passing' in readme
+    assert 'Source%20tests-144%20passing' in readme
     assert 'V1.5.1_RELEASE_NOTES.md' in readme
     assert (root/'V1.5.1_RELEASE_NOTES.md').is_file()

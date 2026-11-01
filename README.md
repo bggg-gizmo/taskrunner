@@ -15,7 +15,7 @@
 [![PySide6](https://img.shields.io/badge/UI-PySide6%20%2F%20Qt-ff5fb7?style=flat-square)](#the-visual-identity)
 [![Playwright](https://img.shields.io/badge/Browser-Playwright-32c48d?style=flat-square)](#what-you-can-do)
 [![Local first](https://img.shields.io/badge/Privacy-Local--first-8556e9?style=flat-square)](SECURITY.md)
-[![Local tests](https://img.shields.io/badge/Source%20tests-139%20passing-27ae60?style=flat-square)](#quality-gates)
+[![Local tests](https://img.shields.io/badge/Source%20tests-144%20passing-27ae60?style=flat-square)](#quality-gates)
 
 **Background Gremlin Group**  
 *Creating Unique Tools for Unique Individuals*
@@ -43,7 +43,7 @@ Task Runner is a native Windows application for composing, scheduling, monitorin
 
 The interface takes inspiration from vaporwave aesthetics and classic Windows desktop software. Seven original short retro interface sounds—selection, execution, saving, completion, failure, startup, and exit—can be switched off in Settings without affecting workflows.
 
-**Current release:** v1.5.1 source with a local Windows build system. Native Windows verification of the new features is pending; a signed or acceptance-tested executable is not yet advertised.
+**Current release:** v1.5.1 source with GUI responsiveness and task-editor hardening, and a local Windows build system. Native Windows verification of the new features is pending; a signed or acceptance-tested executable is not yet advertised.
 
 ## New in Task Runner 1.5.1
 
@@ -108,6 +108,8 @@ No screen coordinates are required for the Playwright browser actions or CSS-bas
 4. Choose **New Task**. Give the task a name; use **● Record actions / Replay** to perform the real workflow, press **Ctrl+Shift+F12** to stop, then edit its captured actions, delays and verification. You can also build individual actions through screenshot selection.
 5. Use **Run now** while testing. Check **Logs** and inspect failure screenshots. Review any shutdown, file deletion, program launch, or overwrite action before scheduling.
 6. To run scheduled tasks when the GUI is closed, install the Windows heartbeat from Settings or `INSTALL_SCHEDULER.cmd`. It runs under the signed-in interactive Windows account. Use **Windows Installed Apps → Task Runner → Uninstall** or **`UNINSTALL_WINDOWS.cmd`** to uninstall; local data is preserved by default.
+
+**Windows GUI regression checks:** The build now tests the real modal event loops for **New Task**, **Add Action**, **Save**, and **Edit**, and checks the frozen executable. Periodic dashboard reads use a background snapshot collector so SQLite busy waits cannot block the main Qt event loop. Source-level Linux tests alone cannot certify interactive Windows behavior. If an operation fails, see `%LOCALAPPDATA%\TaskRunner\runtime-errors.log`; the build must report `SUCCESS` before installation.
 
 **Important timing distinction:** The GUI polls schedules approximately once per second while open. The current Windows Task Scheduler heartbeat runs once per minute when the GUI is closed. Thus a saved **one-second interval is not guaranteed to execute every second with the GUI closed**. A scheduled desktop workflow also requires the user to be logged in and the desktop unlocked. This limitation is explicitly retained rather than misrepresented as background second-precision execution.
 
