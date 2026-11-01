@@ -3,7 +3,7 @@ import json
 import os
 import sys
 import sqlite3
-from contextlib import contextmanager
+from contextlib import closing, contextmanager
 from datetime import timedelta
 from pathlib import Path
 from typing import Any
@@ -123,8 +123,11 @@ class Store:
         os.close(fd)
         staged = Path(staged)
         try:
-            with sqlite3.connect(self.db_path, timeout=20) as source:
-                with sqlite3.connect(staged) as backup:
+            # SQLite connection context managers commit/rollback but DO NOT
+            # close their handles. Windows refuses to rename a live SQLite file;
+            # explicitly closing both connections releases the staged backup.
+            with closing(sqlite3.connect(self.db_path, timeout=20)) as source:
+                with closing(sqlite3.connect(staged)) as backup:
                     source.backup(backup)
                     if backup.execute("PRAGMA integrity_check").fetchone()[0] != "ok":
                         raise RuntimeError("SQLite backup integrity check failed")

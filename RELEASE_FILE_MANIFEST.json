@@ -42,8 +42,8 @@
       "sha256": "7fe4da8d03b18cd559d4e2b3f1ff8039b3becbbbc17f0a552267a5a65abae243"
     },
     "CHANGELOG.md": {
-      "bytes": 8159,
-      "sha256": "68b0f24008494fb4b08ac287bc9179e5b8f5447159881843a488b0c1d14cd319"
+      "bytes": 8439,
+      "sha256": "e322d52182325e07fad0fc14b5b9f1f258882d048c8968bd59d812ee2787d73d"
     },
     "CHECK_DEPENDENCIES.cmd": {
       "bytes": 792,
@@ -98,8 +98,8 @@
       "sha256": "5ddce97bd17aa1b39aafbf737e50eb2197c240c5495aedd4b5b88e7bb410b7e2"
     },
     "V1.5.1_RELEASE_NOTES.md": {
-      "bytes": 2782,
-      "sha256": "6a3df287b0e253b01a01c1a4e0e5a7c2b22d611d5b772a10044e2264ab1a1071"
+      "bytes": 3886,
+      "sha256": "8c2071e86959d6f7f911deb20abc1c7a19dbd55b18e635fc5a965ae63726fd75"
     },
     "V1.5_RELEASE_NOTES.md": {
       "bytes": 3218,
@@ -1322,8 +1322,8 @@
       "sha256": "5c57298364b62f6dd86c0f961a956f88957a62370aa84f488dda5fb1384a781a"
     },
     "task_runner/store.py": {
-      "bytes": 26703,
-      "sha256": "2edee89ffdcc7ae19b752487fa7667f645d18fcb76214af52180aa8002c8b101"
+      "bytes": 26965,
+      "sha256": "6ff006299af46c8d05e7dfca716965ee09cb5f3c5745d0a9dce8071eb504c703"
     },
     "task_runner/style.py": {
       "bytes": 2086,
@@ -1394,8 +1394,8 @@
       "sha256": "acac3eb7c3ee50660398cc27dcdd6305a99d9e25199ca3d4639399c846dfcae1"
     },
     "tests/test_v13.py": {
-      "bytes": 10629,
-      "sha256": "0c16bff96cdcce3e119040c1a356d96f657bbcbc06c11dcda2384c03d3553737"
+      "bytes": 11058,
+      "sha256": "c2f0208f693100f922ee825f56d2633d0b0fcf8f003a0a62046f68e2ae296978"
     },
     "tests/test_v14.py": {
       "bytes": 8328,
@@ -1406,8 +1406,8 @@
       "sha256": "138a60f123262cee5e3b85f714096e9e77394a7dc2cc19144d581e8d84cfa86e"
     },
     "tests/test_v151_resource_hardening.py": {
-      "bytes": 5176,
-      "sha256": "1e4cfe1d631d4a4ade5e94cb79889a30c4e8b6e5158b02c75cd07ab29542d642"
+      "bytes": 5192,
+      "sha256": "f1819fecf29e03b07d9c51d9afb3ebcdb45d88f46efa224f02daf7723f8e0de0"
     },
     "tests/test_v15_resources.py": {
       "bytes": 7937,

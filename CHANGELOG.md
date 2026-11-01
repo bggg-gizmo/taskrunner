@@ -4,6 +4,7 @@ All notable public-facing changes are documented here. Archived source versions 
 
 ## v1.5.1 — Resource guard safety and release quality (source hotfix)
 
+- Windows build follow-up: explicitly close SQLite backup handles before replacing the staged file; read UTF-8 schema/README in regression checks; exercise the native Windows image-click test path without changing runtime mouse handling. Windows build acceptance remains pending.
 - Fixed a resource-watch PID reuse edge case: all watch policies now bind to the selected process's creation identity and stop watching if Windows recycles its PID.
 - Fixed a watcher-stop race: a late threshold alert is not silently cleared when the workflow stops its guard, and a monitor already being stopped will not initiate a new termination after a slow sample completes.
 - Improved per-user Windows upgrade rollback: the previous installed application is retained until the updated shortcuts and Installed Apps registration succeed.

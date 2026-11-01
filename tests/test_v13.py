@@ -109,7 +109,7 @@ def test_monitor_validation_and_source_guardrails(tmp_path):
 def test_new_actions_visible_and_json_schema_matches():
     from scripts.generate_workflow_schema import generate
     root=Path(__file__).resolve().parents[1]
-    assert json.loads((root/'schemas/taskrunner-job.schema.json').read_text())==generate()
+    assert json.loads((root/'schemas/taskrunner-job.schema.json').read_text(encoding='utf-8'))==generate()
     assert {'wait_screen','wait_content','capture_live_start','capture_live_stop',
             'clipboard_image','capture_program_output'} <= ACTIONS.keys()
     for kind in ('wait_screen','capture_live_stop'):
@@ -191,18 +191,26 @@ def test_program_stdout_stream_capture(tmp_path):
 
 
 def test_click_image_uses_current_match_not_recorded_coordinates(monkeypatch):
-    from task_runner.executor import WorkflowEngine
     import sys, types
-    runner=WorkflowEngine()
-    clicked=[]
+    import task_runner.executor as executor
     import task_runner.observability as obs
+    import task_runner.winmouse as winmouse
+
+    runner=executor.WorkflowEngine()
+    clicked=[]
     monkeypatch.setattr(obs,'image_location',lambda *args:(123,567))
-    fake=types.SimpleNamespace(click=lambda *args,**kwargs:clicked.append((args,kwargs)))
-    monkeypatch.setitem(sys.modules,'pyautogui',fake)
+    capture_click=lambda *args,**kwargs:clicked.append((args,kwargs))
+    monkeypatch.setattr(winmouse,'click',capture_click)
+    monkeypatch.setitem(sys.modules,'pyautogui',types.SimpleNamespace(click=capture_click))
     step=default_step('click_image')
     step['params'].update({'image':'current-button.png','region':''})
-    runner.run_action(step)
-    assert clicked==[((123,567),{'button':'left'})]
+    # Cover both the native Windows multi-monitor implementation and the
+    # PyAutoGUI fallback, even on Linux build-validation hosts.
+    for platform in ('win32','linux'):
+        monkeypatch.setattr(executor,'sys',types.SimpleNamespace(platform=platform))
+        clicked.clear()
+        runner.run_action(step)
+        assert clicked==[((123,567),{'button':'left'})]
 
 
 def test_browser_close_preserves_unrelated_output_capture(tmp_path):
