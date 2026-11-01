@@ -1,53 +1,26 @@
 <div align="center">
 
-<img src="./assets/task-runner.png" alt="Task Runner vaporwave application icon — Background Gremlin Group" width="180">
+<img src="assets/task-runner.png" alt="Task Runner — original vaporwave application icon" width="170">
 
 # TASK RUNNER
 
-### ⚡ CAPTURE THE DESKTOP. BUILD THE WORKFLOW. RUN ON YOUR SCHEDULE.
+**Windows desktop automation, without writing every script by hand.**
 
-**Visual automation for Windows — without having to hand-code every step.**
+*Developed by the Background Gremlin Group*
 
-`WINDOWS 10 / 11` · `PYSIDE6` · `PLAYWRIGHT` · `BEAUTIFUL SOUP` · `LOCAL-FIRST`
-
-**Background Gremlin Group**  
-*Creating Unique Tools for Unique Individuals*
-
-[**Quick start**](#windows-quick-start) · [**Capabilities**](#capabilities) · [**Action guide**](docs/USER_GUIDE.md) · [**Security**](SECURITY.md)
+**Creating Unique Tools for Unique Individuals**
 
 </div>
 
 ---
 
-> [!IMPORTANT]
-> **Release status:** v1.2.1 Windows source and local EXE builder. The UI and an earlier build have run on Windows; the current hardening changes still need a fresh interactive Windows acceptance pass before a verified binary release is advertised. No paid GitHub Actions are used.
-
 Task Runner is a native Windows application for composing, scheduling, monitoring, and troubleshooting multi-step desktop and browser automations. Its screenshot-driven wizard lets you select real desktop coordinates; its action editor provides Playwright-based browser operations, Beautiful Soup extraction, Windows UI Automation, clipboard and file handling, conditional flows, verification, retries, and deliberate timing controls.
 
 The interface takes inspiration from vaporwave aesthetics and classic Windows desktop software. Seven original short retro interface sounds—selection, execution, saving, completion, failure, startup, and exit—can be switched off in Settings without affecting workflows.
 
-**Built for an actual Windows desktop.** All builds run locally. No hosted build pipeline, usage-credit-consuming GitHub Actions, or unverified downloadable EXE is represented as a completed release.
+**Project status:** Windows source and local Windows build system. The user has confirmed that a previous version compiled successfully on Windows; the additional hardening changes in this repository candidate still require a new on-device Windows build and acceptance test. This source package is not evidence of a fully tested Windows release.
 
-### From a screen capture to an autonomous sequence
-
-```mermaid
-flowchart LR
-    A["Capture a target"] --> B["Arrange actions"]
-    B --> C["Set waits & retries"]
-    C --> D["Choose a schedule"]
-    D --> E["Verify & log"]
-    E --> F["Output or recover"]
-```
-
-| **DESKTOP** | **BROWSER** | **CONTROL** |
-|:---|:---|:---|
-| Point-and-click, typing, windows, clipboard, files | Playwright, dropdowns, scrolling text, HTML extraction | Conditional flows, retries, delays, scheduling, logs |
-
-**Built for elaborate tasks:** open a folder, launch a program, wait for its window, fill a form, copy long output, save a report, and optionally shut down the machine—all as one ordered, editable workflow.
-
----
-
-## Capabilities
+## What you can do
 
 | Feature | Implementation |
 | --- | --- |
@@ -81,7 +54,7 @@ No screen coordinates are required for the Playwright browser actions or CSS-bas
 
 You can run directly from source with **`RUN_FROM_SOURCE.cmd`**, or precheck reusable dependencies via **`CHECK_DEPENDENCIES.cmd`**. No global administrator-level installation is required for the intended shared user-site setup. The first install can be blocked by local Python/Windows policy. The dependency installer retries a pip wheel-cache permission problem without cache before failing visibly.
 
-## What a workflow looks like
+## A real automation example
 
 Create a workflow that (1) opens a folder or program, (2) waits for its window, (3) activates it, (4) clicks or types into an exact target, (5) checks for a response, (6) captures scrolling text, (7) saves a UTF-8 report, and (8) closes an application. Configure one-second settling delays after context-sensitive actions and verification on the states that must actually change. A failed verification can cause a retry; merely dispatching a click is not proof that the click achieved its purpose.
 
@@ -93,21 +66,21 @@ Task Runner saves jobs and execution history to a local SQLite database in `%LOC
 
 File replacement now stages a complete UTF-8 write or copied file beside the destination before atomically replacing the old file. If staging fails, the previous destination stays in place. Append and move-file/directory actions retain their existing semantics; review destructive steps carefully. Task Runner does **not** claim to sandbox arbitrary workflows or encrypt its SQLite database.
 
-## Vaporwave desktop experience
+## The visual identity
 
-The existing Windows/Qt interface stays intact. The custom icon, vaporwave color system, and **seven original optional sound cues** (select, run, save, done, error, startup, exit) are included in `assets/`. Toggle interface audio in Settings without altering workflow execution. Only genuine application screenshots should be presented as product captures; no mockup is labeled as a real Windows screenshot.
+The application preserves its current Windows/Qt layout, original vaporwave icon, background styling, and optional retro sound cues. This repository does not substitute a concept render for screenshots captured from a running Windows build. Actual UI screenshots can be added after on-device acceptance.
 
-## Source layout
+## Directory guide
 
 ```text
 taskrunner/
   task_runner/                 Application GUI, scheduler, workflow engine, storage, Windows input
   assets/                      Original icon, Windows executable resource and seven WAV cues
-  tests/                       Regression and source validation tests
-  scripts/                     Shared dependency checker, schema generator and publication audit
+  tests/                       Regression tests and source-validation checks
+  scripts/                     Shared dependency checker, schema generator and privacy audit
   schemas/taskrunner-job.schema.json
-  docs/                        Full user guide and architecture
-  .github/                     Issue forms and example main protection configuration
+  docs/                        Full user guide and system architecture
+  .github/                     Issue forms and example main-branch protection ruleset
   BUILD_WINDOWS.cmd            Windows standalone-directory EXE build
   CHECK_DEPENDENCIES.cmd       Install/check reusable Python dependencies
   RUN_FROM_SOURCE.cmd          Launch the Windows GUI from source
@@ -118,7 +91,7 @@ taskrunner/
   LICENSING.md                 Copyright and license status
 ```
 
-## Test it locally
+## Quality gates
 
 Run locally, with no GitHub Actions or paid hosted runners:
 
@@ -134,7 +107,7 @@ Workflow export JSON structure is documented in [`schemas/taskrunner-job.schema.
 
 **No GitHub Actions workflows are included.** Builds and acceptance tests are local. Dependency changes and Windows releases require explicit local review.
 
-## Documentation and public-release policy
+## Documentation and release governance
 
 - [Full action and workflow guide](docs/USER_GUIDE.md) — complete existing feature documentation, preserved from the prior package.
 - [Security policy](SECURITY.md) — local trust boundaries and private vulnerability reporting.

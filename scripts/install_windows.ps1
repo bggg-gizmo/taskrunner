@@ -15,6 +15,7 @@ $staging = Join-Path $parent ('TaskRunner.install.'+[guid]::NewGuid().ToString('
 $old = Join-Path $parent ('TaskRunner.previous.'+[guid]::NewGuid().ToString('N'))
 New-Item -ItemType Directory -Path $staging -Force | Out-Null
 $committed = $false
+$activated = $false
 try {
     Get-ChildItem -LiteralPath $src -Force | Copy-Item -Destination $staging -Recurse -Force -ErrorAction Stop
     if (-not (Test-Path (Join-Path $staging 'TaskRunner.exe'))) { throw 'Staging missing executable' }
@@ -22,7 +23,7 @@ try {
     Copy-Item (Join-Path $root 'UNINSTALL_WINDOWS.cmd') (Join-Path $staging 'UNINSTALL_WINDOWS.cmd') -Force
     if (Test-Path $install) { Move-Item -LiteralPath $install -Destination $old }
     Move-Item -LiteralPath $staging -Destination $install
-    $committed = $true
+    $activated = $true
     $menu = Join-Path $env:APPDATA 'Microsoft\Windows\Start Menu\Programs\Task Runner'
     New-Item -ItemType Directory -Path $menu -Force | Out-Null
     $shell = New-Object -ComObject WScript.Shell
@@ -38,19 +39,27 @@ try {
     $key='HKCU:\Software\Microsoft\Windows\CurrentVersion\Uninstall\BackgroundGremlinGroup.TaskRunner'
     New-Item -Path $key -Force | Out-Null
     New-ItemProperty -Path $key -Name DisplayName -Value 'Task Runner' -PropertyType String -Force | Out-Null
-    New-ItemProperty -Path $key -Name DisplayVersion -Value '1.4.0' -PropertyType String -Force | Out-Null
+    New-ItemProperty -Path $key -Name DisplayVersion -Value '1.5.1' -PropertyType String -Force | Out-Null
     New-ItemProperty -Path $key -Name Publisher -Value 'Background Gremlin Group' -PropertyType String -Force | Out-Null
     New-ItemProperty -Path $key -Name InstallLocation -Value $install -PropertyType String -Force | Out-Null
     New-ItemProperty -Path $key -Name DisplayIcon -Value (Join-Path $install 'TaskRunner.exe') -PropertyType String -Force | Out-Null
     New-ItemProperty -Path $key -Name UninstallString -Value ('"'+(Join-Path $install 'UNINSTALL_WINDOWS.cmd')+'"') -PropertyType String -Force | Out-Null
     New-ItemProperty -Path $key -Name NoModify -Value 1 -PropertyType DWord -Force | Out-Null
     New-ItemProperty -Path $key -Name NoRepair -Value 1 -PropertyType DWord -Force | Out-Null
+    # Only discard the previous installation after all shortcuts and registry
+    # registration finish. A failed upgrade must not destroy the prior EXE.
+    $committed = $true
     Write-Host "SUCCESS: Task Runner installed at $install"
     Write-Host 'Start Menu shortcut and Windows Apps uninstall entry registered.'
     Write-Host 'Local workflows, shared Python packages, and Playwright cache were not modified.'
 } catch {
-    if (-not $committed -and (Test-Path $old) -and -not (Test-Path $install)) {
-        Move-Item -LiteralPath $old -Destination $install
+    if (-not $committed) {
+        if ($activated -and (Test-Path -LiteralPath $install)) {
+            Remove-Item -LiteralPath $install -Recurse -Force -ErrorAction Stop
+        }
+        if ((Test-Path -LiteralPath $old) -and -not (Test-Path -LiteralPath $install)) {
+            Move-Item -LiteralPath $old -Destination $install -ErrorAction Stop
+        }
     }
     throw
 } finally {

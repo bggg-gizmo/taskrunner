@@ -14,3 +14,4 @@ opencv-python-headless>=4.10,<5
 pynput>=1.7.7,<2
 rapidocr>=3.10.0,<4
 onnxruntime>=1.22,<2
+psutil>=5.9,<8

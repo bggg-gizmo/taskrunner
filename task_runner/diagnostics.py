@@ -13,7 +13,7 @@ from .paths import asset_path,setup_browser_path
 
 
 def run_diagnostics(report_path: str | Path) -> bool:
-    report={"application":"Task Runner","version":"1.4.0","developer":"Background Gremlin Group","test_started_utc":datetime.now(timezone.utc).isoformat(),
+    report={"application":"Task Runner","version":"1.5.1","developer":"Background Gremlin Group","test_started_utc":datetime.now(timezone.utc).isoformat(),
             "python":sys.version,"platform":platform.platform(),
             "frozen":bool(getattr(sys,"frozen",False)),"checks":[]}
 
@@ -28,7 +28,7 @@ def run_diagnostics(report_path: str | Path) -> bool:
 
     def dependencies():
         for package in ("PySide6","playwright","bs4","lxml","croniter","tzlocal",
-                        "mss","PIL","pyautogui","pywinauto","pyperclip","cv2","rapidocr","onnxruntime"):
+                        "mss","PIL","pyautogui","pywinauto","pyperclip","cv2","rapidocr","onnxruntime","psutil"):
             importlib.import_module(package)
 
     def local_ocr():
@@ -39,6 +39,12 @@ def run_diagnostics(report_path: str | Path) -> bool:
         # package data in the frozen EXE, regardless of recognized text.
         detected=read_region(image=Image.new('RGB',(128,64),'white'))
         assert isinstance(detected,str)
+
+    def resource_monitor():
+        from .resources import sample_resources
+        report=sample_resources(os.getpid())
+        assert report.pid==os.getpid() and report.process_ram_mb>0
+        assert report.total_ram_mb>=report.available_ram_mb>0
 
     def assets():
         from PIL import Image
@@ -98,6 +104,7 @@ def run_diagnostics(report_path: str | Path) -> bool:
     check("All runtime Python modules can import",dependencies)
     check("Icon and all seven audio assets",assets)
     check("Offline OCR models bundled and initialized",local_ocr)
+    check("Resource Monitor RAM/process telemetry",resource_monitor)
     check("Time-zone-aware cron engine",scheduling)
     check("SQLite save, claim, execute, verify and persistence",workflow)
     check("Playwright bundled Chromium headless startup",browser)

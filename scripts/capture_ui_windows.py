@@ -31,7 +31,7 @@ def main():
         app.processEvents()
         # Capture actual window pixels; hide the desktop beneath it.
         for index,name in ((0,'01-dashboard'),(1,'02-playback-debugger'),
-                           (2,'03-settings-vault'),(3,'04-output-gallery')):
+                           (2,'03-settings-vault'),(3,'04-output-gallery'),(4,'05-resource-monitor')):
             main.set_page(index)
             app.processEvents()
             path=directory/f'{name}.png'
@@ -42,12 +42,12 @@ def main():
         wizard.resize(1120,900)
         wizard.show()
         app.processEvents()
-        path=directory/'05-task-wizard.png'
+        path=directory/'06-task-wizard.png'
         if not wizard.grab().save(str(path),'PNG'):
             raise RuntimeError(f'Qt screenshot failed: {path}')
         print(path)
         wizard.close();main.close()
         app.quit()
-    print("Captured actual v1.4 PySide6 widgets without accessing saved workflows.")
+    print("Captured actual v1.5 PySide6 widgets without accessing saved workflows.")
 
 if __name__=='__main__':main()

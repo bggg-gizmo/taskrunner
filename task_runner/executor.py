@@ -31,6 +31,9 @@ class WorkflowEngine:
         self.browser = None
         self.page = None
         self.live_capture = None
+        self.memory_watch = None
+        self.owned_processes: dict[int, tuple[int, float]] = {}
+        self.execution_id = None
 
     def expand(self, value):
         if not isinstance(value,str):
@@ -43,6 +46,8 @@ class WorkflowEngine:
         return INTERPOLATE.sub(repl,value)
 
     def abort_if_requested(self):
+        if self.memory_watch is not None and self.memory_watch.cancel_reason:
+            raise Cancelled(self.memory_watch.cancel_reason)
         if self.should_stop():
             raise Cancelled("Execution cancelled by operator")
 
@@ -75,7 +80,68 @@ class WorkflowEngine:
             raise ValueError(f"Unknown action: {kind}")
         p={k:self.expand(v) for k,v in step.get("params",{}).items()}
         self.abort_if_requested()
-        if kind=='wait_ocr':
+        if kind == 'memory_snapshot':
+            from .resources import sample_resources
+            pid = int(p.get('pid') or self.vars.get('process_id') or 0)
+            report = sample_resources(pid, include_gpu=bool(p.get('include_gpu',False)))
+            self.vars['memory_process_ram_mb'] = str(report.process_ram_mb)
+            self.vars['memory_system_available_mb'] = str(report.available_ram_mb)
+            self.vars['memory_system_used_percent'] = str(report.system_used_percent)
+            self.vars['memory_gpu_vram_mb'] = (str(report.process_gpu_vram_mb)
+                                                  if report.process_gpu_vram_mb is not None else 'unavailable')
+            if self.execution_id is not None:
+                self.store.event(self.execution_id,'INFO',
+                    f'Resource snapshot PID={pid}: process RAM={report.process_ram_mb:.1f} MiB; '
+                    f'available RAM={report.available_ram_mb:.1f} MiB; '
+                    f'NVIDIA compute VRAM={self.vars["memory_gpu_vram_mb"]}')
+        elif kind == 'memory_watch_start':
+            from .resources import MemoryWatch
+            if self.memory_watch is not None:
+                raise RuntimeError('A resource guard is already active; stop it before starting another')
+            pid = int(p.get('pid') or self.vars.get('process_id') or 0)
+            if pid <= 0:
+                raise ValueError('Resource guard requires a PID (launch a program first or enter a PID)')
+            response = p.get('response','warn')
+            from .resources import process_identity
+            # Snapshot PID identity even for warning-only guards so the
+            # watcher never switches silently to an unrelated recycled PID.
+            observed = process_identity(pid)
+            owned = self.owned_processes.get(pid)
+            if response == 'terminate_owned':
+                if owned is None:
+                    raise ValueError('Cannot terminate arbitrary processes: PID must have been launched by this workflow')
+                if abs(observed[1]-owned[1])>0.01:
+                    raise RuntimeError('Owned PID creation time changed (PID reuse); refusing resource guard termination')
+            def record(level,message):
+                if self.execution_id is not None:
+                    self.store.event(self.execution_id,level,message)
+                self.on_event('resource',0,{'level':level,'message':message})
+            watch = MemoryWatch(pid, process_ram_limit_mb=float(p.get('process_ram_limit_mb',0)),
+                minimum_available_ram_mb=float(p.get('minimum_available_ram_mb',0)),
+                process_gpu_vram_limit_mb=float(p.get('process_gpu_vram_limit_mb',0)),
+                interval=float(p.get('interval',2)),response=response,owned_identity=owned,
+                on_event=record, observed_identity=observed)
+            self.memory_watch = watch.start()
+            self.vars['memory_guard_pid'] = str(pid)
+            self.abort_if_requested()
+        elif kind == 'memory_watch_stop':
+            if self.memory_watch is None:
+                raise RuntimeError('No resource guard is running')
+            # Do not swallow a cancellation that arrived after the initial
+            # abort check but while the watcher was stopping/joining.
+            watch = self.memory_watch
+            report = watch.stop()
+            stop_reason = watch.cancel_reason
+            self.memory_watch = None
+            self.vars['memory_peak_process_mb'] = str(report['peak_process_mb'])
+            self.vars['memory_sample_count'] = str(report['samples'])
+            if self.execution_id is not None:
+                self.store.event(self.execution_id,'INFO',
+                    f'Resource guard stopped: {report["samples"]} samples, '
+                    f'peak process RAM {report["peak_process_mb"]:.1f} MiB')
+            if stop_reason:
+                raise Cancelled(stop_reason)
+        elif kind=='wait_ocr':
             from .ocr import read_region,stable_text_condition
             result=stable_text_condition(
                 lambda:read_region(p.get('region',''),float(p.get('confidence',.45))),
@@ -337,6 +403,15 @@ class WorkflowEngine:
                 cmd=[p["path"]] + shlex.split(arguments)
             proc=subprocess.Popen(cmd,cwd=p.get("cwd") or None)
             self.vars["process_id"]=str(proc.pid)
+            try:
+                from .resources import process_identity
+                self.owned_processes[proc.pid]=process_identity(proc.pid)
+            except Exception as error:
+                # Launch remains functional if the OS denies process inspection.
+                # Only optional owned-process termination is unavailable.
+                if self.execution_id is not None:
+                    self.store.event(self.execution_id, 'WARNING',
+                        f'Cannot track launched process ownership for PID {proc.pid}: {error}')
             if p.get("wait_for_exit",False):
                 while proc.poll() is None:
                     # Waiting for a GUI program must remain cancellable.
@@ -487,6 +562,17 @@ class WorkflowEngine:
             self.sleep(.3)
 
     def cleanup(self):
+        watch=getattr(self,'memory_watch',None)
+        if watch is not None:
+            try:
+                summary=watch.stop()
+                if self.execution_id is not None:
+                    self.store.event(self.execution_id,'INFO',
+                        f'Resource guard cleanup: {summary["samples"]} samples; '
+                        f'peak RAM {summary["peak_process_mb"]:.1f} MiB')
+            except Exception:
+                pass
+            self.memory_watch=None
         monitor=getattr(self,"live_capture",None)
         if monitor is not None:
             try:
@@ -508,6 +594,7 @@ class WorkflowEngine:
         self.browser=self.browser_manager=self.page=None
 
     def execute(self, job_id: int, execution_id: int):
+        self.execution_id=execution_id
         job=self.store.get_job(job_id)
         if job is None:
             self.store.finish(job_id,execution_id,"failed","Job was deleted before execution")

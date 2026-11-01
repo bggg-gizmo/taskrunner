@@ -1,0 +1,24 @@
+name: Feature request
+description: Suggest an addition without removing existing capabilities
+title: "Feature: "
+labels: [enhancement]
+body:
+  - type: textarea
+    id: scenario
+    attributes:
+      label: Workflow scenario
+      description: Describe what you are trying to automate and the result you need
+    validations:
+      required: true
+  - type: textarea
+    id: behavior
+    attributes:
+      label: Desired behavior
+      description: Include UI controls, action parameters, timing and verification if relevant
+    validations:
+      required: true
+  - type: textarea
+    id: compatibility
+    attributes:
+      label: Compatibility considerations
+      description: Which current Task Runner workflows or features must be preserved?

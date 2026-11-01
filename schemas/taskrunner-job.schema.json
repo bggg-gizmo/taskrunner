@@ -75,6 +75,179 @@
                 ],
                 "properties": {
                   "type": {
+                    "const": "memory_snapshot"
+                  },
+                  "params": {
+                    "type": "object",
+                    "properties": {
+                      "pid": {
+                        "type": "string",
+                        "title": "PID (blank = last launched process; 0 = system only)",
+                        "default": ""
+                      },
+                      "include_gpu": {
+                        "type": "boolean",
+                        "title": "Check NVIDIA compute VRAM (optional)",
+                        "default": false
+                      }
+                    },
+                    "required": [],
+                    "additionalProperties": true
+                  },
+                  "verify": {
+                    "$ref": "#/$defs/verification"
+                  },
+                  "retry_count": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 100
+                  },
+                  "retry_delay": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 3600
+                  },
+                  "delay_before": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 3600
+                  },
+                  "delay_after": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 3600
+                  }
+                },
+                "additionalProperties": true
+              },
+              {
+                "type": "object",
+                "required": [
+                  "type",
+                  "params"
+                ],
+                "properties": {
+                  "type": {
+                    "const": "memory_watch_start"
+                  },
+                  "params": {
+                    "type": "object",
+                    "properties": {
+                      "pid": {
+                        "type": "string",
+                        "title": "PID (blank = last launched program)",
+                        "default": ""
+                      },
+                      "process_ram_limit_mb": {
+                        "type": "number",
+                        "title": "Process tree RAM limit MiB (0 = off)",
+                        "default": 0.0
+                      },
+                      "minimum_available_ram_mb": {
+                        "type": "number",
+                        "title": "Minimum free system RAM MiB (0 = off)",
+                        "default": 0.0
+                      },
+                      "process_gpu_vram_limit_mb": {
+                        "type": "number",
+                        "title": "NVIDIA compute VRAM limit MiB (0 = off)",
+                        "default": 0.0
+                      },
+                      "interval": {
+                        "type": "number",
+                        "title": "Polling every (seconds)",
+                        "default": 2.0
+                      },
+                      "response": {
+                        "type": "string",
+                        "title": "Threshold response",
+                        "default": "warn",
+                        "enum": [
+                          "warn",
+                          "cancel_workflow",
+                          "terminate_owned"
+                        ]
+                      }
+                    },
+                    "required": [],
+                    "additionalProperties": true
+                  },
+                  "verify": {
+                    "$ref": "#/$defs/verification"
+                  },
+                  "retry_count": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 100
+                  },
+                  "retry_delay": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 3600
+                  },
+                  "delay_before": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 3600
+                  },
+                  "delay_after": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 3600
+                  }
+                },
+                "additionalProperties": true
+              },
+              {
+                "type": "object",
+                "required": [
+                  "type",
+                  "params"
+                ],
+                "properties": {
+                  "type": {
+                    "const": "memory_watch_stop"
+                  },
+                  "params": {
+                    "type": "object",
+                    "properties": {},
+                    "required": [],
+                    "additionalProperties": true
+                  },
+                  "verify": {
+                    "$ref": "#/$defs/verification"
+                  },
+                  "retry_count": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 100
+                  },
+                  "retry_delay": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 3600
+                  },
+                  "delay_before": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 3600
+                  },
+                  "delay_after": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 3600
+                  }
+                },
+                "additionalProperties": true
+              },
+              {
+                "type": "object",
+                "required": [
+                  "type",
+                  "params"
+                ],
+                "properties": {
+                  "type": {
                     "const": "click_image"
                   },
                   "params": {

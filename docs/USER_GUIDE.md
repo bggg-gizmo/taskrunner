@@ -2,7 +2,7 @@
 
 **Developed by the Background Gremlin Group — Creating Unique Tools for Unique Individuals.**
 
-**Task Runner 1.2.1** — a native Windows desktop automation controller. Visual screenshot targeting, ordered workflows with nested conditions and bounded loops, cron/interval/date schedules, browser automation, HTML retrieval and parsing, file operations, per-step verification and retry, execution history, optional retro-vaporwave UI audio, and a custom application icon.
+**Task Runner 1.5.1** — a native Windows desktop automation controller. Visual screenshot targeting, ordered workflows with nested conditions and bounded loops, cron/interval/date schedules, browser automation, HTML retrieval and parsing, file operations, per-step verification and retry, execution history, optional retro-vaporwave UI audio, and a custom application icon.
 
 ## Windows executable build
 
@@ -82,7 +82,7 @@ After PyInstaller builds the EXE, `BUILD_WINDOWS.cmd` executes `dist\TaskRunner\
 
 ## Build and validation status
 
-As of the current source audit, **61 offline tests pass and 3 timezone/cron tests are skipped** because `croniter`/`tzlocal` cannot be installed in the offline authoring environment. The build script installs those libraries and runs the **complete suite on Windows**; the post-build self-test additionally verifies browser and asset packaging. A Windows `.exe` requires a **Windows** Python/PyInstaller build. All Windows-specific interaction and native GUI behaviors require testing on an actual Windows desktop. After building, run a harmless test job such as `Write text file → Verify file exists` before enabling scheduled desktop clicks or shutdown commands.
+For the v1.5.1 local source release, **139 automated tests pass and 3 are skipped** on the Linux authoring environment. Native Windows behavior still requires acceptance testing. The build script installs those libraries and runs the **complete suite on Windows**; the post-build self-test additionally verifies browser and asset packaging. A Windows `.exe` requires a **Windows** Python/PyInstaller build. All Windows-specific interaction and native GUI behaviors require testing on an actual Windows desktop. After building, run a harmless test job such as `Write text file → Verify file exists` before enabling scheduled desktop clicks or shutdown commands.
 
 ## Version 1.2 — expanding controls, scrolling capture and precise waits
 
@@ -177,3 +177,9 @@ The Dashboard's **Export package** button creates a ZIP-format `.trpkg` containi
 Every successful verified step saves a new checkpoint. Choose a failed or cancelled execution in **Execution Logs → Resume failed run…** and review the confirmation. Task Runner refuses continuation if the job changed, if the workflow uses unsupported branching or module expansion, or if a prior action left volatile browser, variable or capture state that cannot be safely reconstructed. It starts a **new execution** at the first unfinished step and never silently replays earlier successful steps. An action that failed might have partially changed an external program before it returned an error, so review your program's state before confirming continuation.
 
 For actual Windows UI screenshots, execute `CAPTURE_UI_WINDOWS.cmd` from the extracted source directory. It launches the real PySide6 screens against a temporary isolated task database and saves screenshots under `ui-shots/`. This avoids misrepresenting designed mockups as real runtime captures.
+
+## Resource Monitor and memory guards (v1.5.1)
+
+Open **Resource Monitor** in the sidebar to check live system RAM and a selected PID's process-tree RSS. Use **Check NVIDIA GPU VRAM** for optional driver-reported GPU metrics; missing data is shown as unavailable. In a task, use **Launch a program**, then **Start RAM / VRAM guard** (leave PID blank to monitor the launched PID), then the workflow steps, then **Stop RAM / VRAM guard**.
+
+Thresholds use MiB. The default `warn` response only records events. `cancel_workflow` cancels Task Runner actions but does not kill an external process. `terminate_owned` is explicitly selected and accepted only for a process launched by the same workflow; it validates PID creation time before termination. No files or unrelated processes are cleaned automatically. GPU monitoring uses NVIDIA compute allocation query only, not all possible GPU consumers.

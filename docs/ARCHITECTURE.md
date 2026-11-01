@@ -29,7 +29,7 @@ Workflows are user-authored automation with the signed-in account's access, not 
 
 ## Known Windows limitations
 
-Native application accessibility varies by program; UIA text/dropdown extraction may fail if the application does not expose controls. Windows desktop automation cannot operate against UAC secure desktops or locked sessions. A compiling executable does not prove that mouse coordinates, monitor DPI, focus, task scheduling or clipboard access work correctly. `WINDOWS_ACCEPTANCE.md` is the on-device certification checklist.
+Native application accessibility varies by program; UIA text/dropdown extraction may fail if the application does not expose controls. Windows desktop automation cannot operate against UAC secure desktops or locked sessions. A compiling executable does not prove that mouse coordinates, monitor DPI, focus, task scheduling or clipboard access work correctly. [`docs/V1.5_WINDOWS_ACCEPTANCE.md`](V1.5_WINDOWS_ACCEPTANCE.md) is the on-device certification checklist.
 
 ## 1.4 local intelligence and control-plane additions
 

@@ -4,30 +4,30 @@
 
 # TASK RUNNER
 
-### RECORD · REPLAY · OBSERVE · CAPTURE · DEBUG · RECOVER
+### RECORD · REPLAY · OBSERVE · CAPTURE · DEBUG · RECOVER · MONITOR
 
 **Visual desktop automation and workflow scheduling for Windows.**
 
-[![Version 1.4.0](https://img.shields.io/badge/Release-v1.4.0-b45cff?style=for-the-badge)](V1.4_RELEASE_NOTES.md)
+[![Version 1.5.1](https://img.shields.io/badge/Release-v1.5.1-b45cff?style=for-the-badge)](V1.5.1_RELEASE_NOTES.md)
 [![Windows 10 and 11](https://img.shields.io/badge/Windows-10%20%7C%2011-00c5f8?style=for-the-badge&logo=windows&logoColor=white)](#windows-quick-start)
 [![Python 3.11–3.13](https://img.shields.io/badge/Python-3.11%20to%203.13-4169e1?style=for-the-badge&logo=python&logoColor=white)](requirements.txt)
 
 [![PySide6](https://img.shields.io/badge/UI-PySide6%20%2F%20Qt-ff5fb7?style=flat-square)](#the-visual-identity)
 [![Playwright](https://img.shields.io/badge/Browser-Playwright-32c48d?style=flat-square)](#what-you-can-do)
 [![Local first](https://img.shields.io/badge/Privacy-Local--first-8556e9?style=flat-square)](SECURITY.md)
-[![Local tests](https://img.shields.io/badge/Source%20tests-110%20passing-27ae60?style=flat-square)](#quality-gates)
+[![Local tests](https://img.shields.io/badge/Source%20tests-139%20passing-27ae60?style=flat-square)](#quality-gates)
 
 **Background Gremlin Group**  
 *Creating Unique Tools for Unique Individuals*
 
-[Explore features](#what-you-can-do) · [Build on Windows](#windows-quick-start) · [Action guide](docs/USER_GUIDE.md) · [v1.4 release notes](V1.4_RELEASE_NOTES.md) · [Previous releases](old%20builds/README.md)
+[Explore features](#what-you-can-do) · [Build on Windows](#windows-quick-start) · [Action guide](docs/USER_GUIDE.md) · [v1.5.1 release notes](V1.5.1_RELEASE_NOTES.md) · [Previous releases](old%20builds/README.md)
 
 </div>
 
 ---
 
 > [!IMPORTANT]
-> **Version 1.4.0 — Windows source release.** Build from source on Windows 10/11. New desktop-recording, debugging, OCR, and installer paths require hands-on Windows verification before a prebuilt executable is offered.
+> **Version 1.5.1 — Windows source release.** Build from source on Windows 10/11. New desktop-recording, debugging, OCR, and installer paths require hands-on Windows verification before a prebuilt executable is offered.
 
 ```mermaid
 flowchart LR
@@ -43,7 +43,23 @@ Task Runner is a native Windows application for composing, scheduling, monitorin
 
 The interface takes inspiration from vaporwave aesthetics and classic Windows desktop software. Seven original short retro interface sounds—selection, execution, saving, completion, failure, startup, and exit—can be switched off in Settings without affecting workflows.
 
-**Current release:** v1.4.0 source with a local Windows build system. Native Windows verification of the new features is pending; a signed or acceptance-tested executable is not yet advertised.
+**Current release:** v1.5.1 source with a local Windows build system. Native Windows verification of the new features is pending; a signed or acceptance-tested executable is not yet advertised.
+
+## New in Task Runner 1.5.1
+
+**More reliable OOM monitoring:** Resource guards now recognize PID reuse across all policies, so a newly started application cannot silently inherit another process's watch. Explicit guard shutdowns cannot lose a late cancellation or initiate new termination after a slow metric read completes. Warning-only remains the default; user files are never deleted by this feature.
+
+**Safer Windows upgrades:** If application registration fails during installation, the installer attempts to restore the previous installed build before reporting the error. The same original application UI, tasks, scheduler, installer/uninstaller, sounds and prior source archives remain available.
+
+[Read the v1.5.1 release notes](V1.5.1_RELEASE_NOTES.md) · [Complete changelog](CHANGELOG.md)
+
+## New in Task Runner 1.5
+
+**Resource Monitor / OOM safeguards:** A new read-only Resource Monitor shows available system RAM and memory used by a selected program plus its child processes. A separate GPU check can report NVIDIA total VRAM and compute-process VRAM where the local driver supports it.
+
+Add **Record RAM / VRAM snapshot**, **Start RAM / VRAM guard**, or **Stop RAM / VRAM guard** to an existing workflow. Set process memory ceilings, minimum available system RAM, and optional NVIDIA VRAM ceilings. Warning-only is the default; you can explicitly opt into workflow cancellation or stopping only an executable launched by the same workflow. No cleanup deletes user files or terminates unrelated processes automatically.
+
+[v1.5.0 features and limitations](V1.5_RELEASE_NOTES.md) · [Previous v1.4.0 source](old%20builds/v1.4.0/) · [Public changelog](CHANGELOG.md)
 
 ## New in Task Runner 1.4
 
@@ -66,6 +82,7 @@ Task Runner now has an **interactive playback debugger**. Start **▶ Debug repl
 | **Record & replay** | Record mouse clicks, typing, scrolls, keyboard shortcuts and real waits; stop with Ctrl+Shift+F12 and save as editable workflow steps |
 | **Event-based triggers** | Wait for screen/image appearance or change; detect new text/code/output in windows, browser pages, files and clipboard |
 | **Live output and rendered images** | Record changed desktop regions, clipboard images, new image files, window text and file output as versioned snapshots with a manifest |
+| **Resource Monitor / OOM guards** | Read-only RAM/process inspection, NVIDIA compute VRAM checks, workflow thresholds with warnings, optional cancellation and verified owned-process termination |
 | **More accurate targeting** | Use window-relative/accessible controls from recordings, or click the current position of a matching reference image |
 | **Windows installation & uninstall** | Per-user installed app with Start Menu/Installed Apps entry; uninstall without removing shared dependencies |
 | Reliable action sequencing | Before- and after-action waits, retry delays, optional screen-change/window/file/browser verification |

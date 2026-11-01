@@ -1,0 +1,1005 @@
+{
+  "product": "Task Runner",
+  "version": "1.4.0",
+  "developer": "Background Gremlin Group",
+  "branch": "main",
+  "preserves": "v1.3.0/v1.2.1 public source",
+  "files": {
+    ".editorconfig": {
+      "bytes": 246,
+      "sha256": "804c32fd5bf6a2ce73783964b0e4454a37d4f46ae7ed3bfd04661804b3e218f1"
+    },
+    ".gitattributes": {
+      "bytes": 200,
+      "sha256": "ff1d32042108504846431da1da8bae93d8f8c3142b5298d963c5d28042bc8051"
+    },
+    ".github/ISSUE_TEMPLATE/bug_report.yml": {
+      "bytes": 1883,
+      "sha256": "543ce2de75d0aa13ca6745dba9c041aa3bf2bd971005f34b15175042d77009aa"
+    },
+    ".github/ISSUE_TEMPLATE/config.yml": {
+      "bytes": 328,
+      "sha256": "fab2e3a0c1f246a02130305e6adc3d01d4bdc1b8f14cbc38710c98825c938ea8"
+    },
+    ".github/ISSUE_TEMPLATE/feature_request.yml": {
+      "bytes": 746,
+      "sha256": "0fb8bf3ef8513b08f9de896c1a7fc60050a715909e5ea746fb2320c697f43b7a"
+    },
+    ".github/rulesets/main-branch-protection.json": {
+      "bytes": 352,
+      "sha256": "be521a8a5d2d00e7eac2d5f45d2e78b993e0f0564af060e0552496605ae13b6d"
+    },
+    ".gitignore": {
+      "bytes": 925,
+      "sha256": "a5ea31bf93a546f80b4808569dd0cdd50a0770726967cea960fc830a202151d3"
+    },
+    "BUILD_WINDOWS.cmd": {
+      "bytes": 3304,
+      "sha256": "5fc3b121893e94a594e5e0c03517b76b1fa322fbc045d1bdd777ae27e6bc15a0"
+    },
+    "CAPTURE_UI_WINDOWS.cmd": {
+      "bytes": 396,
+      "sha256": "7fe4da8d03b18cd559d4e2b3f1ff8039b3becbbbc17f0a552267a5a65abae243"
+    },
+    "CHANGELOG.md": {
+      "bytes": 6021,
+      "sha256": "b81a3dae09ceede1886d29e374ae596fb03bc48b98a2725538eb95e7c4a54706"
+    },
+    "CHECK_DEPENDENCIES.cmd": {
+      "bytes": 792,
+      "sha256": "765377b6c82c0da79af799826021430cfcf4e2a034015119c1d530e42c7e628f"
+    },
+    "CONTRIBUTING.md": {
+      "bytes": 2079,
+      "sha256": "ae36546034142c58051e39cbf06773085989b731d687194d673b77e019170bde"
+    },
+    "INSTALL_SCHEDULER.cmd": {
+      "bytes": 493,
+      "sha256": "5b98ead18a40a9ebe24df46a47e1e1c8a867a5428e2ea3aa3b0572d49e5fd606"
+    },
+    "INSTALL_WINDOWS.cmd": {
+      "bytes": 378,
+      "sha256": "da154c976f94a8194b1d330b94203320ee3ddf449d8e646f71921e44d744d45f"
+    },
+    "LICENSING.md": {
+      "bytes": 702,
+      "sha256": "aff5abd8bb27cc3ddf7ee9f27e451b0b8453794b04a9cae4bb0579671b23fd60"
+    },
+    "README.md": {
+      "bytes": 15327,
+      "sha256": "2818329877462f2fbe7dbd10657f0c153cb92ba5db007fbcb565729ce161fc0c"
+    },
+    "REMOVE_SCHEDULER.cmd": {
+      "bytes": 341,
+      "sha256": "01c307191905b7e2cc35fa496db53860f3183c82fa955fe5950a96307efa309f"
+    },
+    "RUN_FROM_SOURCE.cmd": {
+      "bytes": 604,
+      "sha256": "2fe389a57b92ba4c5b69da736eb3989e7d63c6555bb533a8cf3d04bb0c34afa3"
+    },
+    "SECURITY.md": {
+      "bytes": 3043,
+      "sha256": "afd3f23b1beb4edd0b01bb7338779398a02d091a9a72dfe8b28f14d19e4ce7bf"
+    },
+    "UNINSTALL_WINDOWS.cmd": {
+      "bytes": 587,
+      "sha256": "7ad1c1c02302773ae550efd2397e0575f222e358f1a34a0e981f886ceec4eb51"
+    },
+    "V1.2_RELEASE_NOTES.md": {
+      "bytes": 6017,
+      "sha256": "a940f3021c13933ceebc27c63725dfb765e13963be3b152c8e6d50f082153bbf"
+    },
+    "V1.3_RELEASE_NOTES.md": {
+      "bytes": 4597,
+      "sha256": "ab9db2e6bad41263ed5bd1dc0e55b1f455ccbc6fd4d15894f9014a4ee4d50594"
+    },
+    "V1.4_RELEASE_NOTES.md": {
+      "bytes": 6444,
+      "sha256": "5ddce97bd17aa1b39aafbf737e50eb2197c240c5495aedd4b5b88e7bb410b7e2"
+    },
+    "assets/done.wav": {
+      "bytes": 18736,
+      "sha256": "9af807ad33a1d43e8a8495dd6ee3c9d066340762470179cd451089903d4535ad"
+    },
+    "assets/error.wav": {
+      "bytes": 17062,
+      "sha256": "536fcaf2f3b03a7923c709b95edd2b874654293c8f61769e8b8f2c69d4501b78"
+    },
+    "assets/exit.wav": {
+      "bytes": 25622,
+      "sha256": "11be854d79e2ef88086025c676cf3582134d04623c41ca81cb8715f28a5bf007"
+    },
+    "assets/icon-art.png": {
+      "bytes": 88228,
+      "sha256": "3718f2bacccc6b6a8e13cb28151c1f14055df96bb90470c716e5d18044aa346d"
+    },
+    "assets/run.wav": {
+      "bytes": 13442,
+      "sha256": "65eff7fcd62f8c4890b79178ee11283642cc5f1a6f842943165a6d0a53fc44bd"
+    },
+    "assets/save.wav": {
+      "bytes": 11770,
+      "sha256": "9b333c48be29373d2834ebb13debed582b014b03fc1de792267c0fa71bef07e2"
+    },
+    "assets/select.wav": {
+      "bytes": 6258,
+      "sha256": "ca984a7cbef7b527efc6db344b4d42328af5cdd528cd60016deb9af23d18e811"
+    },
+    "assets/startup.wav": {
+      "bytes": 32902,
+      "sha256": "7c0d7c4875c583da04a4a1bd0184c02372fd4bd96ae2be8cbdaadfff30bf88ff"
+    },
+    "assets/task-runner.ico": {
+      "bytes": 157439,
+      "sha256": "79d2f06ef17197abf0ebcc5e608fc042d1e57887fe10b994d526db785a63a1e0"
+    },
+    "assets/task-runner.png": {
+      "bytes": 107038,
+      "sha256": "7166ac0acee88dd880e07b894d3ae25097ae11ee3054d7ac751b1e398befefbb"
+    },
+    "assets/version_info.txt": {
+      "bytes": 965,
+      "sha256": "89241aba3a1512ac506e0559a9c1dca7aa44dc442a7e64a5d00bdb9d1d5c9ecf"
+    },
+    "docs/ARCHITECTURE.md": {
+      "bytes": 5438,
+      "sha256": "f474d0dc6094259ae6a34d434a054b890ceab2305eca2bec892698088904403e"
+    },
+    "docs/USER_GUIDE.md": {
+      "bytes": 31599,
+      "sha256": "698058b6b262cd0d69154da761b1752fed33f1afd47283d09d7f4e216c24e8fb"
+    },
+    "docs/V1.4_WINDOWS_ACCEPTANCE.md": {
+      "bytes": 4764,
+      "sha256": "96358916470a2585510f73effd7d82e28c351cda37bc654950aa4ba4f095aeda"
+    },
+    "launcher.py": {
+      "bytes": 176,
+      "sha256": "abd16802eb09f5e0cf569d17d6b014c7ad322022feef52582e6a05fd560a4eee"
+    },
+    "old builds/README.md": {
+      "bytes": 1061,
+      "sha256": "13dcb661dbe9c8d90ce80e188aae523390a3b83f6d6e37d28bfdd988af98df5b"
+    },
+    "old builds/v1.2.1/.editorconfig": {
+      "bytes": 246,
+      "sha256": "804c32fd5bf6a2ce73783964b0e4454a37d4f46ae7ed3bfd04661804b3e218f1"
+    },
+    "old builds/v1.2.1/.gitattributes": {
+      "bytes": 200,
+      "sha256": "ff1d32042108504846431da1da8bae93d8f8c3142b5298d963c5d28042bc8051"
+    },
+    "old builds/v1.2.1/.github/ISSUE_TEMPLATE/bug_report.yml": {
+      "bytes": 1883,
+      "sha256": "543ce2de75d0aa13ca6745dba9c041aa3bf2bd971005f34b15175042d77009aa"
+    },
+    "old builds/v1.2.1/.github/ISSUE_TEMPLATE/config.yml": {
+      "bytes": 328,
+      "sha256": "fab2e3a0c1f246a02130305e6adc3d01d4bdc1b8f14cbc38710c98825c938ea8"
+    },
+    "old builds/v1.2.1/.github/ISSUE_TEMPLATE/feature_request.yml": {
+      "bytes": 746,
+      "sha256": "0fb8bf3ef8513b08f9de896c1a7fc60050a715909e5ea746fb2320c697f43b7a"
+    },
+    "old builds/v1.2.1/.github/rulesets/main-branch-protection.json": {
+      "bytes": 352,
+      "sha256": "be521a8a5d2d00e7eac2d5f45d2e78b993e0f0564af060e0552496605ae13b6d"
+    },
+    "old builds/v1.2.1/.gitignore": {
+      "bytes": 827,
+      "sha256": "ff18462ed921e87bdefcd45aef878b23e718cf98788159bb3384f0409df3ec86"
+    },
+    "old builds/v1.2.1/BUILD_WINDOWS.cmd": {
+      "bytes": 3141,
+      "sha256": "4ce2bd2996ad12b9edacd28dbf9c7b1eade3b42808f78294073b3b27035f65c4"
+    },
+    "old builds/v1.2.1/CHANGELOG.md": {
+      "bytes": 2223,
+      "sha256": "85f4d856545003bc768a8a991ebd0de73a7fc71a5863e963e48cc34e45e62c9f"
+    },
+    "old builds/v1.2.1/CHECK_DEPENDENCIES.cmd": {
+      "bytes": 792,
+      "sha256": "765377b6c82c0da79af799826021430cfcf4e2a034015119c1d530e42c7e628f"
+    },
+    "old builds/v1.2.1/CONTRIBUTING.md": {
+      "bytes": 2079,
+      "sha256": "ae36546034142c58051e39cbf06773085989b731d687194d673b77e019170bde"
+    },
+    "old builds/v1.2.1/INSTALL_SCHEDULER.cmd": {
+      "bytes": 493,
+      "sha256": "5b98ead18a40a9ebe24df46a47e1e1c8a867a5428e2ea3aa3b0572d49e5fd606"
+    },
+    "old builds/v1.2.1/LICENSING.md": {
+      "bytes": 702,
+      "sha256": "aff5abd8bb27cc3ddf7ee9f27e451b0b8453794b04a9cae4bb0579671b23fd60"
+    },
+    "old builds/v1.2.1/README.md": {
+      "bytes": 10676,
+      "sha256": "e7149d46873969b7340e2869a770629c8ca7f5e1f641aea295e7dae3a835bd63"
+    },
+    "old builds/v1.2.1/REMOVE_SCHEDULER.cmd": {
+      "bytes": 341,
+      "sha256": "01c307191905b7e2cc35fa496db53860f3183c82fa955fe5950a96307efa309f"
+    },
+    "old builds/v1.2.1/RUN_FROM_SOURCE.cmd": {
+      "bytes": 604,
+      "sha256": "2fe389a57b92ba4c5b69da736eb3989e7d63c6555bb533a8cf3d04bb0c34afa3"
+    },
+    "old builds/v1.2.1/SECURITY.md": {
+      "bytes": 3043,
+      "sha256": "afd3f23b1beb4edd0b01bb7338779398a02d091a9a72dfe8b28f14d19e4ce7bf"
+    },
+    "old builds/v1.2.1/V1.2_RELEASE_NOTES.md": {
+      "bytes": 6017,
+      "sha256": "a940f3021c13933ceebc27c63725dfb765e13963be3b152c8e6d50f082153bbf"
+    },
+    "old builds/v1.2.1/assets/done.wav": {
+      "bytes": 18736,
+      "sha256": "9af807ad33a1d43e8a8495dd6ee3c9d066340762470179cd451089903d4535ad"
+    },
+    "old builds/v1.2.1/assets/error.wav": {
+      "bytes": 17062,
+      "sha256": "536fcaf2f3b03a7923c709b95edd2b874654293c8f61769e8b8f2c69d4501b78"
+    },
+    "old builds/v1.2.1/assets/exit.wav": {
+      "bytes": 25622,
+      "sha256": "11be854d79e2ef88086025c676cf3582134d04623c41ca81cb8715f28a5bf007"
+    },
+    "old builds/v1.2.1/assets/icon-art.png": {
+      "bytes": 88228,
+      "sha256": "3718f2bacccc6b6a8e13cb28151c1f14055df96bb90470c716e5d18044aa346d"
+    },
+    "old builds/v1.2.1/assets/run.wav": {
+      "bytes": 13442,
+      "sha256": "65eff7fcd62f8c4890b79178ee11283642cc5f1a6f842943165a6d0a53fc44bd"
+    },
+    "old builds/v1.2.1/assets/save.wav": {
+      "bytes": 11770,
+      "sha256": "9b333c48be29373d2834ebb13debed582b014b03fc1de792267c0fa71bef07e2"
+    },
+    "old builds/v1.2.1/assets/select.wav": {
+      "bytes": 6258,
+      "sha256": "ca984a7cbef7b527efc6db344b4d42328af5cdd528cd60016deb9af23d18e811"
+    },
+    "old builds/v1.2.1/assets/startup.wav": {
+      "bytes": 32902,
+      "sha256": "7c0d7c4875c583da04a4a1bd0184c02372fd4bd96ae2be8cbdaadfff30bf88ff"
+    },
+    "old builds/v1.2.1/assets/task-runner.ico": {
+      "bytes": 157439,
+      "sha256": "79d2f06ef17197abf0ebcc5e608fc042d1e57887fe10b994d526db785a63a1e0"
+    },
+    "old builds/v1.2.1/assets/task-runner.png": {
+      "bytes": 107038,
+      "sha256": "7166ac0acee88dd880e07b894d3ae25097ae11ee3054d7ac751b1e398befefbb"
+    },
+    "old builds/v1.2.1/assets/version_info.txt": {
+      "bytes": 965,
+      "sha256": "27ca8f18141455b03c63c64ee0722dddcdf18a9f911a9e40fe57ec756081c967"
+    },
+    "old builds/v1.2.1/docs/ARCHITECTURE.md": {
+      "bytes": 3409,
+      "sha256": "ae2b4fc05dec11f2a04babc5c3fed87e7b4c38c9a7d4dd7e97a3488a0a86f5ff"
+    },
+    "old builds/v1.2.1/docs/USER_GUIDE.md": {
+      "bytes": 21104,
+      "sha256": "28bde77b4667b218524452fc23d14091f1b974e9db7e71075afb38bec5ccd278"
+    },
+    "old builds/v1.2.1/launcher.py": {
+      "bytes": 176,
+      "sha256": "abd16802eb09f5e0cf569d17d6b014c7ad322022feef52582e6a05fd560a4eee"
+    },
+    "old builds/v1.2.1/repository-metadata.json": {
+      "bytes": 792,
+      "sha256": "9671398dc8c27ac1def48f9df0616a296e42f1a19398a1a2953db853ff317aa2"
+    },
+    "old builds/v1.2.1/requirements-build.txt": {
+      "bytes": 55,
+      "sha256": "aabbfc6336ad32c1cf80defb4bab1a05badb7f285496f056c31e152d42863f04"
+    },
+    "old builds/v1.2.1/requirements.txt": {
+      "bytes": 232,
+      "sha256": "82269ce24f3dbf6d7f225b5577a1fa377d1b8535873d02373b16a1af892ee98c"
+    },
+    "old builds/v1.2.1/schemas/taskrunner-job.schema.json": {
+      "bytes": 102239,
+      "sha256": "89e1d8ebb8ecc5f767f422a9b3933117ed249da783e3329de0152f8d4efe53b9"
+    },
+    "old builds/v1.2.1/scripts/FIND_PYTHON.cmd": {
+      "bytes": 1687,
+      "sha256": "4089ea024ea29a8d9891ee048cc6d8c20051218e3f8d60d2c1853d667b6bcbe6"
+    },
+    "old builds/v1.2.1/scripts/generate_workflow_schema.py": {
+      "bytes": 3523,
+      "sha256": "e93c66437256d3c8f3165cdd5d683154f6a0b0d93e8a726651b8544a018766cc"
+    },
+    "old builds/v1.2.1/scripts/prepublish_audit.py": {
+      "bytes": 3149,
+      "sha256": "fc25274973e3077d8e62f36f8a839292278cf5d8b4f045ef6074fad22355d09c"
+    },
+    "old builds/v1.2.1/scripts/shared_dependencies.py": {
+      "bytes": 9198,
+      "sha256": "4d7b7588568369cac56476d2507ce1557b6cce3e02f480c8199d4bc0a831dc3b"
+    },
+    "old builds/v1.2.1/task_runner/__init__.py": {
+      "bytes": 110,
+      "sha256": "7445c31cab64041302cdbc369483ae0ab4fac23242d4534f60c544a0f78cd7df"
+    },
+    "old builds/v1.2.1/task_runner/__main__.py": {
+      "bytes": 2344,
+      "sha256": "4ff2cf2bb5dc9c54c7d63e1fdf755c6657a719333fe31ef785bcd4abc3e79dff"
+    },
+    "old builds/v1.2.1/task_runner/actions.py": {
+      "bytes": 14962,
+      "sha256": "26347b48738eb27c435e387afb065bb71332967c1681ac1f60aaa53a661922d6"
+    },
+    "old builds/v1.2.1/task_runner/capture.py": {
+      "bytes": 5497,
+      "sha256": "c829d81205170c83f0963e9cf077a219a99bce8d9470bd10f8f3a737efb0d176"
+    },
+    "old builds/v1.2.1/task_runner/collection.py": {
+      "bytes": 11560,
+      "sha256": "b220630a2655e102b25c5a72230c9a7576347925e75d6b68bd935a7c4ee2e846"
+    },
+    "old builds/v1.2.1/task_runner/diagnostics.py": {
+      "bytes": 4823,
+      "sha256": "1befb25e94aaf83848bc507273647472a21d85b5089d7f83077e85287a260eb3"
+    },
+    "old builds/v1.2.1/task_runner/executor.py": {
+      "bytes": 26002,
+      "sha256": "618d9477faf5dda7926a488897c4ff5025d02282ecfadfc55e24a1c41a76c22e"
+    },
+    "old builds/v1.2.1/task_runner/fileops.py": {
+      "bytes": 2334,
+      "sha256": "57b3f45ba96ab3d742386535d7a488a9f9e02f80fd28c13e3cd45d4296821974"
+    },
+    "old builds/v1.2.1/task_runner/flow.py": {
+      "bytes": 7963,
+      "sha256": "2cddc0110963bdbdf19945f9a315097f01d1029650afe0480f1f8e6d30a9c816"
+    },
+    "old builds/v1.2.1/task_runner/gui.py": {
+      "bytes": 53503,
+      "sha256": "6530edc097b697c1b20f9cad3bd43cb6547ab40fd572841850a9f845cd50ba68"
+    },
+    "old builds/v1.2.1/task_runner/paths.py": {
+      "bytes": 1040,
+      "sha256": "8f1e5631aba858f16643e9e6be12bab4249a4a3ad1952aa4cda85aeae89a68f0"
+    },
+    "old builds/v1.2.1/task_runner/runner.py": {
+      "bytes": 5184,
+      "sha256": "270fd616beac8b3694b47888e8b10fefeef5007219a7b78123e08dc4da344304"
+    },
+    "old builds/v1.2.1/task_runner/scheduling.py": {
+      "bytes": 2587,
+      "sha256": "0a9b46491d6e15828808fc483afb55e94607807dea8fb2a0bd5c148c6fc645cd"
+    },
+    "old builds/v1.2.1/task_runner/sounds.py": {
+      "bytes": 1272,
+      "sha256": "5c57298364b62f6dd86c0f961a956f88957a62370aa84f488dda5fb1384a781a"
+    },
+    "old builds/v1.2.1/task_runner/store.py": {
+      "bytes": 13308,
+      "sha256": "086fe368a3fe2dc3c268a93eff773bc22747d2e0bd4e008cf12ae09737104ddc"
+    },
+    "old builds/v1.2.1/task_runner/style.py": {
+      "bytes": 2086,
+      "sha256": "e5e791784f71666a2152140d0a03becf68a73c27158b0894668e058e6f58fe4d"
+    },
+    "old builds/v1.2.1/task_runner/visual_verification.py": {
+      "bytes": 2087,
+      "sha256": "a3581f0152a8f7adbde6a19dd6decaca08c25af577c7569d74439f4e9fd46947"
+    },
+    "old builds/v1.2.1/task_runner/wininput.py": {
+      "bytes": 3883,
+      "sha256": "49931033a4d97fe3ba67481b48b687cfec34003da23be7f449b2fd1eb7fb60c9"
+    },
+    "old builds/v1.2.1/task_runner/winmouse.py": {
+      "bytes": 2970,
+      "sha256": "690afa7b821bf0e4859930606e1f0e19bcd6c5c59aafb5eb8292f61cd7e19e1d"
+    },
+    "old builds/v1.2.1/tests/test_backup_and_race.py": {
+      "bytes": 1864,
+      "sha256": "8e3e0f8992ba1b3bac8f153b915cce57603d3786b6047beacdfa463d20bee428"
+    },
+    "old builds/v1.2.1/tests/test_executor.py": {
+      "bytes": 2151,
+      "sha256": "4f407b61e3aba157e8e3b4558ec44371a5347715835b2aa7deaadf78f03ef2c0"
+    },
+    "old builds/v1.2.1/tests/test_fileops_safety.py": {
+      "bytes": 2635,
+      "sha256": "e668d2c6822550812218a5e95391ea61b273cfd0ff3105cf5c600ebb7a1c0c9c"
+    },
+    "old builds/v1.2.1/tests/test_flow.py": {
+      "bytes": 5630,
+      "sha256": "c6032b15536a03c6670c96efd53941f7a1074fc43146b1cbd5733f68026d17bb"
+    },
+    "old builds/v1.2.1/tests/test_repo_readiness.py": {
+      "bytes": 2684,
+      "sha256": "7fd60fb1e6f0045780ba102f88811a6431714449ff941d73c95886547e3d02bd"
+    },
+    "old builds/v1.2.1/tests/test_runtime.py": {
+      "bytes": 4709,
+      "sha256": "4e815c6fbc0bcd79a7758f500a232f34539e6efca43a81f294c6bd36a783d85d"
+    },
+    "old builds/v1.2.1/tests/test_scheduling.py": {
+      "bytes": 1307,
+      "sha256": "7510abd5b50a14e28589ad504cb998ec424ae80c432e31ebc378f3bffeea8f0c"
+    },
+    "old builds/v1.2.1/tests/test_shared_dependencies.py": {
+      "bytes": 2960,
+      "sha256": "15c360f837098390a3380e2f3882b4cc80a92c58760f2ad44c8e6bcfa97cb6a1"
+    },
+    "old builds/v1.2.1/tests/test_store.py": {
+      "bytes": 2632,
+      "sha256": "c2b741519fdd837bf4b78957d58c5736c939b67710b991eae0a5000cccaa641b"
+    },
+    "old builds/v1.2.1/tests/test_v12.py": {
+      "bytes": 6620,
+      "sha256": "bfa6feeca0660b3529901daf596a809891991f935c9c54a724a89bbcb07eee48"
+    },
+    "old builds/v1.2.1/tests/test_v12_reliability.py": {
+      "bytes": 5158,
+      "sha256": "acac3eb7c3ee50660398cc27dcdd6305a99d9e25199ca3d4639399c846dfcae1"
+    },
+    "old builds/v1.2.1/tests/test_windows_launcher_config.py": {
+      "bytes": 1590,
+      "sha256": "f484db999d98f554a82f588e506be0e29fe021e5c67024ddb894bba4547dc5dd"
+    },
+    "old builds/v1.3.0/.editorconfig": {
+      "bytes": 246,
+      "sha256": "804c32fd5bf6a2ce73783964b0e4454a37d4f46ae7ed3bfd04661804b3e218f1"
+    },
+    "old builds/v1.3.0/.gitattributes": {
+      "bytes": 200,
+      "sha256": "ff1d32042108504846431da1da8bae93d8f8c3142b5298d963c5d28042bc8051"
+    },
+    "old builds/v1.3.0/.github/ISSUE_TEMPLATE/bug_report.yml": {
+      "bytes": 1883,
+      "sha256": "543ce2de75d0aa13ca6745dba9c041aa3bf2bd971005f34b15175042d77009aa"
+    },
+    "old builds/v1.3.0/.github/ISSUE_TEMPLATE/config.yml": {
+      "bytes": 328,
+      "sha256": "fab2e3a0c1f246a02130305e6adc3d01d4bdc1b8f14cbc38710c98825c938ea8"
+    },
+    "old builds/v1.3.0/.github/ISSUE_TEMPLATE/feature_request.yml": {
+      "bytes": 746,
+      "sha256": "0fb8bf3ef8513b08f9de896c1a7fc60050a715909e5ea746fb2320c697f43b7a"
+    },
+    "old builds/v1.3.0/.github/rulesets/main-branch-protection.json": {
+      "bytes": 352,
+      "sha256": "be521a8a5d2d00e7eac2d5f45d2e78b993e0f0564af060e0552496605ae13b6d"
+    },
+    "old builds/v1.3.0/.gitignore": {
+      "bytes": 827,
+      "sha256": "ff18462ed921e87bdefcd45aef878b23e718cf98788159bb3384f0409df3ec86"
+    },
+    "old builds/v1.3.0/BUILD_WINDOWS.cmd": {
+      "bytes": 3255,
+      "sha256": "4897b15a905f0c4e79210a24ada15f9760b18bea18b02329aa83a0dd6859a373"
+    },
+    "old builds/v1.3.0/CHANGELOG.md": {
+      "bytes": 3750,
+      "sha256": "82efb030787aeb64e2002f2693efd8fd4ef5ae8f6d6e8fa4353ca512f8d00c48"
+    },
+    "old builds/v1.3.0/CHECK_DEPENDENCIES.cmd": {
+      "bytes": 792,
+      "sha256": "765377b6c82c0da79af799826021430cfcf4e2a034015119c1d530e42c7e628f"
+    },
+    "old builds/v1.3.0/CONTRIBUTING.md": {
+      "bytes": 2079,
+      "sha256": "ae36546034142c58051e39cbf06773085989b731d687194d673b77e019170bde"
+    },
+    "old builds/v1.3.0/INSTALL_SCHEDULER.cmd": {
+      "bytes": 493,
+      "sha256": "5b98ead18a40a9ebe24df46a47e1e1c8a867a5428e2ea3aa3b0572d49e5fd606"
+    },
+    "old builds/v1.3.0/INSTALL_WINDOWS.cmd": {
+      "bytes": 378,
+      "sha256": "da154c976f94a8194b1d330b94203320ee3ddf449d8e646f71921e44d744d45f"
+    },
+    "old builds/v1.3.0/LICENSING.md": {
+      "bytes": 702,
+      "sha256": "aff5abd8bb27cc3ddf7ee9f27e451b0b8453794b04a9cae4bb0579671b23fd60"
+    },
+    "old builds/v1.3.0/README.md": {
+      "bytes": 14060,
+      "sha256": "9977b9dc315cbb0aa022d365664c46705d21108e9bdcf7bca4df84fc38fd5422"
+    },
+    "old builds/v1.3.0/REMOVE_SCHEDULER.cmd": {
+      "bytes": 341,
+      "sha256": "01c307191905b7e2cc35fa496db53860f3183c82fa955fe5950a96307efa309f"
+    },
+    "old builds/v1.3.0/RUN_FROM_SOURCE.cmd": {
+      "bytes": 604,
+      "sha256": "2fe389a57b92ba4c5b69da736eb3989e7d63c6555bb533a8cf3d04bb0c34afa3"
+    },
+    "old builds/v1.3.0/SECURITY.md": {
+      "bytes": 3043,
+      "sha256": "afd3f23b1beb4edd0b01bb7338779398a02d091a9a72dfe8b28f14d19e4ce7bf"
+    },
+    "old builds/v1.3.0/UNINSTALL_WINDOWS.cmd": {
+      "bytes": 587,
+      "sha256": "7ad1c1c02302773ae550efd2397e0575f222e358f1a34a0e981f886ceec4eb51"
+    },
+    "old builds/v1.3.0/V1.2_RELEASE_NOTES.md": {
+      "bytes": 6017,
+      "sha256": "a940f3021c13933ceebc27c63725dfb765e13963be3b152c8e6d50f082153bbf"
+    },
+    "old builds/v1.3.0/V1.3_RELEASE_NOTES.md": {
+      "bytes": 4597,
+      "sha256": "ab9db2e6bad41263ed5bd1dc0e55b1f455ccbc6fd4d15894f9014a4ee4d50594"
+    },
+    "old builds/v1.3.0/assets/done.wav": {
+      "bytes": 18736,
+      "sha256": "9af807ad33a1d43e8a8495dd6ee3c9d066340762470179cd451089903d4535ad"
+    },
+    "old builds/v1.3.0/assets/error.wav": {
+      "bytes": 17062,
+      "sha256": "536fcaf2f3b03a7923c709b95edd2b874654293c8f61769e8b8f2c69d4501b78"
+    },
+    "old builds/v1.3.0/assets/exit.wav": {
+      "bytes": 25622,
+      "sha256": "11be854d79e2ef88086025c676cf3582134d04623c41ca81cb8715f28a5bf007"
+    },
+    "old builds/v1.3.0/assets/icon-art.png": {
+      "bytes": 88228,
+      "sha256": "3718f2bacccc6b6a8e13cb28151c1f14055df96bb90470c716e5d18044aa346d"
+    },
+    "old builds/v1.3.0/assets/run.wav": {
+      "bytes": 13442,
+      "sha256": "65eff7fcd62f8c4890b79178ee11283642cc5f1a6f842943165a6d0a53fc44bd"
+    },
+    "old builds/v1.3.0/assets/save.wav": {
+      "bytes": 11770,
+      "sha256": "9b333c48be29373d2834ebb13debed582b014b03fc1de792267c0fa71bef07e2"
+    },
+    "old builds/v1.3.0/assets/select.wav": {
+      "bytes": 6258,
+      "sha256": "ca984a7cbef7b527efc6db344b4d42328af5cdd528cd60016deb9af23d18e811"
+    },
+    "old builds/v1.3.0/assets/startup.wav": {
+      "bytes": 32902,
+      "sha256": "7c0d7c4875c583da04a4a1bd0184c02372fd4bd96ae2be8cbdaadfff30bf88ff"
+    },
+    "old builds/v1.3.0/assets/task-runner.ico": {
+      "bytes": 157439,
+      "sha256": "79d2f06ef17197abf0ebcc5e608fc042d1e57887fe10b994d526db785a63a1e0"
+    },
+    "old builds/v1.3.0/assets/task-runner.png": {
+      "bytes": 107038,
+      "sha256": "7166ac0acee88dd880e07b894d3ae25097ae11ee3054d7ac751b1e398befefbb"
+    },
+    "old builds/v1.3.0/assets/version_info.txt": {
+      "bytes": 965,
+      "sha256": "1c3fb809f7218333f645175b77d6d3442daf7ddb84baeba8ac88ef103b2fc37d"
+    },
+    "old builds/v1.3.0/docs/ARCHITECTURE.md": {
+      "bytes": 3409,
+      "sha256": "ae2b4fc05dec11f2a04babc5c3fed87e7b4c38c9a7d4dd7e97a3488a0a86f5ff"
+    },
+    "old builds/v1.3.0/docs/USER_GUIDE.md": {
+      "bytes": 25237,
+      "sha256": "a41c496fc26b53c2669010b36afae8edd6e6ca19249316bd4f1f633481bc0c70"
+    },
+    "old builds/v1.3.0/launcher.py": {
+      "bytes": 176,
+      "sha256": "abd16802eb09f5e0cf569d17d6b014c7ad322022feef52582e6a05fd560a4eee"
+    },
+    "old builds/v1.3.0/pytest.ini": {
+      "bytes": 27,
+      "sha256": "c809c969ec7e11b9ff37784e9c6fcc0b7c5148d168e18b05aed797e03fbd6ead"
+    },
+    "old builds/v1.3.0/repository-metadata.json": {
+      "bytes": 929,
+      "sha256": "e32104341ba7567b6a188de5bc5382996df0d0d401a005ff302ffb2babdf64fa"
+    },
+    "old builds/v1.3.0/requirements-build.txt": {
+      "bytes": 55,
+      "sha256": "aabbfc6336ad32c1cf80defb4bab1a05badb7f285496f056c31e152d42863f04"
+    },
+    "old builds/v1.3.0/requirements.txt": {
+      "bytes": 249,
+      "sha256": "ce91b085f30c1b93a5b8caae530d0fa02160424f4aa921b3502f5be70b4d1794"
+    },
+    "old builds/v1.3.0/schemas/taskrunner-job.schema.json": {
+      "bytes": 120074,
+      "sha256": "542df3b4feefa41fd15e24f546274a29d8e68f97ec8d1f926e5a6d3f18199e3b"
+    },
+    "old builds/v1.3.0/scripts/FIND_PYTHON.cmd": {
+      "bytes": 1687,
+      "sha256": "4089ea024ea29a8d9891ee048cc6d8c20051218e3f8d60d2c1853d667b6bcbe6"
+    },
+    "old builds/v1.3.0/scripts/generate_workflow_schema.py": {
+      "bytes": 3523,
+      "sha256": "e93c66437256d3c8f3165cdd5d683154f6a0b0d93e8a726651b8544a018766cc"
+    },
+    "old builds/v1.3.0/scripts/install_windows.ps1": {
+      "bytes": 3872,
+      "sha256": "46261fe49f01e41b53708489f5e74250b0b9442af42b1ec2ef34e6c251e461b4"
+    },
+    "old builds/v1.3.0/scripts/prepublish_audit.py": {
+      "bytes": 3149,
+      "sha256": "fc25274973e3077d8e62f36f8a839292278cf5d8b4f045ef6074fad22355d09c"
+    },
+    "old builds/v1.3.0/scripts/shared_dependencies.py": {
+      "bytes": 9198,
+      "sha256": "4d7b7588568369cac56476d2507ce1557b6cce3e02f480c8199d4bc0a831dc3b"
+    },
+    "old builds/v1.3.0/scripts/uninstall_windows.ps1": {
+      "bytes": 1723,
+      "sha256": "cc63292838dbb5213f01199a4c51c861e51f44d588855edd41fe1cc38e4b2b67"
+    },
+    "old builds/v1.3.0/task_runner/__init__.py": {
+      "bytes": 110,
+      "sha256": "60e060114d5cf7971e8e5e54826903266e4d575ca7fdf83a7325bfda95234c51"
+    },
+    "old builds/v1.3.0/task_runner/__main__.py": {
+      "bytes": 2344,
+      "sha256": "c2636f456a1aa6c1dc3524e6e46e5eb9b8d509cbd3391c254007936d1471c78e"
+    },
+    "old builds/v1.3.0/task_runner/actions.py": {
+      "bytes": 18483,
+      "sha256": "9f84a24a841bcea208313d73016c72b6972bbec135f0385c6f66fd19f4af1403"
+    },
+    "old builds/v1.3.0/task_runner/capture.py": {
+      "bytes": 6110,
+      "sha256": "b6b135bf62f050eda90e03b30a737b8de463ba46fc0f52fd1a377d0c2554d330"
+    },
+    "old builds/v1.3.0/task_runner/collection.py": {
+      "bytes": 11560,
+      "sha256": "b220630a2655e102b25c5a72230c9a7576347925e75d6b68bd935a7c4ee2e846"
+    },
+    "old builds/v1.3.0/task_runner/diagnostics.py": {
+      "bytes": 4823,
+      "sha256": "703b8f87a5b0196eb66afb0abde0f587bccfe837d7d665a571cf320256a88c5d"
+    },
+    "old builds/v1.3.0/task_runner/executor.py": {
+      "bytes": 32481,
+      "sha256": "ea2feb96c4613d2ba569d49451ff3814fe3d32f6968f497f9a8e9f9a132c371b"
+    },
+    "old builds/v1.3.0/task_runner/fileops.py": {
+      "bytes": 2334,
+      "sha256": "57b3f45ba96ab3d742386535d7a488a9f9e02f80fd28c13e3cd45d4296821974"
+    },
+    "old builds/v1.3.0/task_runner/flow.py": {
+      "bytes": 9265,
+      "sha256": "f383891365d2436823b61a383eb2dccad2ae11004b87156ea75ad4d7c1102cfa"
+    },
+    "old builds/v1.3.0/task_runner/gui.py": {
+      "bytes": 55781,
+      "sha256": "dad466976bd3917cd2a61e25e9e4171a5a410510be230fffac68e9ad71b2a5e8"
+    },
+    "old builds/v1.3.0/task_runner/observability.py": {
+      "bytes": 11775,
+      "sha256": "04ca25083210faa17b09f5f67d1479be605a2c6484b92800b06345c38cf892bd"
+    },
+    "old builds/v1.3.0/task_runner/paths.py": {
+      "bytes": 1040,
+      "sha256": "8f1e5631aba858f16643e9e6be12bab4249a4a3ad1952aa4cda85aeae89a68f0"
+    },
+    "old builds/v1.3.0/task_runner/recorder.py": {
+      "bytes": 10973,
+      "sha256": "bad3be5b63030a63be1f572a22c3b1a357bba520c9c8866ffd09a0efa8e4bc4f"
+    },
+    "old builds/v1.3.0/task_runner/runner.py": {
+      "bytes": 5184,
+      "sha256": "270fd616beac8b3694b47888e8b10fefeef5007219a7b78123e08dc4da344304"
+    },
+    "old builds/v1.3.0/task_runner/scheduling.py": {
+      "bytes": 2587,
+      "sha256": "0a9b46491d6e15828808fc483afb55e94607807dea8fb2a0bd5c148c6fc645cd"
+    },
+    "old builds/v1.3.0/task_runner/sounds.py": {
+      "bytes": 1272,
+      "sha256": "5c57298364b62f6dd86c0f961a956f88957a62370aa84f488dda5fb1384a781a"
+    },
+    "old builds/v1.3.0/task_runner/store.py": {
+      "bytes": 13308,
+      "sha256": "086fe368a3fe2dc3c268a93eff773bc22747d2e0bd4e008cf12ae09737104ddc"
+    },
+    "old builds/v1.3.0/task_runner/style.py": {
+      "bytes": 2086,
+      "sha256": "e5e791784f71666a2152140d0a03becf68a73c27158b0894668e058e6f58fe4d"
+    },
+    "old builds/v1.3.0/task_runner/visual_verification.py": {
+      "bytes": 2087,
+      "sha256": "a3581f0152a8f7adbde6a19dd6decaca08c25af577c7569d74439f4e9fd46947"
+    },
+    "old builds/v1.3.0/task_runner/wininput.py": {
+      "bytes": 3883,
+      "sha256": "49931033a4d97fe3ba67481b48b687cfec34003da23be7f449b2fd1eb7fb60c9"
+    },
+    "old builds/v1.3.0/task_runner/winmouse.py": {
+      "bytes": 5503,
+      "sha256": "a9dbd3bf43abe26a16837c3eadc4ec966eca5e07541883849769691f60e58271"
+    },
+    "old builds/v1.3.0/tests/test_backup_and_race.py": {
+      "bytes": 1864,
+      "sha256": "8e3e0f8992ba1b3bac8f153b915cce57603d3786b6047beacdfa463d20bee428"
+    },
+    "old builds/v1.3.0/tests/test_executor.py": {
+      "bytes": 2151,
+      "sha256": "4f407b61e3aba157e8e3b4558ec44371a5347715835b2aa7deaadf78f03ef2c0"
+    },
+    "old builds/v1.3.0/tests/test_fileops_safety.py": {
+      "bytes": 2635,
+      "sha256": "e668d2c6822550812218a5e95391ea61b273cfd0ff3105cf5c600ebb7a1c0c9c"
+    },
+    "old builds/v1.3.0/tests/test_flow.py": {
+      "bytes": 5630,
+      "sha256": "c6032b15536a03c6670c96efd53941f7a1074fc43146b1cbd5733f68026d17bb"
+    },
+    "old builds/v1.3.0/tests/test_repo_readiness.py": {
+      "bytes": 2684,
+      "sha256": "7fd60fb1e6f0045780ba102f88811a6431714449ff941d73c95886547e3d02bd"
+    },
+    "old builds/v1.3.0/tests/test_runtime.py": {
+      "bytes": 4709,
+      "sha256": "4e815c6fbc0bcd79a7758f500a232f34539e6efca43a81f294c6bd36a783d85d"
+    },
+    "old builds/v1.3.0/tests/test_scheduling.py": {
+      "bytes": 1307,
+      "sha256": "7510abd5b50a14e28589ad504cb998ec424ae80c432e31ebc378f3bffeea8f0c"
+    },
+    "old builds/v1.3.0/tests/test_shared_dependencies.py": {
+      "bytes": 2960,
+      "sha256": "15c360f837098390a3380e2f3882b4cc80a92c58760f2ad44c8e6bcfa97cb6a1"
+    },
+    "old builds/v1.3.0/tests/test_store.py": {
+      "bytes": 2632,
+      "sha256": "c2b741519fdd837bf4b78957d58c5736c939b67710b991eae0a5000cccaa641b"
+    },
+    "old builds/v1.3.0/tests/test_v12.py": {
+      "bytes": 6620,
+      "sha256": "bfa6feeca0660b3529901daf596a809891991f935c9c54a724a89bbcb07eee48"
+    },
+    "old builds/v1.3.0/tests/test_v12_reliability.py": {
+      "bytes": 5158,
+      "sha256": "acac3eb7c3ee50660398cc27dcdd6305a99d9e25199ca3d4639399c846dfcae1"
+    },
+    "old builds/v1.3.0/tests/test_v13.py": {
+      "bytes": 10629,
+      "sha256": "0c16bff96cdcce3e119040c1a356d96f657bbcbc06c11dcda2384c03d3553737"
+    },
+    "old builds/v1.3.0/tests/test_windows_launcher_config.py": {
+      "bytes": 1590,
+      "sha256": "f484db999d98f554a82f588e506be0e29fe021e5c67024ddb894bba4547dc5dd"
+    },
+    "pytest.ini": {
+      "bytes": 27,
+      "sha256": "c809c969ec7e11b9ff37784e9c6fcc0b7c5148d168e18b05aed797e03fbd6ead"
+    },
+    "repository-metadata.json": {
+      "bytes": 933,
+      "sha256": "36086cc81d072fa55dd966d6ec1a446e95b0b1565a8a8dcfd50330c1d0c31a2a"
+    },
+    "requirements-build.txt": {
+      "bytes": 55,
+      "sha256": "aabbfc6336ad32c1cf80defb4bab1a05badb7f285496f056c31e152d42863f04"
+    },
+    "requirements.txt": {
+      "bytes": 290,
+      "sha256": "ed6b9e283cef12c7068c15eedd730ce2ca792b46a52806dccea054a4e8e410cc"
+    },
+    "schemas/taskrunner-job.schema.json": {
+      "bytes": 128061,
+      "sha256": "55fa1e715a0bc9760af24df8f60ad030d2dde4b15f262e1e0ac6232ffaeaef63"
+    },
+    "scripts/FIND_PYTHON.cmd": {
+      "bytes": 1687,
+      "sha256": "4089ea024ea29a8d9891ee048cc6d8c20051218e3f8d60d2c1853d667b6bcbe6"
+    },
+    "scripts/capture_ui_windows.py": {
+      "bytes": 2032,
+      "sha256": "2c434d23d58570079c0321bba9af71521158a09a72b9aebc751485d329fef23e"
+    },
+    "scripts/generate_workflow_schema.py": {
+      "bytes": 3536,
+      "sha256": "f50f700e9df2b96b16665cb77f0259cec213bc5b9faa1f250d5fa0cea8584379"
+    },
+    "scripts/install_windows.ps1": {
+      "bytes": 3872,
+      "sha256": "6d4d489a7606cdef9655fb94c15c68359c36b87c38dd3df17507a97647698692"
+    },
+    "scripts/prepublish_audit.py": {
+      "bytes": 3149,
+      "sha256": "fc25274973e3077d8e62f36f8a839292278cf5d8b4f045ef6074fad22355d09c"
+    },
+    "scripts/shared_dependencies.py": {
+      "bytes": 9198,
+      "sha256": "4d7b7588568369cac56476d2507ce1557b6cce3e02f480c8199d4bc0a831dc3b"
+    },
+    "scripts/uninstall_windows.ps1": {
+      "bytes": 1723,
+      "sha256": "cc63292838dbb5213f01199a4c51c861e51f44d588855edd41fe1cc38e4b2b67"
+    },
+    "scripts/verify_release_manifest.py": {
+      "bytes": 1057,
+      "sha256": "8cff21e2bf077aac0aeaa185982b4616ad64029e935ea56ad5f725384d99c889"
+    },
+    "task_runner/__init__.py": {
+      "bytes": 110,
+      "sha256": "eb04b6f1fe41af76ca138731f7bcd1aa477348dbde774c771f62c0bc3b132e6b"
+    },
+    "task_runner/__main__.py": {
+      "bytes": 2458,
+      "sha256": "5f4bae2f76bf63611e8236aabb4936fdac3af404f84f5cffa80f2600a0a13491"
+    },
+    "task_runner/actions.py": {
+      "bytes": 20245,
+      "sha256": "370c908dd924640023e9a97ace755cbc5699c1086b7811ae5f603534ab956a62"
+    },
+    "task_runner/capture.py": {
+      "bytes": 6110,
+      "sha256": "b6b135bf62f050eda90e03b30a737b8de463ba46fc0f52fd1a377d0c2554d330"
+    },
+    "task_runner/collection.py": {
+      "bytes": 11560,
+      "sha256": "b220630a2655e102b25c5a72230c9a7576347925e75d6b68bd935a7c4ee2e846"
+    },
+    "task_runner/debugger.py": {
+      "bytes": 4752,
+      "sha256": "ad0251138f2292aa685986b34a4088e5b0e6a3aae28095f0857b2bd1921ecfb0"
+    },
+    "task_runner/diagnostics.py": {
+      "bytes": 5305,
+      "sha256": "562c437108e5feeb855c1cac6d6a7338553fd765f2ec78c466922e3e510adecb"
+    },
+    "task_runner/executor.py": {
+      "bytes": 35959,
+      "sha256": "e183abbed4769962e7b449160ffaa9acbb0b7a39e64a28a6442534d27290fffb"
+    },
+    "task_runner/file_events.py": {
+      "bytes": 1466,
+      "sha256": "a1fd5b3d5b0e6dd84176e4e8370f0354220921dd90d99dddd734fec8b40fb8a8"
+    },
+    "task_runner/fileops.py": {
+      "bytes": 2334,
+      "sha256": "57b3f45ba96ab3d742386535d7a488a9f9e02f80fd28c13e3cd45d4296821974"
+    },
+    "task_runner/flow.py": {
+      "bytes": 9815,
+      "sha256": "0e882ccc9c02045ab4af4c18c16dd66198eb7da43f5b7ac3b783cf939b05831a"
+    },
+    "task_runner/gallery.py": {
+      "bytes": 3962,
+      "sha256": "ee29adfec70445af770034fbe20fcea7f64a0f44ccbd2ada41c6c50e41442494"
+    },
+    "task_runner/gui.py": {
+      "bytes": 75351,
+      "sha256": "fb319d4b223e266e9e7f99efcba6ecea26303545d0327e6e4f936ad83d2fc46b"
+    },
+    "task_runner/modules.py": {
+      "bytes": 2157,
+      "sha256": "e61e1e912c16f1f7f38f50cb1c58676329ab1af1fdcb493f520544932d8393ed"
+    },
+    "task_runner/observability.py": {
+      "bytes": 11775,
+      "sha256": "04ca25083210faa17b09f5f67d1479be605a2c6484b92800b06345c38cf892bd"
+    },
+    "task_runner/ocr.py": {
+      "bytes": 3629,
+      "sha256": "873cb17b9142588f067fd3774c988190c6904f87f284058198d9f54f5a95608f"
+    },
+    "task_runner/packages.py": {
+      "bytes": 9785,
+      "sha256": "a3ff2601748d3eeb7bec8550912081f89405b1eb47e923d05dfef1921960ae67"
+    },
+    "task_runner/paths.py": {
+      "bytes": 1040,
+      "sha256": "8f1e5631aba858f16643e9e6be12bab4249a4a3ad1952aa4cda85aeae89a68f0"
+    },
+    "task_runner/precision.py": {
+      "bytes": 5990,
+      "sha256": "9f638ab3f08ce11a7329e62ace059fcf5c28ec4234a6b576ed418d811462fd50"
+    },
+    "task_runner/recorder.py": {
+      "bytes": 10973,
+      "sha256": "bad3be5b63030a63be1f572a22c3b1a357bba520c9c8866ffd09a0efa8e4bc4f"
+    },
+    "task_runner/recovery.py": {
+      "bytes": 1522,
+      "sha256": "8c6a1e9e52a5f76ff23576286ba6551ed94a6c46a60acaef8557d01c05a28951"
+    },
+    "task_runner/runner.py": {
+      "bytes": 6086,
+      "sha256": "d53b34edf8df84d43e58c1d607d6a03366087a061c6f2bcd0ac217dcb9d6999e"
+    },
+    "task_runner/scheduling.py": {
+      "bytes": 2703,
+      "sha256": "36c2617867e32abfa642b73438868a245ff30e90e863e59a3d90912089e3e4c8"
+    },
+    "task_runner/sounds.py": {
+      "bytes": 1272,
+      "sha256": "5c57298364b62f6dd86c0f961a956f88957a62370aa84f488dda5fb1384a781a"
+    },
+    "task_runner/store.py": {
+      "bytes": 26703,
+      "sha256": "2edee89ffdcc7ae19b752487fa7667f645d18fcb76214af52180aa8002c8b101"
+    },
+    "task_runner/style.py": {
+      "bytes": 2086,
+      "sha256": "e5e791784f71666a2152140d0a03becf68a73c27158b0894668e058e6f58fe4d"
+    },
+    "task_runner/vault.py": {
+      "bytes": 3641,
+      "sha256": "9b00fa49ac75a7f8dcc26b50fe49c036e98b7c35e8d78ac2112072c4a3a5c4b5"
+    },
+    "task_runner/visual_verification.py": {
+      "bytes": 2087,
+      "sha256": "a3581f0152a8f7adbde6a19dd6decaca08c25af577c7569d74439f4e9fd46947"
+    },
+    "task_runner/wininput.py": {
+      "bytes": 3883,
+      "sha256": "49931033a4d97fe3ba67481b48b687cfec34003da23be7f449b2fd1eb7fb60c9"
+    },
+    "task_runner/winmouse.py": {
+      "bytes": 7688,
+      "sha256": "c66414f793b8dae3a4d88fa0d1890dc1beaa8a7a4fc23eda5291943bf567f73d"
+    },
+    "tests/test_backup_and_race.py": {
+      "bytes": 1864,
+      "sha256": "8e3e0f8992ba1b3bac8f153b915cce57603d3786b6047beacdfa463d20bee428"
+    },
+    "tests/test_executor.py": {
+      "bytes": 2151,
+      "sha256": "4f407b61e3aba157e8e3b4558ec44371a5347715835b2aa7deaadf78f03ef2c0"
+    },
+    "tests/test_fileops_safety.py": {
+      "bytes": 2635,
+      "sha256": "e668d2c6822550812218a5e95391ea61b273cfd0ff3105cf5c600ebb7a1c0c9c"
+    },
+    "tests/test_flow.py": {
+      "bytes": 5630,
+      "sha256": "c6032b15536a03c6670c96efd53941f7a1074fc43146b1cbd5733f68026d17bb"
+    },
+    "tests/test_ocr_windows_313.py": {
+      "bytes": 2420,
+      "sha256": "c14b0a00b2f55b0620157c9a99167180201d4d0c7e66f43d8f96283b2a646698"
+    },
+    "tests/test_repo_readiness.py": {
+      "bytes": 2684,
+      "sha256": "7fd60fb1e6f0045780ba102f88811a6431714449ff941d73c95886547e3d02bd"
+    },
+    "tests/test_runtime.py": {
+      "bytes": 4709,
+      "sha256": "4e815c6fbc0bcd79a7758f500a232f34539e6efca43a81f294c6bd36a783d85d"
+    },
+    "tests/test_scheduling.py": {
+      "bytes": 1307,
+      "sha256": "7510abd5b50a14e28589ad504cb998ec424ae80c432e31ebc378f3bffeea8f0c"
+    },
+    "tests/test_shared_dependencies.py": {
+      "bytes": 2960,
+      "sha256": "15c360f837098390a3380e2f3882b4cc80a92c58760f2ad44c8e6bcfa97cb6a1"
+    },
+    "tests/test_store.py": {
+      "bytes": 2632,
+      "sha256": "c2b741519fdd837bf4b78957d58c5736c939b67710b991eae0a5000cccaa641b"
+    },
+    "tests/test_v12.py": {
+      "bytes": 6620,
+      "sha256": "bfa6feeca0660b3529901daf596a809891991f935c9c54a724a89bbcb07eee48"
+    },
+    "tests/test_v12_reliability.py": {
+      "bytes": 5158,
+      "sha256": "acac3eb7c3ee50660398cc27dcdd6305a99d9e25199ca3d4639399c846dfcae1"
+    },
+    "tests/test_v13.py": {
+      "bytes": 10629,
+      "sha256": "0c16bff96cdcce3e119040c1a356d96f657bbcbc06c11dcda2384c03d3553737"
+    },
+    "tests/test_v14.py": {
+      "bytes": 8328,
+      "sha256": "f8ae14ebdda770fdf6ce27da5560256a4a8ba8a3338324699ee64979b1e5e497"
+    },
+    "tests/test_v14_full.py": {
+      "bytes": 8471,
+      "sha256": "138a60f123262cee5e3b85f714096e9e77394a7dc2cc19144d581e8d84cfa86e"
+    },
+    "tests/test_windows_launcher_config.py": {
+      "bytes": 1590,
+      "sha256": "f484db999d98f554a82f588e506be0e29fe021e5c67024ddb894bba4547dc5dd"
+    }
+  }
+}

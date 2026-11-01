@@ -1,0 +1,63 @@
+name: Bug report
+description: Report a reproducible Task Runner application or build failure
+title: "Bug: "
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Do not attach unredacted task JSON, screenshots, execution logs, passwords, browser session data, or personal paths. Security vulnerabilities belong in private reporting (see SECURITY.md).
+  - type: input
+    id: version
+    attributes:
+      label: Task Runner version
+      description: Use the version displayed in Settings → About Task Runner
+    validations:
+      required: true
+  - type: dropdown
+    id: area
+    attributes:
+      label: Affected area
+      options:
+        - Windows build / dependencies
+        - Task wizard / screenshot selection
+        - Desktop mouse / keyboard
+        - Browser / Playwright
+        - Parsing / text extraction
+        - File operations / clipboard
+        - Scheduling / Task Scheduler
+        - Verification / retries
+        - Logs / SQLite persistence
+        - Other
+    validations:
+      required: true
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Reproduction steps
+      description: Describe the exact UI actions and expected sequence without sharing private data
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behavior
+    validations:
+      required: true
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual behavior and sanitized errors
+    validations:
+      required: true
+  - type: input
+    id: windows
+    attributes:
+      label: Windows version and Python version (if building from source)
+  - type: checkboxes
+    id: safety
+    attributes:
+      label: Disclosure safety
+      options:
+        - label: I removed personal data, secrets, and unredacted desktop screenshots before submission.
+          required: true

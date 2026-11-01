@@ -639,9 +639,10 @@ class MainWindow(QMainWindow):
         nav.addWidget(btn("+ New Task",self.new_task))
         nav.addWidget(btn("Execution Logs",lambda:self.set_page(1)))
         nav.addWidget(btn("Output Gallery",lambda:self.set_page(3)))
+        nav.addWidget(btn("Resource Monitor",lambda:self.set_page(4)))
         nav.addWidget(btn("Settings",lambda:self.set_page(2)))
         nav.addStretch()
-        nav.addWidget(QLabel("TASK RUNNER  /  1.4.0"))
+        nav.addWidget(QLabel("TASK RUNNER  /  1.5.1"))
         by=QLabel("BACKGROUND GREMLIN GROUP")
         by.setWordWrap(True);by.setObjectName("Muted");nav.addWidget(by)
         motto=QLabel("Creating Unique Tools\nfor Unique Individuals")
@@ -663,6 +664,7 @@ class MainWindow(QMainWindow):
         self.build_logs()
         self.build_settings()
         self.build_gallery()
+        self.build_resources()
         self.set_page(0)
         self.statusBar().showMessage("Ready — use New Task to configure a workflow")
         self.timer=QTimer(self);self.timer.setInterval(3000)
@@ -915,17 +917,94 @@ class MainWindow(QMainWindow):
         layout.addWidget(paths)
         credits=QGroupBox("About Task Runner")
         credits_layout=QVBoxLayout(credits)
-        credits_layout.addWidget(QLabel("Task Runner v1.4.0  ·  Vaporwave Edition"))
+        credits_layout.addWidget(QLabel("Task Runner v1.5.1  ·  Vaporwave Edition"))
         credits_layout.addWidget(QLabel("Developed by the Background Gremlin Group"))
         credits_layout.addWidget(QLabel("Creating Unique Tools for Unique Individuals"))
         layout.addWidget(credits)
         layout.addStretch()
         self.stack.addWidget(page)
 
+    def build_resources(self):
+        page=QWidget()
+        layout=QVBoxLayout(page)
+        name=QLabel('RESOURCE MONITOR  /  RAM + NVIDIA VRAM')
+        name.setObjectName('SectionTitle')
+        layout.addWidget(name)
+        intro=QLabel('Read-only live system memory. Enter a PID to inspect that program and its child processes. '
+                     'To enforce thresholds, add Start RAM / VRAM guard and Stop RAM / VRAM guard actions to a workflow.')
+        intro.setWordWrap(True)
+        intro.setObjectName('Muted')
+        layout.addWidget(intro)
+        row=QHBoxLayout()
+        row.addWidget(QLabel('Inspect PID (0 = system only)'))
+        self.resource_pid=QSpinBox()
+        self.resource_pid.setRange(0,2147483647)
+        self.resource_pid.setValue(0)
+        row.addWidget(self.resource_pid)
+        row.addWidget(btn('Refresh RAM / process',self.refresh_resources,primary=True))
+        row.addWidget(btn('Check NVIDIA GPU VRAM',self.refresh_gpu))
+        row.addStretch()
+        layout.addLayout(row)
+        self.resource_readout=QPlainTextEdit()
+        self.resource_readout.setReadOnly(True)
+        self.resource_readout.setPlainText('Select a PID or press Refresh. No process is modified by this screen.')
+        layout.addWidget(self.resource_readout,1)
+        self.resource_gpu=QLabel('NVIDIA GPU VRAM: not queried')
+        self.resource_gpu.setWordWrap(True)
+        layout.addWidget(self.resource_gpu)
+        safety=QGroupBox('Resource guard policy')
+        safety_layout=QVBoxLayout(safety)
+        safety_label=QLabel(
+            'All memory guards are opt-in workflow steps. Default is warning only. '
+            'RAM thresholds monitor the selected process tree and/or free system RAM. '
+            'VRAM thresholds use reported NVIDIA compute allocations, not total GPU usage. '
+            'Missing GPU data is treated as unavailable, never as zero. '
+            'Workflow cancellation does not kill a program. Termination is permitted only '
+            'when explicitly configured for a process launched by the current workflow. '
+            'No files are automatically deleted.')
+        safety_label.setWordWrap(True)
+        safety_layout.addWidget(safety_label)
+        layout.addWidget(safety)
+        self.stack.addWidget(page)
+
+    def refresh_resources(self):
+        try:
+            from .resources import sample_resources
+            from datetime import datetime
+            report=sample_resources(self.resource_pid.value())
+            line=[f'MEMORY SNAPSHOT  /  {datetime.now().strftime("%Y-%m-%d %H:%M:%S")}',
+                  '',f'System RAM used: {report.system_used_percent:.1f}%',
+                  f'System RAM available: {report.available_ram_mb:,.1f} MiB',
+                  f'System RAM total: {report.total_ram_mb:,.1f} MiB']
+            if report.pid:
+                line.extend(['',f'Inspected PID: {report.pid}',
+                             f'Process tree: {report.process_count} process(es)',
+                             f'Process tree RAM (RSS): {report.process_ram_mb:,.1f} MiB'])
+            self.resource_readout.setPlainText('\n'.join(line))
+        except Exception as error:
+            self.resource_readout.setPlainText(f'Cannot read selected resources: {error}')
+
+    def refresh_gpu(self):
+        try:
+            from .resources import nvidia_overview, sample_resources
+            devices=nvidia_overview()
+            if not devices:
+                self.resource_gpu.setText('NVIDIA GPU VRAM: unavailable (no compatible nvidia-smi/driver detected)')
+                return
+            details=[f'{d["name"]}: {d["used_mb"]:,.0f} / {d["total_mb"]:,.0f} MiB (GPU total)' for d in devices]
+            if self.resource_pid.value():
+                value=sample_resources(self.resource_pid.value(),include_gpu=True).process_gpu_vram_mb
+                details.append('NVIDIA compute VRAM for inspected PID tree: '+
+                    (f'{value:,.1f} MiB' if value is not None else 'unavailable / not reported'))
+            self.resource_gpu.setText('   |   '.join(details))
+        except Exception as error:
+            self.resource_gpu.setText(f'NVIDIA GPU VRAM: unavailable ({error})')
+
     def set_page(self,index):
         self.stack.setCurrentIndex(index)
         if index==1:self.refresh_logs()
         if index==2:self.refresh_scheduler_label()
+        if index==4:self.refresh_resources()
 
     def refresh_scheduler_label(self):
         self.scheduler_label.setText("Scheduler: " + ("installed" if scheduler_status() else "not installed"))
@@ -1159,6 +1238,7 @@ class MainWindow(QMainWindow):
         self.preferences.play("select")
 
     def refresh(self):
+        if self.stack.currentIndex()==4:self.refresh_resources()
         remembered=self.selected_id()
         jobs=self.store.all_jobs()
         self.table.setRowCount(len(jobs))

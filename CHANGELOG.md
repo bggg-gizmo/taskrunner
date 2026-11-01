@@ -2,6 +2,25 @@
 
 All notable public-facing changes are documented here. Archived source versions are available in [`old builds/`](old%20builds/). Source-only release status is distinguished from completed Windows acceptance testing.
 
+## v1.5.1 — Resource guard safety and release quality (source hotfix)
+
+- Fixed a resource-watch PID reuse edge case: all watch policies now bind to the selected process's creation identity and stop watching if Windows recycles its PID.
+- Fixed a watcher-stop race: a late threshold alert is not silently cleared when the workflow stops its guard, and a monitor already being stopped will not initiate a new termination after a slow sample completes.
+- Improved per-user Windows upgrade rollback: the previous installed application is retained until the updated shortcuts and Installed Apps registration succeed.
+- Refreshed README release badges, v1.5.x feature guidance, Windows user guide, build/version metadata, and regression acceptance requirements.
+- Preserved all existing UI layouts, workflow action types, vault, scheduler, media assets, and v1.2.1/v1.3.0/v1.4.0 archived sources.
+- Linux regression suite passed. Native Windows installation, process control, graphics driver integration and EXE self-test require on-device acceptance.
+
+## v1.5.0 — Resource Monitor & OOM safeguards (source release)
+
+- Introduced a read-only Resource Monitor page with live system RAM and process tree memory usage.
+- Added local NVIDIA GPU VRAM statistics where supported, distinguishing global GPU use from compute-process allocations and explicitly reporting unavailable values.
+- Added three opt-in workflow actions: memory snapshot, start memory guard, and stop memory guard, including captured metrics in workflow variables.
+- Added configurable RAM/VRAM thresholds with warning-only default, operator-selected workflow cancellation, and optional termination restricted to a process launched within the same workflow after PID identity verification.
+- Resource monitors stop and emit a peak RAM summary when workflows end; threshold fluctuations are deduplicated in logs.
+- Added psutil to the shared-Python dependency and Windows runtime checks; retained all previous features and older public source archives.
+- Source regression tests and privacy audit run locally. Native Windows/PyInstaller/GPU acceptance is still outstanding.
+
 ## v1.4.0 — Windows Python 3.13 OCR build fix
 
 - Corrected the OCR dependency for Python 3.13: replaced the legacy `rapidocr-onnxruntime` constraint with the maintained `rapidocr` and the separately installed `onnxruntime` inference engine.

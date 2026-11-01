@@ -1,7 +1,7 @@
 {
   "name": "taskrunner",
   "display_name": "Task Runner",
-  "description": "Windows Task Runner: record/replay, adaptive visual automation, interactive debugging, OCR, file event triggers, capture gallery and recovery.",
+  "description": "Windows Task Runner: record/replay, resource and OOM monitoring, adaptive visual automation, interactive debugging, OCR, event triggers and recovery.",
   "developer": "Background Gremlin Group",
   "tagline": "Creating Unique Tools for Unique Individuals",
   "platforms": [
@@ -29,5 +29,5 @@
   "automatic_publication": false,
   "github_actions_workflows": false,
   "license_selected": false,
-  "version": "1.4.0"
+  "version": "1.5.1"
 }

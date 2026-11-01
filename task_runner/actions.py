@@ -19,6 +19,21 @@ class Action:
 
 T=Field
 ACTIONS = {
+ "memory_snapshot": Action("Record RAM / VRAM snapshot", "Resource monitor",
+     "Log current system RAM, the selected PID process-tree RAM and optional NVIDIA compute-process VRAM; save values to workflow variables.",
+     (T("pid","PID (blank = last launched process; 0 = system only)","text",""),
+      T("include_gpu","Check NVIDIA compute VRAM (optional)","bool",False))),
+ "memory_watch_start": Action("Start RAM / VRAM guard", "Resource monitor",
+     "Watch a process tree during later actions. Zero thresholds disable that check. Warnings are default; optionally cancel workflow or stop ONLY an explicitly owned launched program.",
+     (T("pid","PID (blank = last launched program)","text",""),
+      T("process_ram_limit_mb","Process tree RAM limit MiB (0 = off)","float",0.0),
+      T("minimum_available_ram_mb","Minimum free system RAM MiB (0 = off)","float",0.0),
+      T("process_gpu_vram_limit_mb","NVIDIA compute VRAM limit MiB (0 = off)","float",0.0),
+      T("interval","Polling every (seconds)","float",2.0),
+      T("response","Threshold response","choice","warn",("warn","cancel_workflow","terminate_owned")))),
+ "memory_watch_stop": Action("Stop RAM / VRAM guard", "Resource monitor",
+     "Stop this workflow's resource watcher; save the peak RAM and sample count in workflow variables.", ()),
+
  "click_image": Action("Click on-screen image", "Visual triggers", "Find a matching button or icon in a screen region, then click its current position instead of an old fixed coordinate.", (T("image","Reference image PNG","path","",required=True),T("region","Search region x,y,width,height (blank = all monitors)","text",""),T("confidence","Confidence (0–1)","float",0.88),T("timeout","Wait for image (seconds)","float",45.0),T("poll","Check every (seconds)","float",0.4),T("button","Button","choice","left",("left","right","middle")))),
  "wait_screen": Action("Wait for visual change", "Visual triggers", "Continue when a selected screen region changes, or a reference image becomes visible/hidden. Works with desktop apps.", (T("mode","Condition","choice","changed",("changed","image_appears","image_disappears")),T("region","Screen region: x,y,width,height (blank = full screen)","text",""),T("image","Reference image file (for image conditions)","path",""),T("confidence","Image matching confidence","float",0.88),T("timeout","Wait up to (seconds)","float",180.0),T("poll","Check every (seconds)","float",0.5))),
  "wait_content": Action("Wait for text / code / output", "Visual triggers", "Wait for text in a Windows window, open browser page, file, or clipboard; use contains, absent, or changed conditions.", (T("source","Monitor","choice","window",("window","browser","file","clipboard")),T("target","Window title, CSS selector, file path (blank = clipboard)","text",""),T("condition","Condition","choice","contains",("contains","absent","changed")),T("text","Expected text (contains/absent)","multiline",""),T("timeout","Wait up to (seconds)","float",180.0),T("poll","Check every (seconds)","float",0.5),T("name","Store captured text as variable","text","observed_text"))),

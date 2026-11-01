@@ -5,7 +5,7 @@ title Task Runner - Windows EXE Builder
 
 echo.
 echo  ================================================================
-echo     TASK RUNNER  v1.4.0  -  Windows build - vaporwave edition
+echo     TASK RUNNER  v1.5.1  -  Windows build - vaporwave edition
  echo  ================================================================
 echo.
 call "%~dp0scripts\FIND_PYTHON.cmd"
@@ -31,7 +31,7 @@ set "PLAYWRIGHT_BROWSERS_PATH=%LOCALAPPDATA%\ms-playwright"
 if errorlevel 1 goto :FAILED
 
 echo [4/6] Building the full Windows GUI executable ...
-"%TASKRUNNER_PYTHON_EXE%" -m PyInstaller --noconfirm --clean --windowed --onedir --name "TaskRunner" --version-file "assets\version_info.txt" --icon "assets\task-runner.ico" --add-data "assets;assets" --collect-all playwright --collect-submodules pywinauto --collect-submodules pyautogui --collect-submodules pynput --collect-submodules bs4 --collect-submodules lxml --hidden-import tzdata --hidden-import tzlocal --hidden-import croniter --hidden-import cv2 --collect-all rapidocr --collect-all onnxruntime --paths "." "launcher.py"
+"%TASKRUNNER_PYTHON_EXE%" -m PyInstaller --noconfirm --clean --windowed --onedir --name "TaskRunner" --version-file "assets\version_info.txt" --icon "assets\task-runner.ico" --add-data "assets;assets" --collect-all playwright --collect-submodules pywinauto --collect-submodules pyautogui --collect-submodules pynput --collect-submodules psutil --collect-submodules bs4 --collect-submodules lxml --hidden-import tzdata --hidden-import tzlocal --hidden-import croniter --hidden-import cv2 --collect-all rapidocr --collect-all onnxruntime --paths "." "launcher.py"
 if errorlevel 1 goto :FAILED
 
 echo [5/6] Bundling installed Chromium browser binaries for offline EXE use ...

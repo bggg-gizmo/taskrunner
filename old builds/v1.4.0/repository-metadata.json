@@ -1,0 +1,33 @@
+{
+  "name": "taskrunner",
+  "display_name": "Task Runner",
+  "description": "Windows Task Runner: record/replay, adaptive visual automation, interactive debugging, OCR, file event triggers, capture gallery and recovery.",
+  "developer": "Background Gremlin Group",
+  "tagline": "Creating Unique Tools for Unique Individuals",
+  "platforms": [
+    "Windows 10 x64",
+    "Windows 11 x64"
+  ],
+  "language": "Python",
+  "interface": "PySide6 / Qt",
+  "distribution": "Source and Windows build command scripts",
+  "topics": [
+    "windows",
+    "desktop-automation",
+    "workflow-automation",
+    "task-scheduler",
+    "playwright",
+    "beautifulsoup",
+    "pyside6",
+    "vaporwave",
+    "python",
+    "macro-recorder",
+    "screenshot-automation",
+    "ui-automation"
+  ],
+  "repository_visibility": "public",
+  "automatic_publication": false,
+  "github_actions_workflows": false,
+  "license_selected": false,
+  "version": "1.4.0"
+}
