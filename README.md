@@ -174,7 +174,7 @@ The source checks validate workflows and code paths; desktop targeting, the debu
 
 Workflow export JSON structure is documented in [`schemas/taskrunner-job.schema.json`](schemas/taskrunner-job.schema.json). If action fields change, run `python scripts/generate_workflow_schema.py` and include the synchronized schema and tests.
 
-The Windows build script runs checks before packaging the application.
+The Windows build script runs checks before packaging the application. It also runs interactive Qt construction/save/edit checks in the Windows test suite and inside the packaged self-test. If a GUI callback fails, consult `%LOCALAPPDATA%\TaskRunner\runtime-errors.log` for a traceback; set `TASKRUNNER_HOME` if using a custom local data directory. The Windows build bundles the supported offline RapidOCR ONNX runtime/models without optional machine-learning toolkits installed for unrelated projects.
 
 ## Previous releases and changelog
 

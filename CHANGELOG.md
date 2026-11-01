@@ -2,6 +2,13 @@
 
 All notable public-facing changes are documented here. Archived source versions are available in [`old builds/`](old%20builds/). Source-only release status is distinguished from completed Windows acceptance testing.
 
+## v1.5.1 — Windows runtime responsiveness and GUI editor correction
+
+- Move GUI scheduler polls off the Qt event loop, avoid background dashboard table rebuilds during modal editors, and reduce repeated SQLite WAL journal contention.
+- Keep New Task / Edit visible within the usable monitor bounds; surface errors from those dialogs and log uncaught Windows GUI callbacks to `runtime-errors.log`.
+- Remove aggressive all-submodule OCR/ONNX package collection in the Windows build while preserving the ONNX runtime, local OCR models and all existing automation actions.
+- Expand packaged and source Qt checks to drive actual New Task / Edit interactions and verify task persistence.
+
 ## v1.5.1 — Resource guard safety and release quality (source hotfix)
 
 - Windows build follow-up: explicitly close SQLite backup handles before replacing the staged file; read UTF-8 schema/README in regression checks; exercise the native Windows image-click test path without changing runtime mouse handling. Windows build acceptance remains pending.

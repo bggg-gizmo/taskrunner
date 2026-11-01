@@ -86,6 +86,12 @@ class Store:
     def __init__(self, db_path: Path | None = None):
         self.db_path = Path(db_path or data_root() / "tasks.sqlite3")
         self.db_path.parent.mkdir(parents=True, exist_ok=True)
+        # WAL is a database-wide persistent setting. Configure it once per
+        # Store instance rather than acquiring a journal-mode lock for every
+        # UI read, scheduler poll, and workflow event.
+        with closing(sqlite3.connect(self.db_path, timeout=20)) as initial:
+            initial.execute("PRAGMA busy_timeout=20000")
+            initial.execute("PRAGMA journal_mode=WAL")
         with self.connection() as db:
             db.executescript(SCHEMA)
             columns={r[1] for r in db.execute("PRAGMA table_info(executions)")}
@@ -101,7 +107,6 @@ class Store:
         db = sqlite3.connect(self.db_path, timeout=20)
         db.row_factory = sqlite3.Row
         db.execute("PRAGMA foreign_keys=ON")
-        db.execute("PRAGMA journal_mode=WAL")
         db.execute("PRAGMA busy_timeout=20000")
         try:
             yield db

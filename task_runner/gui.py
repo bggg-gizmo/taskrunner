@@ -4,6 +4,8 @@ import copy
 import json
 import os
 import threading
+import queue
+import traceback
 from datetime import datetime, timedelta
 from pathlib import Path
 from PySide6.QtCore import Qt,QDate,QDateTime,QTime,QTimer
@@ -43,6 +45,23 @@ def message(parent,title,text,critical=False):
 def confirm(parent,title,text):
     return QMessageBox.question(parent,title,text,QMessageBox.StandardButton.Yes|QMessageBox.StandardButton.No,
                                 QMessageBox.StandardButton.No)==QMessageBox.StandardButton.Yes
+
+
+def report_gui_failure(parent, operation, error):
+    """Always surface failures from Qt slots, even in a windowed EXE.
+
+    On Windows the PyInstaller windowed bootloader has no visible console; a
+    traceback printed by PySide6 otherwise looks like an inert button.
+    """
+    details=traceback.format_exc()
+    try:
+        log=data_root()/"runtime-errors.log"
+        with log.open("a",encoding="utf-8") as handle:
+            handle.write(f"\n[{datetime.now().isoformat(timespec='seconds')}] {operation}\n{details}\n")
+        where=str(log)
+    except OSError:
+        where="the application's local data directory (logging unavailable)"
+    message(parent,operation,f"{type(error).__name__}: {error}\n\nDiagnostic log: {where}",True)
 
 
 def field_value(widget):
@@ -313,7 +332,15 @@ class TaskWizard(QDialog):
         self.recording_timer=None
         self.recording_started=0.0
         self.setWindowTitle("Task Runner — Task Setup Wizard")
-        self.resize(1040,850)
+        # Keep the existing UI and layout, but ensure the dialog and its
+        # fixed footer fit on 720p and smaller usable desktop areas.
+        screen=parent.screen() if parent is not None else QApplication.primaryScreen()
+        if screen is not None:
+            area=screen.availableGeometry()
+            self.resize(min(1040,max(540,area.width()-32)),
+                        min(850,max(470,area.height()-48)))
+        else:
+            self.resize(1040,850)
         root=QVBoxLayout(self)
         scroller=QScrollArea()
         scroller.setWidgetResizable(True)
@@ -622,6 +649,8 @@ class MainWindow(QMainWindow):
         self.store=Store();self.preferences=Preferences()
         self.active_workers={}
         self._restore_after_run=set()
+        self._scheduler_lock=threading.Lock()
+        self._scheduler_results=queue.SimpleQueue()
         self.selected_job=None
         self.setWindowTitle("Task Runner — Automation Control Panel")
         self.setWindowIcon(QIcon(str(asset_path("task-runner.ico"))))
@@ -668,7 +697,7 @@ class MainWindow(QMainWindow):
         self.set_page(0)
         self.statusBar().showMessage("Ready — use New Task to configure a workflow")
         self.timer=QTimer(self);self.timer.setInterval(3000)
-        self.timer.timeout.connect(self.refresh)
+        self.timer.timeout.connect(self.refresh_if_idle)
         self.timer.start()
         self.scheduler_timer=QTimer(self);self.scheduler_timer.setInterval(1000)
         self.scheduler_timer.timeout.connect(self.check_due)
@@ -1026,25 +1055,35 @@ class MainWindow(QMainWindow):
         return selected
 
     def new_task(self):
-        wizard=TaskWizard(self.store,parent=self)
-        if wizard.exec()==QDialog.DialogCode.Accepted:
-            self.preferences.play("save")
-            self.refresh()
-            self.select_task(wizard.saved_id)
-            if wizard.run_after_save:self.run_selected()
+        try:
+            wizard=TaskWizard(self.store,parent=self)
+            if wizard.exec()==QDialog.DialogCode.Accepted:
+                self.preferences.play("save")
+                self.refresh()
+                self.select_task(wizard.saved_id)
+                if wizard.run_after_save:self.run_selected()
+        except Exception as exc:
+            report_gui_failure(self,"Cannot create task",exc)
 
     def edit_selected(self):
-        job_id=self.require_selection()
-        if job_id is None:return
-        job=self.store.get_job(job_id)
-        if job["status"]=="running":
-            message(self,"Task is running","Stop the current execution before editing this task.")
-            return
-        wizard=TaskWizard(self.store,job,parent=self)
-        if wizard.exec()==QDialog.DialogCode.Accepted:
-            self.preferences.play("save")
-            self.refresh();self.select_task(wizard.saved_id)
-            if wizard.run_after_save:self.run_selected()
+        try:
+            job_id=self.require_selection()
+            if job_id is None:return
+            job=self.store.get_job(job_id)
+            if job is None:
+                message(self,"Task unavailable","The selected task no longer exists.",True)
+                self.refresh()
+                return
+            if job["status"]=="running":
+                message(self,"Task is running","Stop the current execution before editing this task.")
+                return
+            wizard=TaskWizard(self.store,job,parent=self)
+            if wizard.exec()==QDialog.DialogCode.Accepted:
+                self.preferences.play("save")
+                self.refresh();self.select_task(wizard.saved_id)
+                if wizard.run_after_save:self.run_selected()
+        except Exception as exc:
+            report_gui_failure(self,"Cannot edit task",exc)
 
     def select_task(self,job_id):
         for row in range(self.table.rowCount()):
@@ -1270,16 +1309,50 @@ class MainWindow(QMainWindow):
         self.active_workers={key:value for key,value in self.active_workers.items()
                              if value.is_alive() or key in self._restore_after_run}
 
-    def check_due(self):
-        # If GUI is open, it also acts as a scheduler. SQLite claims prevent duplication with the heartbeat.
+    def refresh_if_idle(self):
+        # Qt QDialog.exec() enters a nested event loop. Avoid rebuilding the
+        # dashboard and doing synchronously blocking DB work behind a dialog.
+        if QApplication.activeModalWidget() is None:
+            try:
+                self.refresh()
+            except Exception as exc:
+                report_gui_failure(self,"Dashboard refresh failed",exc)
+
+    def _poll_schedules(self):
+        """Run database and watched-path polling off the Qt event loop."""
         try:
             self.store.recover_abandoned()
-            for job_id,execution_id in self.store.claim_due()+self.store.claim_file_events():
-                th=threading.Thread(target=run_claimed,args=(job_id,execution_id),daemon=False)
+            due=self.store.claim_due()+self.store.claim_file_events()
+            self._scheduler_results.put((due,None))
+        except Exception as exc:
+            self._scheduler_results.put(((),f"{type(exc).__name__}: {exc}"))
+        finally:
+            self._scheduler_lock.release()
+
+    def check_due(self):
+        # Collect completed worker results on the GUI thread. No Qt API is
+        # ever called from the database polling worker.
+        while True:
+            try:
+                due,error=self._scheduler_results.get_nowait()
+            except queue.Empty:
+                break
+            if error:
+                self.statusBar().showMessage(f"Scheduler check failed: {error}")
+            for job_id,execution_id in due:
+                th=threading.Thread(target=run_claimed,args=(job_id,execution_id),daemon=False,
+                                    name=f"taskrunner-scheduled-{job_id}")
                 self.active_workers[execution_id]=th
                 th.start()
-        except Exception as exc:
-            self.statusBar().showMessage(f"Scheduler check failed: {exc}")
+        # Preserve continuous scheduling, but never run disk I/O and SQLite
+        # busy waits on the GUI event loop. Only one poll may run at a time.
+        if self._scheduler_lock.acquire(blocking=False):
+            thread=threading.Thread(target=self._poll_schedules,daemon=True,
+                                    name="taskrunner-scheduler-poll")
+            try:thread.start()
+            except BaseException:
+                self._scheduler_lock.release()
+                raise
 
     def refresh_logs(self):
         current=self.runs.currentRow()

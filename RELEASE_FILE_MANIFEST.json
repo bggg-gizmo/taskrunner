@@ -34,16 +34,16 @@
       "sha256": "a5ea31bf93a546f80b4808569dd0cdd50a0770726967cea960fc830a202151d3"
     },
     "BUILD_WINDOWS.cmd": {
-      "bytes": 3332,
-      "sha256": "30732ce9a25ae252d17a55396208ae14ec75e960700e74a016d02b9109f6a92f"
+      "bytes": 3723,
+      "sha256": "a284afdb3724cf8ed79e1833859257ba08c17ea7d14f106fb240ea46808932a1"
     },
     "CAPTURE_UI_WINDOWS.cmd": {
       "bytes": 396,
       "sha256": "7fe4da8d03b18cd559d4e2b3f1ff8039b3becbbbc17f0a552267a5a65abae243"
     },
     "CHANGELOG.md": {
-      "bytes": 8439,
-      "sha256": "e322d52182325e07fad0fc14b5b9f1f258882d048c8968bd59d812ee2787d73d"
+      "bytes": 9125,
+      "sha256": "4f412ad0a70121e2a17d61df81e5c201c1ab0f77fd8a89f2d8fb596144affe2c"
     },
     "CHECK_DEPENDENCIES.cmd": {
       "bytes": 792,
@@ -66,8 +66,8 @@
       "sha256": "aff5abd8bb27cc3ddf7ee9f27e451b0b8453794b04a9cae4bb0579671b23fd60"
     },
     "README.md": {
-      "bytes": 17224,
-      "sha256": "cdff620b3edfead96016e3fbe53ebe726008886b0a35eb8cc68bab8e3d5477d9"
+      "bytes": 17656,
+      "sha256": "d9d152e9f1aef05895a0a0b6fcfd11bc6f251d4b20977002edfdf3c335da5043"
     },
     "REMOVE_SCHEDULER.cmd": {
       "bytes": 341,
@@ -98,8 +98,8 @@
       "sha256": "5ddce97bd17aa1b39aafbf737e50eb2197c240c5495aedd4b5b88e7bb410b7e2"
     },
     "V1.5.1_RELEASE_NOTES.md": {
-      "bytes": 3886,
-      "sha256": "8c2071e86959d6f7f911deb20abc1c7a19dbd55b18e635fc5a965ae63726fd75"
+      "bytes": 5931,
+      "sha256": "62b9fa3d44d890dff8603613b4861b1cc87a4da7dc18594dee7e06828cb10fc3"
     },
     "V1.5_RELEASE_NOTES.md": {
       "bytes": 3218,
@@ -1226,8 +1226,8 @@
       "sha256": "9a16a4ed9b8c7ff9665fa1f59c1de33e243086c9897d2ee75304a189b5603869"
     },
     "task_runner/__main__.py": {
-      "bytes": 2458,
-      "sha256": "c49e9a8ed506f1e25b7c4ff373d62e00d19717a2628531af05d8784a0db9d30a"
+      "bytes": 3249,
+      "sha256": "550ffd7921a9768bf98cce5ccfcc0d38f3261412593745492e4f15d463255ce2"
     },
     "task_runner/actions.py": {
       "bytes": 21565,
@@ -1246,8 +1246,8 @@
       "sha256": "ad0251138f2292aa685986b34a4088e5b0e6a3aae28095f0857b2bd1921ecfb0"
     },
     "task_runner/diagnostics.py": {
-      "bytes": 5634,
-      "sha256": "903ed2c962b9ba547b192850ba72b33639f2a2c3570e7fc7dee27c62ff05c7a6"
+      "bytes": 8790,
+      "sha256": "1e8b6c42b99f35172c49c3a17e4a7a1985ae83967ec06209aaf2f81426f7105d"
     },
     "task_runner/executor.py": {
       "bytes": 41247,
@@ -1270,8 +1270,8 @@
       "sha256": "ee29adfec70445af770034fbe20fcea7f64a0f44ccbd2ada41c6c50e41442494"
     },
     "task_runner/gui.py": {
-      "bytes": 79757,
-      "sha256": "9464bb1a90444b557a6bb91e0b3176db9cf282c97509adedeba016b6feeb899c"
+      "bytes": 83019,
+      "sha256": "ee00ae15e41e1fd68d18326c9d0b58bf057a964b1bc8a1cec435c64fc2e8f250"
     },
     "task_runner/modules.py": {
       "bytes": 2157,
@@ -1322,8 +1322,8 @@
       "sha256": "5c57298364b62f6dd86c0f961a956f88957a62370aa84f488dda5fb1384a781a"
     },
     "task_runner/store.py": {
-      "bytes": 26965,
-      "sha256": "6ff006299af46c8d05e7dfca716965ee09cb5f3c5745d0a9dce8071eb504c703"
+      "bytes": 27314,
+      "sha256": "0fe0149246a55ff4cc2f7437ab8e6009324ad98afc67bf19c2b1ada46ac64be7"
     },
     "task_runner/style.py": {
       "bytes": 2086,
@@ -1361,9 +1361,13 @@
       "bytes": 5630,
       "sha256": "c6032b15536a03c6670c96efd53941f7a1074fc43146b1cbd5733f68026d17bb"
     },
+    "tests/test_gui_smoke.py": {
+      "bytes": 1590,
+      "sha256": "cf7943302860bfc8e04cadce5ec7c6909ae1c4a4fe9fd910ca3e5227cf22fea8"
+    },
     "tests/test_ocr_windows_313.py": {
-      "bytes": 2420,
-      "sha256": "c14b0a00b2f55b0620157c9a99167180201d4d0c7e66f43d8f96283b2a646698"
+      "bytes": 2988,
+      "sha256": "9c1f491ff3baa03d5823e48e70834d53a9c1db680cf82a329be19c9e3f7692c1"
     },
     "tests/test_repo_readiness.py": {
       "bytes": 2684,
@@ -1372,6 +1376,10 @@
     "tests/test_runtime.py": {
       "bytes": 4709,
       "sha256": "4e815c6fbc0bcd79a7758f500a232f34539e6efca43a81f294c6bd36a783d85d"
+    },
+    "tests/test_runtime_responsiveness.py": {
+      "bytes": 1404,
+      "sha256": "ff02f770a6d87a79fe531b53f6d6aecfc7c239c10118e28ccdbef7b4a15fc388"
     },
     "tests/test_scheduling.py": {
       "bytes": 1307,

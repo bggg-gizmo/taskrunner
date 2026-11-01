@@ -53,8 +53,17 @@ def test_full_build_uses_supported_rapidocr_runtime():
     assert names['rapidocr'].specifier.contains('3.10.0')
     assert names['onnxruntime'].specifier.contains('1.31.1')
     script=(ROOT/'BUILD_WINDOWS.cmd').read_text(encoding='utf-8')
-    assert '--collect-all rapidocr ' in script
-    assert '--collect-all onnxruntime ' in script
+    # Only application-supported ONNX inference is included in the EXE.
+    # Data collection MUST contain the three offline OCR model files; pulling
+    # every optional PyTorch/Paddle backend installs huge unrelated libraries.
+    assert '--collect-data rapidocr ' in script
+    assert '--collect-binaries rapidocr ' in script
+    assert '--hidden-import rapidocr.inference_engine.onnxruntime ' in script
+    assert '--collect-data onnxruntime ' in script
+    assert '--collect-binaries onnxruntime ' in script
+    assert '--collect-all rapidocr ' not in script
+    assert '--collect-all onnxruntime ' not in script
+    assert '--exclude-module torch ' in script
     assert 'rapidocr_onnxruntime' not in script
     diagnostics=(ROOT/'task_runner/diagnostics.py').read_text(encoding='utf-8')
     assert 'read_region(image=Image.new' in diagnostics

@@ -12,6 +12,71 @@ from pathlib import Path
 from .paths import asset_path,setup_browser_path
 
 
+def interactive_dialogs():
+    """Exercise actual Qt objects and the New Task / Edit event handlers.
+
+    The older self-test only imported the classes, missing runtime errors
+    in dialog constructors, signal connections, and persistence.
+    """
+    from unittest.mock import patch
+    from PySide6.QtWidgets import QApplication, QDialog, QPushButton
+    from .actions import default_step
+    from .gui import MainWindow,TaskWizard,StepEditor
+    app=QApplication.instance()
+    if app is None:
+        app=QApplication([])
+    with tempfile.TemporaryDirectory(prefix='taskrunner-ui-check-') as temp:
+        original_home=os.environ.get('TASKRUNNER_HOME')
+        os.environ['TASKRUNNER_HOME']=temp
+        window=None
+        try:
+            window=MainWindow()
+            assert window.table is not None and window.stack.count()==5
+            editor=StepEditor(default_step('wait'),parent=window)
+            assert editor.kind.currentData()=='wait'
+            editor.apply()
+            assert editor.result()==QDialog.DialogCode.Accepted
+            editor.deleteLater()
+
+            def scripted_wizard(dialog):
+                dialog.name.setText('GUI smoke test edited' if dialog.previous.get('id') else 'GUI smoke test')
+                if not dialog.actions:
+                    dialog.actions=[default_step('wait')]
+                dialog.refresh_actions()
+                dialog.save(run_now=False)
+                assert dialog.saved_id>0
+                return QDialog.DialogCode.Accepted
+
+            # A failed validation must never open a blocking message box
+            # inside the unattended packaged executable self-test.
+            with patch('task_runner.gui.message',side_effect=AssertionError('Unexpected GUI error dialog')):
+                with patch.object(TaskWizard,'exec',scripted_wizard):
+                    dashboard=window.stack.widget(0)
+                    new_button=next(button for button in dashboard.findChildren(QPushButton)
+                                    if button.text()=='New Task')
+                    new_button.click()
+                    jobs=window.store.all_jobs()
+                    assert len(jobs)==1 and jobs[0]['name']=='GUI smoke test'
+                    window.select_task(jobs[0]['id'])
+                    edit_button=next(button for button in dashboard.findChildren(QPushButton)
+                                     if button.text()=='Edit')
+                    edit_button.click()
+                    updated=window.store.get_job(jobs[0]['id'])
+                    assert updated['name']=='GUI smoke test edited'
+                    assert len(updated['actions'])==1
+        finally:
+            if window is not None:
+                window.timer.stop()
+                window.scheduler_timer.stop()
+                window.debug_timer.stop()
+                window.close()
+                window.deleteLater()
+            if original_home is None:
+                os.environ.pop('TASKRUNNER_HOME',None)
+            else:
+                os.environ['TASKRUNNER_HOME']=original_home
+
+
 def run_diagnostics(report_path: str | Path) -> bool:
     report={"application":"Task Runner","version":"1.5.1","developer":"Background Gremlin Group","test_started_utc":datetime.now(timezone.utc).isoformat(),
             "python":sys.version,"platform":platform.platform(),
@@ -109,6 +174,7 @@ def run_diagnostics(report_path: str | Path) -> bool:
     check("SQLite save, claim, execute, verify and persistence",workflow)
     check("Playwright bundled Chromium headless startup",browser)
     check("Main Qt GUI / wizard module import",gui_import)
+    check("Real New Task, Edit and action-editor Qt dialog interactions",interactive_dialogs)
     report["passed"]=all(item["status"]=="pass" for item in report["checks"])
     report["test_finished_utc"]=datetime.now(timezone.utc).isoformat()
     path=Path(report_path).expanduser().resolve()

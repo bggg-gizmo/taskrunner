@@ -2,6 +2,28 @@
 import argparse
 import sys
 
+
+def enable_runtime_error_logging():
+    """Preserve full Qt callback tracebacks in windowed Windows builds."""
+    import traceback
+    from datetime import datetime
+    from .paths import data_root
+    original=sys.excepthook
+
+    def record(exc_type,exc_value,exc_tb):
+        try:
+            path=data_root()/"runtime-errors.log"
+            with path.open('a',encoding='utf-8') as stream:
+                stream.write(f"\n[{datetime.now().isoformat(timespec='seconds')}] Unhandled GUI callback error\n")
+                stream.write(''.join(traceback.format_exception(exc_type,exc_value,exc_tb)))
+        except OSError:
+            pass
+        if sys.stderr is not None:
+            original(exc_type,exc_value,exc_tb)
+
+    sys.excepthook=record
+
+
 def main():
     parser=argparse.ArgumentParser(prog="TaskRunner",description="Windows workflow automation")
     group=parser.add_mutually_exclusive_group()
@@ -33,6 +55,7 @@ def main():
     if sys.platform == "win32":
         from .winmouse import enable_dpi_awareness
         enable_dpi_awareness()
+    enable_runtime_error_logging()
     from PySide6.QtWidgets import QApplication
     from PySide6.QtGui import QIcon
     from .paths import asset_path, setup_browser_path
